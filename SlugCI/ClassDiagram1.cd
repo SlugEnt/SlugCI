@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Nuke.Common.ProjectModel.PrimitiveProject" Collapsed="true">
+    <Position X="8.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAAABAAAAAAAAQABABAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>ProjectModel\PrimitiveProject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Nuke.Common.ProjectModel.Project" Collapsed="true">
+    <Position X="7.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIBAAAABAAAIEAAAAAAAAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ProjectModel\Project.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Nuke.Common.ProjectModel.ProjectExtensions" Collapsed="true">
+    <Position X="12.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAAAAAIAgAAAAAAAAJgAAAACAAAAAIAA=</HashCode>
+      <FileName>ProjectModel\ProjectExtensions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Nuke.Common.ProjectModel.ProjectModelTasks" Collapsed="true">
+    <Position X="14" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAACAAAAAAAAAAAAEAAAAAAAAAAAAAQAAAEAAAAAAA=</HashCode>
+      <FileName>ProjectModel\ProjectModelTasks.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Nuke.Common.ProjectModel.ProjectType" Collapsed="true">
+    <Position X="15.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAFAAQAABAAAgkCAAAAYCAAACABBCAAAJAEAAA=</HashCode>
+      <FileName>ProjectModel\ProjectType.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Nuke.Common.ProjectModel.Solution" Collapsed="true">
+    <Position X="12.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BQAAILAAAABBBDYEAJAACASAAAIAAQIAAhAAAABTAQA=</HashCode>
+      <FileName>ProjectModel\Solution.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Nuke.Common.ProjectModel.SolutionAttribute" Collapsed="true">
+    <Position X="14" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAgAAAAAIAAAAAAAABAAAAAAAAAAAAAAAAAAAEAAAAI=</HashCode>
+      <FileName>ProjectModel\SolutionAttribute.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Nuke.Common.ProjectModel.SolutionFolder" Collapsed="true">
+    <Position X="9.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACBAAAAAAAAAAAABABQAAAgAAAAAAAQA=</HashCode>
+      <FileName>ProjectModel\SolutionFolder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Nuke.Common.ProjectModel.SolutionSerializer" Collapsed="true">
+    <Position X="15.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAIAAAAAAAAAAAAAAAAAACAAIAAAAAAAAAAAgAg=</HashCode>
+      <FileName>ProjectModel\SolutionSerializer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
