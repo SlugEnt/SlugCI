@@ -19,17 +19,9 @@ namespace SlugCI
 			slugBuilder.Clean();
 			slugBuilder.RestoreNugetPackages();
 			slugBuilder.Compile();
-			slugBuilder.Pack();
-/*			
-			DotNetBuild(s => s.SetProjectFile(Solution)
-			                  .SetConfiguration(Configuration)
-			                  .SetAssemblyVersion(assemblyVer)
-			                  .SetFileVersion(fileVer)
-			                  .SetInformationalVersion(infoVer)
-			                  .SetVerbosity(DotNetVerbosity.Minimal)
-			                  .EnableNoRestore());
-*/
-
+			slugBuilder.Test();
+			//slugBuilder.Pack();
+			slugBuilder.CodeCoverage();
 
 
 			Console.WriteLine("Hello World!");
