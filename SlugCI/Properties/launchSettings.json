@@ -2,6 +2,17 @@
   "profiles": {
     "SlugCI": {
       "commandName": "Project"
+    },
+    "No Args": {
+      "commandName": "Project"
+    },
+    "PracticeF Init": {
+      "commandName": "Project",
+      "commandLineArgs": "--rootdir c:\\a_dev\\practice\\practiceG",
+      "environmentVariables": {
+        "SLUGCIDEPLOYTEST": "C:\\temp\\cideploy\\Test",
+        "SLUGCIDEPLOYPROD": "C:\\temp\\cideploy"
+      }
     }
   }
 }

@@ -10,7 +10,7 @@ using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.ReportGenerator;
 
-namespace SlugCI
+namespace Slug.CI
 {
 	class SlugBuilder
 	{
@@ -147,7 +147,7 @@ namespace SlugCI
 				                                                    .Add("", false)
 				                                                    .Add("/p:CoverletOutput={0}/", CoveragePath)
 				                                                    .Add("/p:CoverletOutputFormat={0}", "cobertura")
-				                                                    //.Add("/p:Threshold={0}", CustomNukeSolutionConfig.CodeCoverageThreshold)
+				                                                    //.Add("/p:Threshold={0}", SlugCIConfig.CodeCoverageThreshold)
 				                                                    .Add("/p:Threshold={0}", 5)
 				                                                    .Add("/p:SkipAutoProps={0}", true)
 				                                                    .Add("/p:ExcludeByAttribute={0}",
@@ -160,7 +160,7 @@ namespace SlugCI
 			                                                              .Add("", false)
 			                                                              .Add("/p:CoverletOutput={0}/", coveragePath)
 			                                                              .Add("/p:CoverletOutputFormat={0}", "cobertura")
-																		  //.Add("/p:Threshold={0}", CustomNukeSolutionConfig.CodeCoverageThreshold)
+																		  //.Add("/p:Threshold={0}", SlugCIConfig.CodeCoverageThreshold)
 																		  .Add("/p:Threshold={0}", 5)
 																		  .Add("/p:SkipAutoProps={0}", true)
 			                                                              .Add("/p:ExcludeByAttribute={0}",
@@ -170,7 +170,7 @@ namespace SlugCI
 			DotNetTasks.DotNetTest(settings);
 			return true;
 			/*
-			foreach (NukeConf.Project nukeConfProject in CustomNukeSolutionConfig.Projects)
+			foreach (NukeConf.Project nukeConfProject in SlugCIConfig.Projects)
 			{
 				if (nukeConfProject.IsTestProject)
 				{
@@ -189,7 +189,7 @@ namespace SlugCI
 									 .SetProcessArgumentConfigurator(arguments => arguments.Add("/p:CollectCoverage={0}", true)
 																		 .Add("/p:CoverletOutput={0}/", CoveragePath)
 																		 .Add("/p:CoverletOutputFormat={0}", "cobertura")
-																		 .Add("/p:Threshold={0}", CustomNukeSolutionConfig.CodeCoverageThreshold)
+																		 .Add("/p:Threshold={0}", SlugCIConfig.CodeCoverageThreshold)
 																		 .Add("/p:SkipAutoProps={0}", true)
 																		 .Add("/p:ExcludeByAttribute={0}",
 																			  "\"Obsolete%2cGeneratedCodeAttribute%2cCompilerGeneratedAttribute\"")
@@ -217,9 +217,9 @@ namespace SlugCI
 			/*
 			.DependsOn(Test)
 				.Executes(() => {
-					if (!CustomNukeSolutionConfig.UseCodeCoverage) return;
+					if (!SlugCIConfig.UseCodeCoverage) return;
 
-					foreach (NukeConf.Project nukeConfProject in CustomNukeSolutionConfig.Projects)
+					foreach (NukeConf.Project nukeConfProject in SlugCIConfig.Projects)
 					{
 						if (nukeConfProject.IsTestProject)
 						{
@@ -251,7 +251,7 @@ namespace SlugCI
 			//OutputDirectory.GlobFiles("*.nupkg", "*symbols.nupkg").ForEach(DeleteFile);
 
 			DotNetPackSettings settings = new DotNetPackSettings();
-			foreach ( Project x in Solution.AllProjects ) {
+			foreach ( Nuke.Common.ProjectModel.Project x in Solution.AllProjects ) {
 				settings.Project = x.Path;
 				//settings.SetProject(x.Path);
 				settings.OutputDirectory = ArtifactPath;
@@ -276,6 +276,11 @@ namespace SlugCI
 
 
 
+		
+		public bool CopyCompiledProject (string source, string destination) {
+			FileSystemTasks.CopyDirectoryRecursively(source,destination);
 
+			return true;
+		}
 	}
 }

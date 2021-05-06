@@ -265,7 +265,7 @@ namespace Nuke.Common.ValueInjection
                 var trimmedVariableName = GetTrimmedName(variableName);
                 var alternativeValues = Variables
                     .Where(x => GetTrimmedName(x.Key).EqualsOrdinalIgnoreCase(trimmedVariableName) ||
-                                GetTrimmedName(x.Key).EqualsOrdinalIgnoreCase($"NUKE{trimmedVariableName}")).ToList();
+                                GetTrimmedName(x.Key).EqualsOrdinalIgnoreCase($"SLUGCI_{trimmedVariableName}")).ToList();
                 ControlFlow.AssertWarn(alternativeValues.Count <= 1,
                     $"Could not resolve '{variableName}' since multiple possible sources exist:"
                         .Concat(alternativeValues.Select(x => $" - {x.Key} = {x.Value}")).JoinNewLine());
