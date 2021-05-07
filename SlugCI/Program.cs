@@ -79,6 +79,14 @@ namespace Slug.CI
 
 				// Create the SlugCI which is main processing class.
 				SlugCI slugCI = new SlugCI(ciSession);
+
+
+				// Perform Validation 
+				ValidateDependencies validation = new ValidateDependencies(ciSession);
+				if (!validation.Validate()) throw new ApplicationException("One or more required features is missing from this pc.");
+
+
+				// Begin Executing
 				slugCI.Execute();
 
 				return 0;
@@ -101,7 +109,7 @@ namespace Slug.CI
 				if ( splits.Length != 2 ) throw new ArgumentException("Verbosity setting has invalid method:value combination of:  " + method);
 
 				// Validate the possible values
-				if (splits[1] != "debug" || splits[1] != "info" || splits[1] != "warn") throw new ArgumentException("Verbosity setting has invalid value for the method:  " + method);
+				if (splits[1] != "debug" && splits[1] != "info" && splits[1] != "warn") throw new ArgumentException("Verbosity setting has invalid value for the method:  " + method);
 
 				switch ( splits [0] ) {
 					case "compile":

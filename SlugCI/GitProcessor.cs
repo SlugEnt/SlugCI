@@ -474,7 +474,7 @@ namespace Slug.CI
 				UpdateAssemblyInfo = true,
 			};
 
-			(GitVersion result,IReadOnlyCollection<Output> output) = GitVersionTasks.GitVersion(settings);
+			(GitVersion result,IReadOnlyCollection<Output> output) = GitVersionTasks_Custom.GitVersion(settings);
 
 		}
 

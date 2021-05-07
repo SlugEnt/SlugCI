@@ -16,11 +16,11 @@ namespace Nuke.Common.Tools.GitVersion
     {
         private string GetProcessToolPath()
         {
-            return GitVersionTasks.GetToolPath(Framework);
+            return GitVersionTasks_Custom.GetToolPath(Framework);
         }
     }
 
-    partial class GitVersionTasks
+    partial class GitVersionTasks_Custom
     {
         /// <summary>
         

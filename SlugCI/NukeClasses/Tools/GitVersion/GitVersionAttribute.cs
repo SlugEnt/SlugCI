@@ -45,7 +45,7 @@ namespace Nuke.Common.Tools.GitVersion
             AssertWarn(repository == null || repository.Protocol != GitProtocol.Ssh || NoFetch,
                 $"{nameof(GitVersion)} does not support fetching SSH endpoints. Enable {nameof(NoFetch)} to skip fetching.");
 
-            var gitVersion = GitVersionTasks.GitVersion(s => s
+            var gitVersion = GitVersionTasks_Custom.GitVersion(s => s
                     .SetFramework(Framework)
                     .SetNoFetch(NoFetch)
                     .SetNoCache(NoCache)

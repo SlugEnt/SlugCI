@@ -18,7 +18,7 @@ namespace Nuke.Common.Tools.GitVersion
     /// </summary>
     [PublicAPI]
     [ExcludeFromCodeCoverage]
-    public static partial class GitVersionTasks
+    public static partial class GitVersionTasks_Custom
     {
         /// <summary>
         ///   Path to the GitVersion executable.
@@ -158,7 +158,7 @@ namespace Nuke.Common.Tools.GitVersion
     }
     #region GitVersionSettings
     /// <summary>
-    ///   Used within <see cref="GitVersionTasks"/>.
+    ///   Used within <see cref="GitVersionTasks_Custom"/>.
     /// </summary>
     [PublicAPI]
     [ExcludeFromCodeCoverage]
@@ -169,7 +169,7 @@ namespace Nuke.Common.Tools.GitVersion
         ///   Path to the GitVersion executable.
         /// </summary>
         public override string ProcessToolPath => base.ProcessToolPath ?? GetProcessToolPath();
-        public override Action<OutputType, string> ProcessCustomLogger => GitVersionTasks.GitVersionLogger;
+        public override Action<OutputType, string> ProcessCustomLogger => GitVersionTasks_Custom.GitVersionLogger;
         /// <summary>
         ///   The directory containing .git. If not defined current directory is used. (Must be first argument).
         /// </summary>
@@ -302,7 +302,7 @@ namespace Nuke.Common.Tools.GitVersion
     #endregion
     #region GitVersion
     /// <summary>
-    ///   Used within <see cref="GitVersionTasks"/>.
+    ///   Used within <see cref="GitVersionTasks_Custom"/>.
     /// </summary>
     [PublicAPI]
     [ExcludeFromCodeCoverage]
@@ -341,7 +341,7 @@ namespace Nuke.Common.Tools.GitVersion
     #endregion
     #region GitVersionSettingsExtensions
     /// <summary>
-    ///   Used within <see cref="GitVersionTasks"/>.
+    ///   Used within <see cref="GitVersionTasks_Custom"/>.
     /// </summary>
     [PublicAPI]
     [ExcludeFromCodeCoverage]
@@ -1270,7 +1270,7 @@ namespace Nuke.Common.Tools.GitVersion
     #endregion
     #region GitVersionOutput
     /// <summary>
-    ///   Used within <see cref="GitVersionTasks"/>.
+    ///   Used within <see cref="GitVersionTasks_Custom"/>.
     /// </summary>
     [PublicAPI]
     [Serializable]
@@ -1288,7 +1288,7 @@ namespace Nuke.Common.Tools.GitVersion
     #endregion
     #region GitVersionVerbosity
     /// <summary>
-    ///   Used within <see cref="GitVersionTasks"/>.
+    ///   Used within <see cref="GitVersionTasks_Custom"/>.
     /// </summary>
     [PublicAPI]
     [Serializable]
