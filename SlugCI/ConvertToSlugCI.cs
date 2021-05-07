@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -15,7 +16,7 @@ using Nuke.Common.IO;
 using Nuke.Common.Tooling;
 using Nuke.Common.Utilities;
 using Slug.CI;
-using SlugCI;
+using Slug.CI.NukeClasses;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using Console = Colorful.Console;
@@ -27,28 +28,25 @@ namespace Slug.CI
 	/// Also validates the existing SlugCI and performs any updated to config values.
 	/// </summary>
 	public class ConvertToSlugCI {
-		public const string SLUG_CI_CONFIG_FILE = "SlugCI_Config.json";
+
+
+		/// <summary>
+		/// The Current Session information
+		/// </summary>
+		private CISession CISession { get; set; }
 
 		/// <summary>
 		/// The solution projects Main folder.
 		/// </summary>
-		public AbsolutePath RootDirectory { get; set; }
+		//public AbsolutePath CISession.RootDirectory { get; private set; }
 
 		/// <summary>
 		/// The RootCI folder
 		/// </summary>
-		public AbsolutePath SlugCIPath { get; set; }
-
-		/// <summary>
-		/// Full path and name to the SlugCI config file
-		/// </summary>
-		public AbsolutePath SlugCIFileName { get; set; }
+		//private AbsolutePath SlugCIPath { get; set; }
 
 
-		public AbsolutePath SourceDirectory { get; set; }
 
-		public AbsolutePath TestsDirectory { get; set; }
-		public AbsolutePath OutputDirectory { get; set; }
 
 		internal AbsolutePath CurrentSolutionPath { get; set; }
 		internal AbsolutePath ExpectedSolutionPath { get; set; }
@@ -64,47 +62,68 @@ namespace Slug.CI
 		/// </summary>
 		private bool IsSlugNukeFormat { get; set; }
 
+		
+		/// <summary>
+		/// Returns true if the solution is in proper SluCI Format
+		/// </summary>
+		public bool IsInSlugCIFormat { get; set; }
+
+
+		/// <summary>
+		/// Returns the SlugCIConfig value
+		/// </summary>
+		private SlugCIConfig SlugCIConfig { get; set; }
+
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public ConvertToSlugCI(AbsolutePath rootDir)
-		{
-			// Set expected directories.
-			RootDirectory = rootDir;
-			SlugCIPath = RootDirectory / ".slugci";
-			SlugCIFileName = SlugCIPath / SLUG_CI_CONFIG_FILE;
-			SourceDirectory = RootDirectory / "src";
-			TestsDirectory = RootDirectory / "tests";
-			OutputDirectory = RootDirectory / "artifacts";
-			ExpectedSolutionPath = SourceDirectory;
+		public ConvertToSlugCI(CISession ciSession) {
+			CISession = ciSession;
 
-			Misc.WriteHeader("PreCheck");
+			// Set expected directories.
+			ExpectedSolutionPath = CISession.SourceDirectory;
+
 			
-			PreCheck();
+			if ( ciSession.IsFastStart ) {
+				Misc.WriteSubHeader("FastStart:  Skipping normal checks and validations");
+				SlugCIConfig slugCiConfig = GetSlugCIConfig();
+				if (slugCiConfig == null)
+					throw new ApplicationException("The FastStart option was set, but there is not a valid SlugCIConfig file.  Either remove FastStart option or fix the problem.");
+				IsInSlugCIFormat = true;
+			}
+			else
+				PreCheck();
 		}
 
 
+
+		/// <summary>
+		/// Performs some initial validations
+		/// </summary>
+		/// <returns></returns>
 		public bool PreCheck()
 		{
-			// See if the Root directory exists
-			ControlFlow.Assert(FileSystemTasks.DirectoryExists(RootDirectory), "Root Directory does not exist.  Should be specified on command line or be run from the projects entry folder");
+			Misc.WriteMainHeader("PreCheck");
 
-			if ( DirectoryExists(RootDirectory / ".nuke") || FileExists(RootDirectory / ".nuke")) {
+			// See if the Root directory exists
+			ControlFlow.Assert(FileSystemTasks.DirectoryExists(CISession.RootDirectory), "Root Directory does not exist.  Should be specified on command line or be run from the projects entry folder");
+
+			if ( DirectoryExists(CISession.RootDirectory / ".nuke") || FileExists(CISession.RootDirectory / ".nuke")) {
 				IsSlugNukeFormat = true;
 				Logger.Warn("Detected previous SlugNuke Solution.  Will convert to SlugCI!");
 			}
 
 		
-			if (!FileSystemTasks.DirectoryExists(SlugCIPath))
+			if (!FileSystemTasks.DirectoryExists(CISession.SlugCIPath))
 			{
 				Logger.Warn(".SlugCI directory does not exist.  Proceeding with converting solution to .SlugCI format specifications");
 				// Need to convert project to SlugCI layout.
-
 			}
 
 			
-			ControlFlow.Assert(Converter(),"Failure during SlugCI Converted processing.");
+			ControlFlow.Assert(Converter(),"Failure during SlugCI Converter processing.");
+			IsInSlugCIFormat = true;
 			return true;
 		}
 
@@ -120,38 +139,35 @@ namespace Slug.CI
 		public bool Converter()
 		{
 			// Find the Solution - Assume we are in the root folder right now.
-			List<string> solutionFiles = SearchForSolutionFile(RootDirectory.ToString(), ".sln");
+			List<string> solutionFiles = SearchForSolutionFile(CISession.RootDirectory.ToString(), ".sln");
 			ControlFlow.Assert(solutionFiles.Count != 0, "Unable to find the solution file");
-			ControlFlow.Assert(solutionFiles.Count == 1, "Found more than 1 solution file under the root directory -  - We can only work with 1 solution file." + RootDirectory.ToString());
+			ControlFlow.Assert(solutionFiles.Count == 1, "Found more than 1 solution file under the root directory -  - We can only work with 1 solution file." + CISession.RootDirectory.ToString());
 			string solutionFile = solutionFiles[0];
 			Logger.Normal("Solution File found:  {0}", solutionFile);
 
 			// A.  Proper Directory Structure
 			ControlFlow.Assert(ProperDirectoryStructure(solutionFile), "Attempted to put solution in proper directory structure, but failed.");
 
-			// B.  Nuke File Exists
-			// TODO Remove - not needed anymore
-			//ControlFlow.Assert(NukeFileIsProper(solutionFile), "Unable to format Nuke file in proper format");
 
-			// C.  Ensure the NukeSolutionBuild file is setup.
+			// B.  We need to upgrade from SlugNuke if the SlugNuke config file was found.
 			if ( IsSlugNukeFormat ) {
 				// Move the config file to new name and location.  Delete no longer needed files.
 				try {
-					AbsolutePath oldNukeFile = RootDirectory / "nukeSolutionBuild.conf";
-					EnsureExistingDirectory(SlugCIPath);
-					if (!FileExists(SlugCIFileName)) 
-						MoveFile(oldNukeFile, SlugCIFileName);
+					AbsolutePath oldNukeFile = CISession.RootDirectory / "nukeSolutionBuild.conf";
+					EnsureExistingDirectory(CISession.SlugCIPath);
+					if (!FileExists(CISession.SlugCIFileName)) 
+						MoveFile(oldNukeFile, CISession.SlugCIFileName);
 					else if ( FileExists(oldNukeFile) ) {
-						Logger.Warn(SlugCIFileName +
+						Logger.Warn(CISession.SlugCIFileName +
 						            " already exists.  But so too does the old Config file.  Assuming this was from a prior error.  Removing the old file and LEAVING the current file intact.  Please check to ensure it is correct");
 						DeleteFile(oldNukeFile);
 					}
 
-					DeleteFile(RootDirectory / ".nuke");
-					DeleteFile(RootDirectory / "build.cmd");
-					DeleteFile(RootDirectory / "build.ps1");
-					DeleteFile(RootDirectory / "build.sh");
-					DeleteFile(RootDirectory / "global.json");
+					DeleteFile(CISession.RootDirectory / ".nuke");
+					DeleteFile(CISession.RootDirectory / "build.cmd");
+					DeleteFile(CISession.RootDirectory / "build.ps1");
+					DeleteFile(CISession.RootDirectory / "build.sh");
+					DeleteFile(CISession.RootDirectory / "global.json");
 					IsSlugNukeFormat = false;
 				}
 				catch ( Exception e ) {
@@ -161,7 +177,7 @@ namespace Slug.CI
 			}
 			
 			
-			// Ensure Config file is valid and up-to-date with current Class Structure
+			// C.  Ensure Config file is valid and up-to-date with current Class Structure
 			ProcessSlugCIConfigFile();
 
 			// D.  Copy the GitVersion.Yml file
@@ -172,7 +188,7 @@ namespace Slug.CI
 			string assemblyFolder = Path.GetDirectoryName(assemblyFile);
 			Logger.Info("Assembly Folder: " + assemblyFolder);
 			string src = Path.Combine(assemblyFolder, "GitVersion.yml");
-			AbsolutePath dest = RootDirectory / "GitVersion.yml";
+			AbsolutePath dest = CISession.RootDirectory / "GitVersion.yml";
 
 			if (!FileExists(dest))
 				File.Copy(src, dest, false);
@@ -186,22 +202,41 @@ namespace Slug.CI
 
 
 		/// <summary>
+		/// Returns the current SlugCIConfig object or loads it if null or force reload is true.
+		/// </summary>
+		/// <param name="forceReload"></param>
+		/// <returns></returns>
+		public SlugCIConfig GetSlugCIConfig (bool forceReload = false) {
+			if ( SlugCIConfig == null || forceReload == true ) {
+				SlugCIConfig slugCiConfig;
+				if (FileExists(CISession.SlugCIFileName))
+				{
+					string Json = File.ReadAllText(CISession.SlugCIFileName);
+					slugCiConfig = JsonSerializer.Deserialize<SlugCIConfig>(Json, SlugCIConfig.SerializerOptions());
+					SlugCIConfig = slugCiConfig;
+					return SlugCIConfig;
+				}
+
+				return null;
+			}
+
+			return SlugCIConfig;
+		}
+
+
+
+		/// <summary>
 		/// Ensures there is a valid SlugCI Config file and updates it if necessary OR creates it.
 		/// </summary>
 		/// <returns></returns>
 		private bool ProcessSlugCIConfigFile() {
 			bool isNewConfigFile = false;
-			string startingJson;
+			//string startingJson;
 
-			SlugCIConfig slugCiConfig;
-			if (FileExists(SlugCIFileName)) {
-				startingJson = File.ReadAllText(SlugCIFileName);
-				slugCiConfig = JsonSerializer.Deserialize<SlugCIConfig>(startingJson, SlugCIConfig.SerializerOptions());
-				//using (FileStream fs = File.OpenRead(nsbFile)) { slugCiConfig = await JsonSerializer.DeserializeAsync<SlugCIConfig>(fs, SlugCIConfig.SerializerOptions()); }
-			}
-			else
+			SlugCIConfig slugCiConfig = GetSlugCIConfig();
+			if (slugCiConfig == null)
 			{
-				EnsureExistingDirectory(SlugCIPath);
+				EnsureExistingDirectory(CISession.SlugCIPath);
 				slugCiConfig = new SlugCIConfig();
 				slugCiConfig.DeployToVersionedFolder = true;
 				isNewConfigFile = true;
@@ -256,95 +291,71 @@ namespace Slug.CI
 
 			// Ensure Deploy Roots have values if at least one of the projects has a deploy method of Copy
 			if (hasCopyDeployMethod) {
-				bool wroteHelpText = false;
-				bool checkedForEnvironmentVariables = false;
-				bool environmentVariablesExist = false;
-
-				for (int i = 0; i < 2; i++)
-				{
-					string name;
-					Configuration config;
-
-					if (i == 0)
-					{
-						name = "Production";
-						config = Configuration.Release;
-					}
-					else
-					{
-						name = "Test";
-						config = Configuration.Debug;
-					}
-
-					if (!slugCiConfig.IsRootFolderSpecified(config))
-					{
-						if ( !wroteHelpText ) {
-							// See if Environment Variables are set.  We only check once.
-							if ( !checkedForEnvironmentVariables ) {
-								string value = EnvironmentInfo.GetParameter<string>("SLUGCIDEPLOYPROD");
-								string value2 = EnvironmentInfo.GetParameter<string>("SLUGCIDEPLOYTEST");
-								if ( !value.IsNullOrEmpty() && !value2.IsNullOrEmpty()) environmentVariablesExist = true;
-								checkedForEnvironmentVariables = true;
-							}
-
-
-							Console.WriteLine();
-							Console.WriteLine("One or both of the Deployment folder entries is missing.  This is is ok, if there are environment variables set for these values. Environment Variable values WILL override the values in the config.",Color.DarkOrange);
-							Console.WriteLine("--: If you do not wish to enter values for these and instead rely on Environment variables, just hit enter.", Color.DarkOrange);
-							Console.WriteLine("I did NOT detect one or both of the environment variables.  You need to set these manually",Color.Yellow);
-							if (!environmentVariablesExist)
-								Console.WriteLine("The environment variables are:  SLUGCI_DEPLOY_PROD and SLUGCI_DEPLOY_TEST", Color.DeepPink);
-							wroteHelpText = true;
-						}
-						Console.WriteLine();
-						Console.WriteLine("Enter the root deployment folder for {0} [{1}]", Color.DarkCyan, name, config);
-						string answer = Console.ReadLine();
-						if (i == 0)
-							slugCiConfig.DeployProdRoot = answer;
-						else
-							slugCiConfig.DeployTestRoot = answer;
-					}
+				foreach (PublishTargetEnum value in Enum.GetValues(typeof(PublishTargetEnum))) {
+					ValidateDeployFolders(value, slugCiConfig);
 				}
 			}
 
 
-			// We now always write the config file at the end of Setup.  This ensure we get any new properties.
+			// Determine if we need to save new config.
 			if ( origSlugCiConfig != slugCiConfig ) {
 				string json = JsonSerializer.Serialize<SlugCIConfig>(slugCiConfig, SlugCIConfig.SerializerOptions());
-				File.WriteAllText(SlugCIFileName, json);
+				File.WriteAllText(CISession.SlugCIFileName, json);
+				SlugCIConfig = slugCiConfig;
 				if ( updateProjectAdd ) {
-					Logger.Warn("The file: {0} was updated.  One ore more projects were added.  Ensure they have the correct Deploy setting.", SlugCIFileName);
+					Logger.Warn("The file: {0} was updated.  One ore more projects were added.  Ensure they have the correct Deploy setting.", CISession.SlugCIFileName);
 				}
 			}
 
 			return true;
 		}
-
 
 
 		/// <summary>
-		/// Ensures the Nuke file first line has the solution in the right format.
+		/// Ensures the Deploy Folders have a value and that it can be accessed.  If no value then it prompts user for value
 		/// </summary>
-		/// <param name="solutionFile"></param>
+		/// <param name="config"></param>
+		/// <param name="slugCiConfig"></param>
 		/// <returns></returns>
-		private bool NukeFileIsProper(string solutionFile)
+		private bool ValidateDeployFolders(PublishTargetEnum config, SlugCIConfig slugCiConfig)
 		{
-			string expectedNukeLine = Path.GetFileName(ExpectedSolutionPath) + "/" + Path.GetFileName(solutionFile);
+			// Does the config have a root folder set?
+			if ( !slugCiConfig.IsRootFolderSpecified(config) ) {
+				//string name = "Production";
+				string name = config.ToString();
+				//if ( config == Configuration.Debug ) name = "Test";
 
-			// Read Nuke File if it exists.
-			AbsolutePath nukeFile = RootDirectory / ".nuke";
-			if (FileExists(nukeFile))
-			{
-				string[] lines = File.ReadAllLines(nukeFile.ToString(), Encoding.ASCII);
-				if (lines.Length != 0)
-					if (lines[0] == expectedNukeLine)
-						return true;
+				Misc.WriteSubHeader(name + ": Set Deploy Folder");
+				Console.WriteLine("This deployment folder is missing an entry, To ensure correct operation for ALL users you should set this value.",
+				                  Color.DarkOrange);
+				Console.WriteLine(
+					"--: If you want to always use the environment variables for these entries, just hit the Enter key.  Otherwise enter a valid path to the root location they should be deployed too.",
+					Color.DarkOrange);
+				bool invalidAnswer = true;
+				string answer = "";
+				while ( invalidAnswer ) {
+					Console.WriteLine();
+					Console.WriteLine("Enter the root deployment folder for {0} [{1}]", Color.DarkCyan, name, config);
+					answer = Console.ReadLine();
+					answer = answer.Trim();
+					if ( answer == string.Empty ) answer = "_";
+
+					// Make sure such a folder exists.
+					if ( answer != "_" ) {
+						if ( DirectoryExists((AbsolutePath) answer) ) invalidAnswer = false;
+					}
+					else invalidAnswer = false;
+				}
+
+				if ( config == PublishTargetEnum.Production) 
+					slugCiConfig.DeployProdRoot = answer;
+				else if ( config == PublishTargetEnum.Testing)
+					slugCiConfig.DeployTestRoot = answer;
+				else if ( config == PublishTargetEnum.Development ) SlugCIConfig.DeployDevRoot = answer;
 			}
-
-			// If here the file does not exist or in wrong format.
-			File.WriteAllText(nukeFile, expectedNukeLine);
 			return true;
 		}
+
 
 
 		/// <summary>
@@ -355,13 +366,13 @@ namespace Slug.CI
 		private bool ProperDirectoryStructure(string solutionFile)
 		{
 			// Create src folder if it does not exist.
-			if (!DirectoryExists(SourceDirectory)) { Directory.CreateDirectory(SourceDirectory.ToString()); }
+			if (!DirectoryExists(CISession.SourceDirectory)) { Directory.CreateDirectory(CISession.SourceDirectory.ToString()); }
 
 			// Create Tests folder if it does not exist.
-			if (!DirectoryExists(TestsDirectory)) { Directory.CreateDirectory(TestsDirectory.ToString()); }
+			if (!DirectoryExists(CISession.TestsDirectory)) { Directory.CreateDirectory(CISession.TestsDirectory.ToString()); }
 
 			// Create Artifacts / Output folder if it does not exist.
-			if (!DirectoryExists(OutputDirectory)) { Directory.CreateDirectory(OutputDirectory.ToString()); }
+			if (!DirectoryExists(CISession.OutputDirectory)) { Directory.CreateDirectory(CISession.OutputDirectory.ToString()); }
 
 			// Query the solution for the projects that are in it.
 			// We allow all tests to run, instead of failing at first failure.
@@ -481,7 +492,7 @@ namespace Slug.CI
 			if (lcprojName.StartsWith("test") || lcprojName.EndsWith("test"))
 			{
 				visualStudioProject.IsTestProject = true;
-				newRootPath = TestsDirectory;
+				newRootPath = CISession.TestsDirectory;
 			}
 
 			visualStudioProject.OriginalPath = (AbsolutePath)Path.GetDirectoryName(Path.Combine(CurrentSolutionPath, path));
@@ -535,7 +546,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		List<string> SearchForSolutionFile(string root, string searchTerm)
 		{
-			var files = new List<string>();
+			List<string> files = new List<string>();
 
 			foreach (var file in Directory.EnumerateFiles(root).Where(m => m.EndsWith(searchTerm)))
 			{

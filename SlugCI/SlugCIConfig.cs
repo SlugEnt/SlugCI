@@ -58,14 +58,21 @@ namespace Slug.CI {
 
 
 		/// <summary>
-		/// The root folder to deploy Production (Release) to
+		/// The root folder to deploy Production  to
 		/// </summary>
 		public string DeployProdRoot { get; set; }
 
 		/// <summary>
-		/// The root folder to deploy Test (Debug) to
+		/// The root folder to deploy Test to
 		/// </summary>
 		public string DeployTestRoot { get; set; }
+
+
+		/// <summary>
+		/// The root folder to deploy Development to
+		/// </summary>
+		public string DeployDevRoot { get; set; }
+
 
 		/// <summary>
 		/// If true, it will deploy to a subfolder with the name of the Version tag - Ver#.#.#. If False, no subfolder is created.
@@ -120,15 +127,46 @@ namespace Slug.CI {
 		/// </summary>
 		/// <param name="config"></param>
 		/// <returns></returns>
-		public bool IsRootFolderSpecified (Configuration config) {
-			if ( config == "Release" ) {
-				if ( String.IsNullOrEmpty(DeployProdRoot) ) return false;
-			}
-			else if (String.IsNullOrEmpty(DeployTestRoot)) return false;
+		public bool IsRootFolderSpecified (PublishTargetEnum config) {
+			string value ="";
+			if ( config == PublishTargetEnum.Production ) value = DeployProdRoot;
+			else if ( config == PublishTargetEnum.Testing ) value = DeployTestRoot;
+			else if ( config == PublishTargetEnum.Development ) value = DeployDevRoot;
+			else 
+				throw new ArgumentException("PublishTargetEnum:  Value was not in IF logic.  Probably means a code update needs to be done.");
+
+			if ( value == null ) return false;
+			if ( value == string.Empty ) return false;
+			if ( value.Trim() == string.Empty ) return false;
 			return true;
-		} 
+		}
 
 
+		/// <summary>
+		/// Determines if the root folder for the given config is set to use environment variables or is unset.
+		/// </summary>
+		/// <param name="config"></param>
+		/// <returns></returns>
+		public bool IsRootFolderUsingEnvironmentVariable (Configuration config) {
+			if ( config == "Release" )
+				return (DeployProdRoot == "_");
+			else
+				return (DeployTestRoot == "_");
+		}
+
+
+		/// <summary>
+		/// Sets the given deployment folder based upon configuration to use Environment Variables
+		/// </summary>
+		/// <param name="config"></param>
+		public void SetRootFolderToUseEnvironmentVariable (Configuration config) {
+			if ( config == "Release" )
+				DeployProdRoot = "_";
+			else
+				DeployTestRoot = "_";
+		}
+
+		/*
 		/// <summary>
 		/// Checks to ensure that if any of the projects have a Deploy method of Copy that the DeployRoot folders are specified.
 		/// </summary>
@@ -163,7 +201,7 @@ namespace Slug.CI {
 
 			return true;
 		}
-
+		*/
 
 
 		/// <summary>
@@ -176,6 +214,7 @@ namespace Slug.CI {
 			b.DeployFolderUsesSemVer = DeployFolderUsesSemVer;
 			b.DeployProdRoot = DeployProdRoot;
 			b.DeployTestRoot = DeployTestRoot;
+			b.DeployDevRoot = DeployDevRoot;
 			b.DeployToAssemblyFolders = DeployToAssemblyFolders;
 			b.DeployToVersionedFolder = DeployToVersionedFolder;
 			b.UseCodeCoverage = UseCodeCoverage;
@@ -205,6 +244,7 @@ namespace Slug.CI {
 			if ( b.DeployToVersionedFolder != DeployToVersionedFolder ) return false;
 			if ( b.DeployTestRoot != DeployTestRoot ) return false;
 			if ( b.DeployProdRoot != DeployProdRoot ) return false;
+			if ( b.DeployDevRoot != DeployDevRoot ) return false;
 			if ( b.UseCodeCoverage != UseCodeCoverage ) return false;
 			if ( b.Projects.Count != Projects.Count ) return false;
 

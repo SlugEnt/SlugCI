@@ -8,10 +8,12 @@
     },
     "PracticeF Init": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir c:\\a_dev\\practice\\practiceG",
+      "commandLineArgs": "--rootdir c:\\a_dev\\practice\\practiceG --faststart --verbosity gitversion:debug|compile:info",
       "environmentVariables": {
-        "SLUGCIDEPLOYTEST": "C:\\temp\\cideploy\\Test",
-        "SLUGCIDEPLOYPROD": "C:\\temp\\cideploy"
+        "Key": "Value",
+        "SLUGCI_DEPLOY_DEV": "C:\\temp\\cideploy\\Dev",
+        "SLUGCI_DEPLOY_PROD": "C:\\temp\\cideploy",
+        "SLUGCI_DEPLOY_TEST": "C:\\temp\\cideploy\\Test"
       }
     }
   }

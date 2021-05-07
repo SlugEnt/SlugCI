@@ -9,11 +9,17 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.ReportGenerator;
+using Slug.CI.NukeClasses;
 
 namespace Slug.CI
 {
 	class SlugBuilder
 	{
+		/// <summary>
+		/// The session information
+		/// </summary>
+		private CISession CISession { get; set; }
+
 		/// <summary>
 		/// The Solution we are processing
 		/// </summary>
@@ -33,12 +39,6 @@ namespace Slug.CI
 		
 
 		/// <summary>
-		/// The root path of the git repository / parent of solution folders
-		/// </summary>
-		public AbsolutePath RootPath { get; private set; }
-
-
-		/// <summary>
 		/// Where coverage reports are located
 		/// </summary>
 		public AbsolutePath CoveragePath { get; private set; }
@@ -56,10 +56,16 @@ namespace Slug.CI
 		public AbsolutePath TestOutputPath { get; private set; }
 
 
+		private GitProcessor _gitProcessor;
+
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public SlugBuilder () {
+		public SlugBuilder (CISession ciSession) {
+			Misc.WriteMainHeader("SlugBuilder:: Startup");
+
+			CISession = ciSession;
 
 			Solution = SolutionSerializer.DeserializeFromFile<Solution>(@"C:\A_Dev\SlugEnt\NukeTestControl\src\NukeTestControl.sln");
 			GitRepository = GitRepository.FromLocalDirectory(@"C:\A_Dev\SlugEnt\NukeTestControl\");
@@ -68,6 +74,8 @@ namespace Slug.CI
 			SolutionPath = Solution.Directory;
 			CoveragePath = (AbsolutePath)@"C:\A_Dev\SlugEnt\NukeTestControl\artifacts\Coverage";
 			TestOutputPath = (AbsolutePath)@"C:\A_Dev\SlugEnt\NukeTestControl\artifacts\Tests";
+
+			GitProcessorStartup();
 		}
 
 
@@ -91,6 +99,7 @@ namespace Slug.CI
 
 
 		public bool Clean () {
+			Misc.WriteMainHeader("SlugBuilder::  Clean");
 			//AbsolutePath SourceDirectory = (AbsolutePath)@"C:\A_Dev\SlugEnt\NukeTestControl\src\Printer";
 			IReadOnlyCollection<AbsolutePath> directoriesToClean = SolutionPath.GlobDirectories("**/bin", "**/obj");
 
@@ -109,6 +118,7 @@ namespace Slug.CI
 		/// </summary>
 		/// <returns></returns>
 		public bool RestoreNugetPackages () {
+			Misc.WriteMainHeader("SlugBuilder::  Restore");
 			DotNetRestoreSettings settings = new DotNetRestoreSettings();
 			settings.ProjectFile = Solution;
 			IReadOnlyCollection<Output> outputs = DotNetTasks.DotNetRestore(settings);
@@ -117,6 +127,7 @@ namespace Slug.CI
 
 
 		public bool Compile () {
+			Misc.WriteMainHeader("SlugBuilder:: Compile");
 			DotNetBuildSettings dotNetBuildSettings = new DotNetBuildSettings()
 			{
 				ProjectFile = Solution,
@@ -133,7 +144,7 @@ namespace Slug.CI
 
 
 		public bool Test () {
-			
+			Misc.WriteMainHeader("SlugBuilder:: Run Unit Tests");
 			FileSystemTasks.EnsureExistingDirectory(CoveragePath);
 
 			DotNetTestSettings settings = new DotNetTestSettings()
@@ -204,6 +215,7 @@ namespace Slug.CI
 
 
 		public bool CodeCoverage () {
+			Misc.WriteMainHeader("SlugBuilder:: CodeCoverage");
 			FileSystemTasks.EnsureExistingDirectory(CoveragePath);
 			ReportGeneratorTasks.ReportGenerator(r => r.SetTargetDirectory(CoveragePath)
 			                                           .SetProcessWorkingDirectory(CoveragePath)
@@ -248,6 +260,7 @@ namespace Slug.CI
 
 
 		public bool Pack () {
+			Misc.WriteMainHeader("SlugBuilder::  Nuget Pack");
 			//OutputDirectory.GlobFiles("*.nupkg", "*symbols.nupkg").ForEach(DeleteFile);
 
 			DotNetPackSettings settings = new DotNetPackSettings();
@@ -257,6 +270,7 @@ namespace Slug.CI
 				settings.OutputDirectory = ArtifactPath;
 				settings.IncludeSymbols = true;
 				settings.NoRestore = true;
+				settings.Verbosity = DotNetVerbosity.Diagnostic;
 				settings.SetFileVersion("4.5.6");
 				IReadOnlyCollection<Output> output = DotNetTasks.DotNetPack(settings);
 			}
@@ -278,9 +292,35 @@ namespace Slug.CI
 
 		
 		public bool CopyCompiledProject (string source, string destination) {
+			Misc.WriteMainHeader("SlugBuilder:: Deploy Via Copy");
 			FileSystemTasks.CopyDirectoryRecursively(source,destination);
 
 			return true;
 		}
+
+
+		/// <summary>
+		/// Initializes the GitProcessor and ensures Repo is in the proper state
+		/// </summary>
+		private void GitProcessorStartup()
+		{
+			// Setup the GitProcessor
+			_gitProcessor = new GitProcessor(CISession);
+			if (_gitProcessor.GitVersion == null) Logger.Error("GitProcessor:  Unable to load the GitVersion not Loaded");
+
+			// Get current branch and ensure there are no uncommitted updates.  These methods will throw if anything is out of sorts.
+			_gitProcessor.GetCurrentBranch();
+			_gitProcessor.IsUncommittedChanges();
+			_gitProcessor.IsBranchUpToDate();
+
+			if (_gitProcessor.IsCurrentBranchMainBranch() && CISession.PublishTarget != PublishTargetEnum.Production)
+			{
+				string msg =
+					@"The current branch is the main branch, yet you are running a Test Publish command.  This is unsupported as it will cause version issues in Git.  " +
+					"Either create a branch off master to put the changes into (this is probably what you want) OR change Target command to PublishProd.";
+				ControlFlow.Assert(1 == 0, msg);
+			}
+		}
+
 	}
 }
