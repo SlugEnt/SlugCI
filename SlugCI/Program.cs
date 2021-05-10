@@ -33,7 +33,7 @@ namespace Slug.CI
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		public static int Main(string rootdir = "", string deployto = "test", string compileconfig = "", bool faststart = false, string verbosity = "") {
+		public static int Main(string rootdir = "", string deployto = "test", string compileconfig = "", bool faststart = false, string verbosity = "", bool interactive = true) {
 			try {
 				Misc.WriteAppHeader();
 				CISession ciSession = new CISession();
@@ -75,6 +75,10 @@ namespace Slug.CI
 
 				// Set Faststart
 				if ( faststart == true ) ciSession.IsFastStart = true;
+
+
+				// Interactive mode
+				ciSession.IsInteractiveRun = interactive;
 
 
 				// Create the SlugCI which is main processing class.

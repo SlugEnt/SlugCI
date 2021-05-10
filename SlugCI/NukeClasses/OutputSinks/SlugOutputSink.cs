@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
+using Microsoft.Build.Tasks;
 /*using Nuke.Common.CI;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
@@ -16,6 +17,9 @@ using Nuke.Common.Tools.GitHub;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
 using Slug.CI;
+using Console = Colorful.Console;
+
+// MODIFIED:  Significant Modifications to this code.
 
 namespace Nuke.Common.OutputSinks
 {
@@ -33,7 +37,10 @@ namespace Nuke.Common.OutputSinks
             }
         }
 
-        internal readonly List<Tuple<LogLevel, string>> SevereMessages = new List<Tuple<LogLevel, string>>();
+        
+        internal readonly List<OutputRecord> SevereMessages = new List<OutputRecord>();
+
+        //internal readonly List<Tuple<LogLevel, string>> SevereMessages = new List<Tuple<LogLevel, string>>();
 
         internal virtual IDisposable WriteBlock(string text)
         {
@@ -56,23 +63,41 @@ namespace Nuke.Common.OutputSinks
         /// Writes End of slugBuilder Summary info.
         /// </summary>
         /// <param name="stageStats"></param>
-        internal virtual void WriteSummary(List<BuildStage> stageStats)
-        {
-            if (SevereMessages.Count > 0)
-            {
-                WriteNormal();
-                WriteSevereMessages();
-            }
+        internal virtual void WriteSummary (ExecutionPlan plan, bool isInteractive) {
+	        Console.WriteLine();
+	        Misc.WriteFinalHeader(plan.PlanStatus);
 
+	        if ( !isInteractive ) {
+		        if ( SevereMessages.Count > 0 ) {
+			        WriteNormal();
+			        WriteSevereMessages();
+		        }
+	        }
+
+
+			WriteNormal();
+            WriteSummaryTable(plan);
             WriteNormal();
-            WriteSummaryTable(stageStats);
-            WriteNormal();
-            /*
-            if (build.IsSuccessful)
+            
+            if (plan.WasSuccessful)
                 WriteSuccessfulBuild();
             else
                 WriteFailedBuild();
 
+            if ( isInteractive ) {
+	            bool continueLooping = true;
+	            while ( continueLooping ) {
+		            Console.WriteLine("Press (x) to exit, (d) to view detailed error information");
+		            ConsoleKeyInfo keyInfo = Console.ReadKey();
+		            if ( keyInfo.Key == ConsoleKey.X ) return;
+		            if ( keyInfo.Key == ConsoleKey.D ) {
+                        WriteNormal();
+                        WriteSevereMessages();
+                        return;
+		            }
+	            }
+            }
+            /*
             bool HasHighUsage()
                 => // interface implementations
                    build.GetType().GetInterfaces().Length > 1 ||
@@ -80,7 +105,7 @@ namespace Nuke.Common.OutputSinks
                    build.GetType().GetCustomAttributes<ConfigurationAttributeBase>().Any() ||
                    // global tool
                    NukeBuild.BuildProjectFile == null;
-
+            
             T TryGetValue<T>(Func<T> func)
             {
                 try
@@ -118,14 +143,15 @@ namespace Nuke.Common.OutputSinks
         /// Writes the Summary of the Slug Build Process
         /// </summary>
         /// <param name="StageStats"></param>
-        protected virtual void WriteSummaryTable(List<BuildStage> StageStats)
-        {
+        protected virtual void WriteSummaryTable(ExecutionPlan plan) {
+	        List<BuildStage> StageStats = plan.Plan.ToList();
+
             // MODIFIED: This has been customized
             int firstColumn = Math.Max(StageStats.Max(x => x.Name.Length) + 4, 20);
             int secondColumn = 10;
             int thirdColumn = 10;
             int totalColWidth = firstColumn + secondColumn + thirdColumn;
-            long totalDuration = StageStats.Aggregate((long) 0, (t, x) => t += x.RunTimeDuration());   //(0, (t, x) => t.Add(x.RunTimeDuration()));
+            //long totalDuration = StageStats.Aggregate((long) 0, (t, x) => t += x.RunTimeDuration());   //(0, (t, x) => t.Add(x.RunTimeDuration()));
 
 
             // FX Creates a writable line
@@ -155,8 +181,11 @@ namespace Nuke.Common.OutputSinks
             WriteInformation(CreateLine("Target", "Status", "Duration"));
             WriteNormal(new string(c: '─', count: totalColWidth));
 
+            long totalDuration = 0;
             foreach ( BuildStage stageStat in StageStats ) {
                 string line = CreateLine(stageStat.Name, stageStat.CompletionStatus.ToString(), GetDurationOrBlank(stageStat));
+                totalDuration += stageStat.RunTimeDuration();
+
                 switch (stageStat.CompletionStatus)
                 {
                     case StageCompletionStatusEnum.Skipped:
@@ -187,15 +216,15 @@ namespace Nuke.Common.OutputSinks
         {
             WriteInformation("Repeating warnings and errors:");
 
-            foreach (var (level, message) in SevereMessages.ToList())
+            foreach (OutputRecord record in SevereMessages)
             {
-                switch (level)
+                switch (record.LogLevel)
                 {
                     case LogLevel.Warning:
-                        WriteWarning(message);
+                        WriteWarning(record.Text,record.Details);
                         break;
                     case LogLevel.Error:
-                        WriteError(message);
+                        WriteError(record.Text, record.Details);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
@@ -205,7 +234,7 @@ namespace Nuke.Common.OutputSinks
 
         internal void WriteAndReportWarning(string text, string details = null)
         {
-            SevereMessages.Add(Tuple.Create(LogLevel.Warning, text));
+            SevereMessages.Add(new OutputRecord(LogLevel.Warning,text, details));
             ReportWarning(text, details);
             if (EnableWriteWarnings)
                 WriteWarning(text, details);
@@ -213,10 +242,15 @@ namespace Nuke.Common.OutputSinks
 
         internal void WriteAndReportError(string text, string details = null)
         {
-            SevereMessages.Add(Tuple.Create(LogLevel.Error, text));
+	        SevereMessages.Add(new OutputRecord(LogLevel.Error, text, details));
             ReportError(text, details);
             if (EnableWriteErrors)
                 WriteError(text, details);
+        }
+
+
+        internal void ReportErrorOnly (string text, string details) {
+	        SevereMessages.Add(new OutputRecord(LogLevel.Error, text, details));
         }
 
         protected virtual string FormatBlockText(string text)

@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.Text;
 using Microsoft.Build.Framework;
+using Nuke.Common;
+using Nuke.Common.OutputSinks;
+using Nuke.Common.Tooling;
 using Slug.CI.NukeClasses;
 using Console = Colorful.Console;
 
@@ -19,10 +23,11 @@ namespace Slug.CI
 		/// The name of the stage
 		/// </summary>
 		public string Name { get; }
+		
 
 
 		/// The Session information
-		private  CISession CISession { get; }
+		protected  CISession CISession { get; }
 
 
 		/// <summary>
@@ -47,8 +52,10 @@ namespace Slug.CI
 		/// <param name="name">The name of this stage</param>
 		/// <param name="ciSession">The CISession object</param>
 		public BuildStage (string name, CISession ciSession) {
+			CompletionStatus = StageCompletionStatusEnum.NotStarted;
 			Name = name;
 			CISession = ciSession;
+			
 		}
 
 
@@ -80,13 +87,39 @@ namespace Slug.CI
 		}
 
 
+		/// <summary>
+		/// Method that must be overridden in child classes.  This is where the main logic for the child process lives.
+		/// </summary>
+		/// <returns></returns>
+		protected abstract StageCompletionStatusEnum ExecuteProcess ();
+
+
+		/// <summary>
+		/// Runs the given Build Stage
+		/// </summary>
+		/// <returns></returns>
 		public bool Execute () {
-			// Start stage timer
-			_stopwatch = Stopwatch.StartNew();
+			try {
+				// Start stage timer
+				_stopwatch = Stopwatch.StartNew();
 
+				Misc.WriteMainHeader("SlugBuilder::  " + Name);
 
-			Finished(StageCompletionStatusEnum.Success);
-			return true;
+				System.Console.WriteLine("", Color.DarkGray);
+
+				Finished(ExecuteProcess());
+
+				if ( CompletionStatus == StageCompletionStatusEnum.Success ) return true;
+			}
+			catch ( ProcessException p ) {
+				CompletionStatus = StageCompletionStatusEnum.Failure;
+				Logger.Error(p,true);
+			}
+			catch ( Exception e ) {
+				CompletionStatus = StageCompletionStatusEnum.Failure;
+				Logger.Error(e);
+			}
+			return false;
 		}
 
 
@@ -127,6 +160,10 @@ namespace Slug.CI
 		}
 
 
-		public override string ToString () { return Name; }
+		/// <summary>
+		/// Build Stages display name and Completion Status
+		/// </summary>
+		/// <returns></returns>
+		public override string ToString () { return Name + " [ " + CompletionStatus + " ]"; }
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Nuke.Common;
 
 namespace Slug.CI
 {
@@ -14,6 +15,9 @@ namespace Slug.CI
 
 		// The list of all available stages
 		private List<BuildStage> _buildStages = new List<BuildStage>();
+
+
+		public StageCompletionStatusEnum PlanStatus { get; private set; }
 
 
 		/// <summary>
@@ -36,7 +40,9 @@ namespace Slug.CI
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public ExecutionPlan () {}
+		public ExecutionPlan () {
+			PlanStatus = StageCompletionStatusEnum.NotStarted;
+		}
 
 
 		/// <summary>
@@ -135,6 +141,53 @@ namespace Slug.CI
 
 		}
 
+
+		
+		/// <summary>
+		/// Executes the build plan
+		/// </summary>
+		/// <returns></returns>
+		public StageCompletionStatusEnum Execute () {
+			PlanStatus = StageCompletionStatusEnum.InProcess;
+			StageCompletionStatusEnum stageStatus;
+
+			try {
+				foreach ( BuildStage buildStage in Plan ) {
+					buildStage.Execute();
+					stageStatus = buildStage.CompletionStatus;
+//					if ( FinalStatus > StageCompletionStatusEnum.NotStarted && stageStatus < FinalStatus) { FinalStatus = stageStatus; }
+
+					// Anything less than Skipped is an error and we stop immediately.
+					if ( stageStatus < StageCompletionStatusEnum.Skipped ) { break; }
+				}
+
+
+				// We have processed everything...Now loop thru all the stages to determine final status
+				PlanStatus = StageCompletionStatusEnum.Success;
+				foreach ( BuildStage buildStage in Plan ) {
+					if ( buildStage.CompletionStatus < PlanStatus ) PlanStatus = buildStage.CompletionStatus;
+				}
+			}
+
+			catch ( Exception e ) {
+				PlanStatus = StageCompletionStatusEnum.Failure;
+				Logger.Error(e);
+			}
+
+			return PlanStatus;
+		}
+
+
+
+		/// <summary>
+		/// Returns true if the Plan was successfully executed.
+		/// </summary>
+		public bool WasSuccessful {
+			get {
+				if ( PlanStatus >= StageCompletionStatusEnum.Skipped ) return true;
+				return false;
+			}
+		}
 
 	}
 }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Nuke.Common.Tooling;
+using Nuke.Common.Tools.DotNet;
 using Slug.CI.NukeClasses;
 
 namespace Slug.CI.SlugBuildStages
@@ -18,5 +20,17 @@ namespace Slug.CI.SlugBuildStages
 			PredecessorList.Add(BuildStageStatic.STAGE_CLEAN);
 		}
 
+		/// <summary>
+		/// Run Restore Process
+		/// </summary>
+		/// <returns></returns>
+		protected override StageCompletionStatusEnum ExecuteProcess()
+		{
+			DotNetRestoreSettings settings = new DotNetRestoreSettings();
+			settings.ProjectFile = CISession.Solution;
+			IReadOnlyCollection<Output> outputs = DotNetTasks.DotNetRestore(settings);
+
+			return StageCompletionStatusEnum.Success;
+		}
 	}
 }

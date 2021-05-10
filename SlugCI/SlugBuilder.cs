@@ -5,6 +5,7 @@ using System.Text;
 using Nuke.Common;
 using Nuke.Common.Git;
 using Nuke.Common.IO;
+using Nuke.Common.OutputSinks;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
@@ -20,12 +21,6 @@ namespace Slug.CI
 		/// The session information
 		/// </summary>
 		private CISession CISession { get; set; }
-
-		/// <summary>
-		/// The Solution we are processing
-		/// </summary>
-		public Solution Solution { get; set; }
-
 
 		/// <summary>
 		/// The Git Repository for the Solution
@@ -46,12 +41,6 @@ namespace Slug.CI
 
 
 		/// <summary>
-		/// Path of the folder containing the .sln file.
-		/// </summary>
-		public AbsolutePath SolutionPath { get; private set; }
-
-
-		/// <summary>
 		/// Test output location
 		/// </summary>
 		public AbsolutePath TestOutputPath { get; private set; }
@@ -67,12 +56,15 @@ namespace Slug.CI
 			Misc.WriteMainHeader("SlugBuilder:: Startup");
 
 			CISession = ciSession;
+
+
+
 			// TODO Fix this code
-			Solution = SolutionSerializer.DeserializeFromFile<Solution>(@"C:\A_Dev\SlugEnt\NukeTestControl\src\NukeTestControl.sln");
+
 			GitRepository = GitRepository.FromLocalDirectory(@"C:\A_Dev\SlugEnt\NukeTestControl\");
 
 			// Set Path properties
-			SolutionPath = Solution.Directory;
+			
 			CoveragePath = (AbsolutePath)@"C:\A_Dev\SlugEnt\NukeTestControl\artifacts\Coverage";
 			TestOutputPath = (AbsolutePath)@"C:\A_Dev\SlugEnt\NukeTestControl\artifacts\Tests";
 
@@ -80,13 +72,20 @@ namespace Slug.CI
 			// Load All Known Build Stages
 
 			// TODO - Uncomment
-			GitProcessorStartup();
+			//GitProcessorStartup();
 
 
 			// Setup Build Execution Plan based upon caller's Final Build Request Target
 			// Pretend it was compile
 			LoadBuildStages();
 			_executionPlan.BuildExecutionPlan(BuildStageStatic.STAGE_COMPILE);
+
+
+			// Anything less than skipped indicates an error situation.
+			StageCompletionStatusEnum planStatus = _executionPlan.Execute();
+
+			Logger.OutputSink.WriteSummary(_executionPlan, CISession.IsInteractiveRun);
+
 		}
 
 
@@ -121,59 +120,13 @@ namespace Slug.CI
 			return true;
 		}
 
-
-		public bool Clean () {
-			Misc.WriteMainHeader("SlugBuilder::  Clean");
-			//AbsolutePath SourceDirectory = (AbsolutePath)@"C:\A_Dev\SlugEnt\NukeTestControl\src\Printer";
-			IReadOnlyCollection<AbsolutePath> directoriesToClean = SolutionPath.GlobDirectories("**/bin", "**/obj");
-
-			//TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
-			foreach ( AbsolutePath dir in directoriesToClean ) {
-				FileSystemTasks.EnsureCleanDirectory(dir);
-			}
-			
-			return true;
-		}
-
-
-		/// <summary>
-		/// Performs a restore which ensures all the packages on the compiling pc are current with the expected versions in solution.
-		/// This DOES NOT upgrade packages.
-		/// </summary>
-		/// <returns></returns>
-		public bool RestoreNugetPackages () {
-			Misc.WriteMainHeader("SlugBuilder::  Restore");
-			DotNetRestoreSettings settings = new DotNetRestoreSettings();
-			settings.ProjectFile = Solution;
-			IReadOnlyCollection<Output> outputs = DotNetTasks.DotNetRestore(settings);
-			return true;
-		}
-
-
-		public bool Compile () {
-			Misc.WriteMainHeader("SlugBuilder:: Compile");
-			DotNetBuildSettings dotNetBuildSettings = new DotNetBuildSettings()
-			{
-				ProjectFile = Solution,
-				NoRestore = true
-			};
-			dotNetBuildSettings.SetProjectFile(Solution);
-			dotNetBuildSettings.SetFileVersion("9.4.5");
-			dotNetBuildSettings.SetVerbosity(DotNetVerbosity.Diagnostic);
-			dotNetBuildSettings.EnableNoRestore();
-
-			IReadOnlyCollection<Output> out1 = DotNetTasks.DotNetBuild(dotNetBuildSettings);
-			return true;
-		}
-
-
 		public bool Test () {
 			Misc.WriteMainHeader("SlugBuilder:: Run Unit Tests");
 			FileSystemTasks.EnsureExistingDirectory(CoveragePath);
 
 			DotNetTestSettings settings = new DotNetTestSettings()
 			{
-				ProjectFile = Solution,
+				ProjectFile = CISession.Solution,
 				NoRestore = true,
 				NoBuild = true,
 				ProcessLogOutput = true,
@@ -288,7 +241,7 @@ namespace Slug.CI
 			//OutputDirectory.GlobFiles("*.nupkg", "*symbols.nupkg").ForEach(DeleteFile);
 
 			DotNetPackSettings settings = new DotNetPackSettings();
-			foreach ( Nuke.Common.ProjectModel.Project x in Solution.AllProjects ) {
+			foreach ( Nuke.Common.ProjectModel.Project x in CISession.Solution.AllProjects ) {
 				settings.Project = x.Path;
 				//settings.SetProject(x.Path);
 				settings.OutputDirectory = ArtifactPath;

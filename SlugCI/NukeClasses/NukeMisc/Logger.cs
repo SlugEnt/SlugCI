@@ -296,6 +296,12 @@ namespace Nuke.Common
                 HandleException(exception, OutputSink.WriteAndReportError);
         }
 
+
+        public static void Error (Exception exception, bool skipWrite) {
+            if (LogLevel <= LogLevel.Error)
+                HandleException(exception,OutputSink.ReportErrorOnly);
+        }
+
         #endregion
 
         private static void HandleException(Exception exception, Action<string, string> exceptionOutput, string prefix = null)

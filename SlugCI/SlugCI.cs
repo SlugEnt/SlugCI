@@ -16,6 +16,7 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.IO.FileSystemTasks;
 using System.Xml.XPath;
 using JetBrains.Annotations;
+using Nuke.Common.ProjectModel;
 using Slug.CI;
 using Slug.CI.NukeClasses;
 using Console = Colorful.Console;
@@ -50,16 +51,34 @@ namespace Slug.CI
 			CISession.SlugCIFileName = CISession.SlugCIPath / SLUG_CI_CONFIG_FILE;
 
 
+			// Location Solution and set solution related variables
+			LoadSolutionInfo();
 
-		// Ensure Solution is in SlugCI format. If not migrate it.
-		ConvertToSlugCI converter = new ConvertToSlugCI(CISession);
+			// Ensure Solution is in SlugCI format. If not migrate it.
+			ConvertToSlugCI converter = new ConvertToSlugCI(CISession);
 			if ( !converter.IsInSlugCIFormat ) {
 				ControlFlow.Assert(converter.IsInSlugCIFormat,"The solution is not in the proper SlugCI format.  This should be something that is automatically done.  Obviously something went wrong.");
 			}
 
+
+			// Reload solution info if it was moved.
+			if (converter.SolutionWasMoved) 
+				LoadSolutionInfo();
+
+
 			CheckForEnvironmentVariables();
 		}
 
+
+		private void LoadSolutionInfo () {
+			List<string> solutionFiles = SearchForSolutionFile(CISession.RootDirectory.ToString(), ".sln");
+			ControlFlow.Assert(solutionFiles.Count != 0, "Unable to find the solution file");
+			ControlFlow.Assert(solutionFiles.Count == 1, "Found more than 1 solution file under the root directory -  - We can only work with 1 solution file." + CISession.RootDirectory.ToString());
+			CISession.SolutionFileName = solutionFiles[0];
+			CISession.Solution = SolutionSerializer.DeserializeFromFile<Solution>(CISession.SolutionFileName);
+			CISession.SolutionPath = CISession.Solution.Directory;
+
+		}
 
 
 		[CanBeNull]
@@ -82,9 +101,6 @@ namespace Slug.CI
 
 			slugBuilder.CopyCompiledProject(@"C:\temp\slugcitest", @"C:\temp\cideploy");
 			return;
-			slugBuilder.Clean();
-			slugBuilder.RestoreNugetPackages();
-			slugBuilder.Compile();
 			slugBuilder.Test();
 
 			//slugBuilder.Pack();
@@ -125,6 +141,36 @@ namespace Slug.CI
 			return false;
 		}
 
+
+
+		/// <summary>
+		/// Looks for the .sln file in the current folder and all subdirectories.
+		/// </summary>
+		/// <param name="root"></param>
+		/// <param name="searchTerm"></param>
+		/// <returns></returns>
+		public static List<string> SearchForSolutionFile(string root, string searchTerm)
+		{
+			List<string> files = new List<string>();
+
+			foreach (var file in Directory.EnumerateFiles(root).Where(m => m.EndsWith(searchTerm)))
+			{
+				files.Add(file);
+			}
+			foreach (var subDir in Directory.EnumerateDirectories(root))
+			{
+				try
+				{
+					files.AddRange(SearchForSolutionFile(subDir, searchTerm));
+				}
+				catch (UnauthorizedAccessException)
+				{
+					// ...
+				}
+			}
+
+			return files;
+		}
 
 
 

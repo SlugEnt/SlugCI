@@ -10,20 +10,31 @@ namespace Slug.CI
 	public enum StageCompletionStatusEnum
 	{
 		/// <summary>
+		/// Stage has not been started.
+		/// </summary>
+		NotStarted = 0, 
+
+		/// <summary>
+		/// Stage was started and is in process.
+		/// </summary>
+		InProcess = 10, 
+
+
+		/// <summary>
 		/// Stage was not run, either due to failed dependencies or pre-stage errors
 		/// </summary>
-		Aborted = 0,
+		Aborted = 40,
 
 		/// <summary>
 		/// Stage was unable to successfully complete.
 		/// </summary>
-		Failure = 1,
+		Failure = 50,
 
 
 		/// <summary>
-		/// Stage was puposefully skipped
+		/// Stage was purposefully skipped
 		/// </summary>
-		Skipped = 10,
+		Skipped = 90,
 
 		/// <summary>
 		/// Stage completed, but it might not have done so successfully.

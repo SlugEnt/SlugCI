@@ -73,6 +73,21 @@ namespace Nuke.Common.Tools.DotNet
                     Logger.Warn(output);
                     return;
                 }
+
+                if (i >= 5 &&
+                    'F' == output[i - 5] &&
+                    'A' == output[i - 4] &&
+                    'I' == output[i - 3] &&
+                    'L' == output[i - 2] &&
+                    'E' == output[i - 1] &&
+                    'D' == output[i] )
+
+                {
+	                Logger.Error(output);
+	                return;
+                }
+
+
             }
 
             Logger.Normal(output);

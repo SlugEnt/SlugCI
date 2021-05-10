@@ -35,17 +35,11 @@ namespace Slug.CI
 		/// </summary>
 		private CISession CISession { get; set; }
 
-		/// <summary>
-		/// The solution projects Main folder.
-		/// </summary>
-		//public AbsolutePath CISession.RootDirectory { get; private set; }
 
 		/// <summary>
-		/// The RootCI folder
+		/// True if the solution was moved as part of Converter process
 		/// </summary>
-		//private AbsolutePath SlugCIPath { get; set; }
-
-
+		public bool SolutionWasMoved { get; private set; }
 
 
 		internal AbsolutePath CurrentSolutionPath { get; set; }
@@ -139,14 +133,17 @@ namespace Slug.CI
 		public bool Converter()
 		{
 			// Find the Solution - Assume we are in the root folder right now.
-			List<string> solutionFiles = SearchForSolutionFile(CISession.RootDirectory.ToString(), ".sln");
+
+			// TODO Cleanup
+		/*	List<string> solutionFiles = SearchForSolutionFile(CISession.RootDirectory.ToString(), ".sln");
 			ControlFlow.Assert(solutionFiles.Count != 0, "Unable to find the solution file");
 			ControlFlow.Assert(solutionFiles.Count == 1, "Found more than 1 solution file under the root directory -  - We can only work with 1 solution file." + CISession.RootDirectory.ToString());
 			string solutionFile = solutionFiles[0];
-			Logger.Normal("Solution File found:  {0}", solutionFile);
+		*/
+			Logger.Normal("Solution File found:  {0}", CISession.SolutionFileName);
 
 			// A.  Proper Directory Structure
-			ControlFlow.Assert(ProperDirectoryStructure(solutionFile), "Attempted to put solution in proper directory structure, but failed.");
+			ControlFlow.Assert(ProperDirectoryStructure(CISession.SolutionFileName), "Attempted to put solution in proper directory structure, but failed.");
 
 
 			// B.  We need to upgrade from SlugNuke if the SlugNuke config file was found.
@@ -420,6 +417,7 @@ namespace Slug.CI
 				string slnFileCurrent = CurrentSolutionPath / Path.GetFileName(solutionFile);
 				string slnFileFuture = ExpectedSolutionPath / Path.GetFileName(solutionFile);
 				File.Move(slnFileCurrent, slnFileFuture);
+				SolutionWasMoved = true;
 			}
 
 
@@ -538,34 +536,6 @@ namespace Slug.CI
 
 
 
-		/// <summary>
-		/// Looks for the .sln file in the current folder and all subdirectories.
-		/// </summary>
-		/// <param name="root"></param>
-		/// <param name="searchTerm"></param>
-		/// <returns></returns>
-		List<string> SearchForSolutionFile(string root, string searchTerm)
-		{
-			List<string> files = new List<string>();
-
-			foreach (var file in Directory.EnumerateFiles(root).Where(m => m.EndsWith(searchTerm)))
-			{
-				files.Add(file);
-			}
-			foreach (var subDir in Directory.EnumerateDirectories(root))
-			{
-				try
-				{
-					files.AddRange(SearchForSolutionFile(subDir, searchTerm));
-				}
-				catch (UnauthorizedAccessException)
-				{
-					// ...
-				}
-			}
-
-			return files;
-		}
 
 
 	}

@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using Nuke.Common;
 using static Nuke.Common.IO.FileSystemTasks;
 using Nuke.Common.IO;
+using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
 
@@ -66,11 +67,36 @@ namespace Slug.CI.NukeClasses
 		public string CompileConfig { get; set; }
 
 
+
+		/// <summary>
+		/// Path of the folder containing the .sln file.
+		/// </summary>
+		public AbsolutePath SolutionPath { get; set; }
+
+
+		/// <summary>
+		/// Full path and file name of the solution
+		/// </summary>
+		public string SolutionFileName { get; set; }
+
+		/// <summary>
+		/// The Solution we are processing
+		/// </summary>
+		public Solution Solution { get; set; }
+
+
+
 		/// <summary>
 		/// If true the SlugCIConfig file is not validated or updated with the latest changes to both SlugCI Config changes as well as solution changes to projects, such as add or deletes..
 		/// <para>Generally only used for testing purposes to provide a slight speed increase when starting</para>
 		/// </summary>
 		public bool IsFastStart { get; set; }
+
+
+		/// <summary>
+		/// True if this is a user initiated run and the user can respond to keyboard input
+		/// </summary>
+		public bool IsInteractiveRun { get; set; }
 
 
 		/// <summary>

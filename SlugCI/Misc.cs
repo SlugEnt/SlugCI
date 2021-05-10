@@ -14,6 +14,7 @@ namespace Slug.CI
 	public static class Misc
 	{
 		private const string hdrSep = "|-------------------------------------------------------------------|";
+		private const string apphdr = "|###################################################################| ";
 
 
 		/// <summary>
@@ -52,7 +53,7 @@ namespace Slug.CI
 			Console.WriteLine("|    " + text, Color.DarkCyan);
 			if (parameterList != null)
 				foreach ( string param in parameterList ) {
-					Console.WriteLine("|   -->  " + param);
+					Console.WriteLine("|   -->  " + param,Color.Yellow);
 				}
 			Console.WriteLine(hdrSep, Color.DarkOrange);
 			Console.WriteLine(hdrSep, Color.DarkOrange);
@@ -63,18 +64,46 @@ namespace Slug.CI
 
 
 		/// <summary>
-		/// Writes the Application Header
+		/// Writes The Final Status information
 		/// </summary>
 		/// <param name="text"></param>
 		/// <param name="parameterList"></param>
+		public static void WriteFinalHeader(StageCompletionStatusEnum status) {
+			Color color;
+			Color lineColor = Color.DarkViolet;
+
+			if ( status == StageCompletionStatusEnum.Success ) color = Color.LimeGreen;
+			else if ( status == StageCompletionStatusEnum.Failure || status == StageCompletionStatusEnum.Aborted )
+				color = Color.Red;
+			else
+				color = Color.Yellow;
+
+			Console.WriteLine();
+			Console.WriteLine();
+			Console.WriteLine();
+			Console.WriteLine();
+
+			Console.WriteLine(apphdr, lineColor);
+			Console.WriteLine(apphdr, lineColor);
+			Console.WriteLine("|    " + "Overall Build Status: " + status, color);
+			Console.WriteLine(apphdr, lineColor);
+			Console.WriteLine(apphdr, lineColor);
+			Console.WriteLine();
+		}
+
+
+
+		/// <summary>
+		/// Writes the Application Header
+		/// </summary>
+		/// <param name="parameterList"></param>
 		public static void WriteAppHeader(List<string> parameterList = null) {
-			string hdr = " | ###################################################################| ";
 			string hdrText = "SlugCI - Custom App Migrator";
 			Console.WriteLine();
 			Console.WriteLine();
 			Console.WriteLine();
 			Console.WriteLine();
-			Console.WriteLine(hdr, Color.DarkViolet);
+			Console.WriteLine(apphdr, Color.DarkViolet);
 			Console.WriteLine(hdrSep, Color.DarkViolet);
 			Console.WriteLine("|    " + hdrText, Color.DarkCyan);
 			if (parameterList != null)
@@ -83,7 +112,7 @@ namespace Slug.CI
 					Console.WriteLine("|   -->  " + param);
 				}
 			Console.WriteLine(hdrSep, Color.DarkViolet);
-			Console.WriteLine(hdr, Color.DarkViolet);
+			Console.WriteLine(apphdr, Color.DarkViolet);
 			Console.WriteLine();
 		}
 
