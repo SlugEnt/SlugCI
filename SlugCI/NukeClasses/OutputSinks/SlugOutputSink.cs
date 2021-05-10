@@ -15,19 +15,20 @@ using Nuke.Common.Tools.GitHub;
 */
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
+using Slug.CI;
 
 namespace Nuke.Common.OutputSinks
 {
     [PublicAPI]
-    public abstract class OutputSink
+    public abstract class SlugOutputSink
     {
-        public static OutputSink Default
+        public static SlugOutputSink Default
         {
             get
             {
                 var term = Environment.GetEnvironmentVariable("TERM");
                 return term == null || !term.StartsWithOrdinalIgnoreCase("xterm")
-                    ? (OutputSink) new SystemColorOutputSink()
+                    ? (SlugOutputSink) new SystemColorOutputSink()
                     : new AnsiColorOutputSink();
             }
         }
@@ -50,17 +51,12 @@ namespace Nuke.Common.OutputSinks
                 });
         }
 
-        protected internal void WriteLogo()
-        {
-            Logger.Normal("███╗   ██╗██╗   ██╗██╗  ██╗███████╗");
-            Logger.Normal("████╗  ██║██║   ██║██║ ██╔╝██╔════╝");
-            Logger.Normal("██╔██╗ ██║██║   ██║█████╔╝ █████╗  ");
-            Logger.Normal("██║╚██╗██║██║   ██║██╔═██╗ ██╔══╝  ");
-            Logger.Normal("██║ ╚████║╚██████╔╝██║  ██╗███████╗");
-            Logger.Normal("╚═╝  ╚═══╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝");
-        }
 
-        internal virtual void WriteSummary(NukeBuild build)
+        /// <summary>
+        /// Writes End of slugBuilder Summary info.
+        /// </summary>
+        /// <param name="stageStats"></param>
+        internal virtual void WriteSummary(List<BuildStage> stageStats)
         {
             if (SevereMessages.Count > 0)
             {
@@ -69,7 +65,7 @@ namespace Nuke.Common.OutputSinks
             }
 
             WriteNormal();
-            WriteSummaryTable(build);
+            WriteSummaryTable(stageStats);
             WriteNormal();
             /*
             if (build.IsSuccessful)
@@ -117,70 +113,74 @@ namespace Nuke.Common.OutputSinks
             WriteError($"Build failed on {DateTime.Now.ToString(CultureInfo.CurrentCulture)}. (╯°□°）╯︵ ┻━┻");
         }
 
-        protected virtual void WriteSummaryTable(NukeBuild build)
+
+        /// <summary>
+        /// Writes the Summary of the Slug Build Process
+        /// </summary>
+        /// <param name="StageStats"></param>
+        protected virtual void WriteSummaryTable(List<BuildStage> StageStats)
         {
-            WriteWarning("This section does nothing.");
-            /*
-            var firstColumn = Math.Max(build.ExecutionPlan.Max(x => x.Name.Length) + 4, val2: 19);
-            var secondColumn = 10;
-            var thirdColumn = 10;
-            var allColumns = firstColumn + secondColumn + thirdColumn;
-            var totalDuration = build.ExecutionPlan.Aggregate(TimeSpan.Zero, (t, x) => t.Add(x.Duration));
+            // MODIFIED: This has been customized
+            int firstColumn = Math.Max(StageStats.Max(x => x.Name.Length) + 4, 20);
+            int secondColumn = 10;
+            int thirdColumn = 10;
+            int totalColWidth = firstColumn + secondColumn + thirdColumn;
+            long totalDuration = StageStats.Aggregate((long) 0, (t, x) => t += x.RunTimeDuration());   //(0, (t, x) => t.Add(x.RunTimeDuration()));
 
-            string CreateLine(string target, string executionStatus, string duration, string information = null)
-                => target.PadRight(firstColumn, paddingChar: ' ')
-                   + executionStatus.PadRight(secondColumn, paddingChar: ' ')
-                   + duration.PadLeft(thirdColumn, paddingChar: ' ')
-                   + (information != null ? $"   // {information}" : string.Empty);
 
-            static string GetDurationOrBlank(ExecutableTarget target)
-                => target.Status == ExecutionStatus.Succeeded ||
-                   target.Status == ExecutionStatus.Failed ||
-                   target.Status == ExecutionStatus.Aborted
-                    ? GetDuration(target.Duration)
+            // FX Creates a writable line
+            string CreateLine (string name, string status, string duration) => 
+	            name.PadRight(firstColumn, paddingChar: ' ') +
+	            status.PadRight(secondColumn, paddingChar: ' ') +
+	            duration.PadLeft(thirdColumn, paddingChar: ' ');
+
+
+            // FX builds duration value
+            static string GetDurationOrBlank(BuildStage target)
+                => target.CompletionStatus == StageCompletionStatusEnum.Success ||
+                    target.CompletionStatus == StageCompletionStatusEnum.Failure ||
+					target.CompletionStatus == StageCompletionStatusEnum.Warning ||
+                    target.CompletionStatus == StageCompletionStatusEnum.Warning
+	                ? GetDuration(target.RunTimeDuration())
                     : string.Empty;
 
-            static string GetDuration(TimeSpan duration)
-                => $"{(int) duration.TotalMinutes}:{duration:ss}".Replace("0:00", "< 1sec");
 
-            static string GetInformation(ExecutableTarget target)
-                => target.SummaryInformation.Any()
-                    ? target.SummaryInformation.Select(x => $"{x.Key}: {x.Value}").JoinComma()
-                    : null;
+            // FX Builds the duration from the Runtime
+            static string GetDuration(long duration)
+                => $"{(long) (duration / 1000)}".Replace("0", "< 1sec");
 
-            WriteNormal(new string(c: '═', count: allColumns));
+
+            /// Begin writing table
+            WriteNormal(new string(c: '═', count: totalColWidth));
             WriteInformation(CreateLine("Target", "Status", "Duration"));
-            //WriteInformationInternal($"{{0,-{firstColumn}}}{{1,-{secondColumn}}}{{2,{thirdColumn}}}{{3,1}}", "Target", "Status", "Duration", "Test");
-            WriteNormal(new string(c: '─', count: allColumns));
-            foreach (var target in build.ExecutionPlan)
-            {
-                var line = CreateLine(target.Name, target.Status.ToString(), GetDurationOrBlank(target), GetInformation(target));
-                switch (target.Status)
+            WriteNormal(new string(c: '─', count: totalColWidth));
+
+            foreach ( BuildStage stageStat in StageStats ) {
+                string line = CreateLine(stageStat.Name, stageStat.CompletionStatus.ToString(), GetDurationOrBlank(stageStat));
+                switch (stageStat.CompletionStatus)
                 {
-                    case ExecutionStatus.Skipped:
+                    case StageCompletionStatusEnum.Skipped:
                         WriteNormal(line);
                         break;
-                    case ExecutionStatus.Succeeded:
+                    case StageCompletionStatusEnum.Success:
                         WriteSuccess(line);
                         break;
-                    case ExecutionStatus.Aborted:
-                    case ExecutionStatus.NotRun:
+                    case StageCompletionStatusEnum.Aborted:
                         WriteWarning(line);
                         break;
-                    case ExecutionStatus.Failed:
+                    case StageCompletionStatusEnum.Failure:
                         WriteError(line);
                         break;
-                    case ExecutionStatus.Collective:
-                        break;
                     default:
-                        throw new NotSupportedException(target.Status.ToString());
+                        throw new NotSupportedException(stageStat.CompletionStatus.ToString());
                 }
             }
 
-            WriteNormal(new string(c: '─', count: allColumns));
+
+            WriteNormal(new string(c: '─', count: totalColWidth));
             WriteInformation(CreateLine("Total", string.Empty, GetDuration(totalDuration)));
-            WriteNormal(new string(c: '═', count: allColumns));
-            */
+            WriteNormal(new string(c: '═', count: totalColWidth));
+            
         }
 
         protected virtual void WriteSevereMessages()

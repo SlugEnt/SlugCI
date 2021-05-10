@@ -13,7 +13,7 @@ namespace Nuke.Common.OutputSinks
 {
     [UsedImplicitly]
     [ExcludeFromCodeCoverage]
-    internal class SystemColorOutputSink : OutputSink
+    internal class SystemColorOutputSink : SlugOutputSink
     {
         internal override void WriteNormal(string text)
         {

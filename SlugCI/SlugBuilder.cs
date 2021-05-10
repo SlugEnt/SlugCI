@@ -10,10 +10,11 @@ using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.ReportGenerator;
 using Slug.CI.NukeClasses;
+using Slug.CI.SlugBuildStages;
 
 namespace Slug.CI
 {
-	class SlugBuilder
+	public class SlugBuilder
 	{
 		/// <summary>
 		/// The session information
@@ -55,9 +56,9 @@ namespace Slug.CI
 		/// </summary>
 		public AbsolutePath TestOutputPath { get; private set; }
 
+		private ExecutionPlan _executionPlan = new ExecutionPlan();
 
 		private GitProcessor _gitProcessor;
-
 
 		/// <summary>
 		/// Constructor
@@ -66,7 +67,7 @@ namespace Slug.CI
 			Misc.WriteMainHeader("SlugBuilder:: Startup");
 
 			CISession = ciSession;
-
+			// TODO Fix this code
 			Solution = SolutionSerializer.DeserializeFromFile<Solution>(@"C:\A_Dev\SlugEnt\NukeTestControl\src\NukeTestControl.sln");
 			GitRepository = GitRepository.FromLocalDirectory(@"C:\A_Dev\SlugEnt\NukeTestControl\");
 
@@ -75,8 +76,31 @@ namespace Slug.CI
 			CoveragePath = (AbsolutePath)@"C:\A_Dev\SlugEnt\NukeTestControl\artifacts\Coverage";
 			TestOutputPath = (AbsolutePath)@"C:\A_Dev\SlugEnt\NukeTestControl\artifacts\Tests";
 
+
+			// Load All Known Build Stages
+
+			// TODO - Uncomment
 			GitProcessorStartup();
+
+
+			// Setup Build Execution Plan based upon caller's Final Build Request Target
+			// Pretend it was compile
+			LoadBuildStages();
+			_executionPlan.BuildExecutionPlan(BuildStageStatic.STAGE_COMPILE);
 		}
+
+
+		/// <summary>
+		/// Adds all the known Build stages to a list. 
+		/// </summary>
+		private void LoadBuildStages () {
+			_executionPlan.AddKnownStage(new BuildStage_Clean(CISession));
+			_executionPlan.AddKnownStage(new BuildStage_Restore(CISession));
+			_executionPlan.AddKnownStage(new BuildStage_Compile(CISession));
+		}
+
+
+
 
 
 		public bool Info () {

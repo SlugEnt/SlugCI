@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using Nuke.Common;
 using static Nuke.Common.IO.FileSystemTasks;
 using Nuke.Common.IO;
@@ -88,10 +89,18 @@ namespace Slug.CI.NukeClasses
 		/// </summary>
 		public DotNetVerbosity VerbosityPack { get; set; }
 
+
+		/// <summary>
+		/// List of all the stages run and their statistics and status
+		/// </summary>
+		public List<BuildStage> StageStats { get; private set; } = new List<BuildStage>();
+
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public CISession() {}
+		public CISession () {
+		}
 
 	}
 

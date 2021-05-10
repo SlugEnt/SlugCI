@@ -47,7 +47,7 @@ namespace Nuke.Common
             }
         }
 
-        internal static OutputSink OutputSink = OutputSink.Default;
+        internal static SlugOutputSink OutputSink = SlugOutputSink.Default;
 
         public static LogLevel LogLevel;
 

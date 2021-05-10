@@ -11,7 +11,7 @@ namespace Nuke.Common.OutputSinks
 {
     [UsedImplicitly]
     [ExcludeFromCodeCoverage]
-    internal class AnsiColorOutputSink : OutputSink
+    internal class AnsiColorOutputSink : SlugOutputSink
     {
         public string ResetSequence { get; } = "\u001b[0m";
         public string TraceSequence => $"\u001b[{TraceCode}m";

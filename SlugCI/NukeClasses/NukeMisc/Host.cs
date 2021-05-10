@@ -73,6 +73,6 @@ namespace Nuke.Common
             Instance = this;
         }
 
-        protected internal virtual OutputSink OutputSink => OutputSink.Default;
+        protected internal virtual SlugOutputSink OutputSink => SlugOutputSink.Default;
     }
 }

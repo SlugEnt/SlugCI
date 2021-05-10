@@ -16,7 +16,6 @@ namespace Nuke.Common.Tools.GitVersion
 		/// <returns></returns>
 		public static string Version(GitVersionSettings toolSettings = null) 
 		{
-
 			toolSettings = toolSettings ?? new GitVersionSettings();
 			using var process = ProcessTasks.StartProcess(toolSettings);
 			process.AssertWaitForExit();
