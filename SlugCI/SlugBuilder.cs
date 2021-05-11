@@ -28,23 +28,6 @@ namespace Slug.CI
 		public GitRepository GitRepository { get; set; }
 
 
-		/// <summary>
-		/// The temporary storage path
-		/// </summary>
-		public AbsolutePath ArtifactPath { get;private set; }
-		
-
-		/// <summary>
-		/// Where coverage reports are located
-		/// </summary>
-		public AbsolutePath CoveragePath { get; private set; }
-
-
-		/// <summary>
-		/// Test output location
-		/// </summary>
-		public AbsolutePath TestOutputPath { get; private set; }
-
 		private ExecutionPlan _executionPlan = new ExecutionPlan();
 
 		private GitProcessor _gitProcessor;
@@ -58,15 +41,13 @@ namespace Slug.CI
 			CISession = ciSession;
 
 
+			// Temporary code
 
-			// TODO Fix this code
+				// TODO Fix this code
 
-			GitRepository = GitRepository.FromLocalDirectory(@"C:\A_Dev\SlugEnt\NukeTestControl\");
+				GitRepository = GitRepository.FromLocalDirectory(@"C:\A_Dev\SlugEnt\NukeTestControl\");
 
 			// Set Path properties
-			
-			CoveragePath = (AbsolutePath)@"C:\A_Dev\SlugEnt\NukeTestControl\artifacts\Coverage";
-			TestOutputPath = (AbsolutePath)@"C:\A_Dev\SlugEnt\NukeTestControl\artifacts\Tests";
 
 
 			// Load All Known Build Stages
@@ -122,7 +103,7 @@ namespace Slug.CI
 
 		public bool Test () {
 			Misc.WriteMainHeader("SlugBuilder:: Run Unit Tests");
-			FileSystemTasks.EnsureExistingDirectory(CoveragePath);
+			FileSystemTasks.EnsureExistingDirectory(CISession.CoveragePath);
 
 			DotNetTestSettings settings = new DotNetTestSettings()
 			{
@@ -130,10 +111,10 @@ namespace Slug.CI
 				NoRestore = true,
 				NoBuild = true,
 				ProcessLogOutput = true,
-				ResultsDirectory = TestOutputPath,
+				ResultsDirectory = CISession.TestOutputPath,
 				ProcessArgumentConfigurator = arguments => arguments.Add("/p:CollectCoverage={0}", true)
 				                                                    .Add("", false)
-				                                                    .Add("/p:CoverletOutput={0}/", CoveragePath)
+				                                                    .Add("/p:CoverletOutput={0}/", CISession.CoveragePath)
 				                                                    .Add("/p:CoverletOutputFormat={0}", "cobertura")
 				                                                    //.Add("/p:Threshold={0}", SlugCIConfig.CodeCoverageThreshold)
 				                                                    .Add("/p:Threshold={0}", 5)
@@ -192,17 +173,6 @@ namespace Slug.CI
 
 
 		public bool CodeCoverage () {
-			Misc.WriteMainHeader("SlugBuilder:: CodeCoverage");
-			FileSystemTasks.EnsureExistingDirectory(CoveragePath);
-			ReportGeneratorTasks.ReportGenerator(r => r.SetTargetDirectory(CoveragePath)
-			                                           .SetProcessWorkingDirectory(CoveragePath)
-			                                           .SetReportTypes(ReportTypes.HtmlInline, ReportTypes.Badges)
-			                                           .SetReports("coverage.cobertura.xml")
-			                                           .SetProcessToolPath("reportgenerator"));
-
-			AbsolutePath coverageFile = CoveragePath / "index.html";
-			Process.Start(@"cmd.exe ", @"/c " + coverageFile);
-
 			/*
 			.DependsOn(Test)
 				.Executes(() => {
@@ -244,7 +214,7 @@ namespace Slug.CI
 			foreach ( Nuke.Common.ProjectModel.Project x in CISession.Solution.AllProjects ) {
 				settings.Project = x.Path;
 				//settings.SetProject(x.Path);
-				settings.OutputDirectory = ArtifactPath;
+				//settings.OutputDirectory = ArtifactPath;
 				settings.IncludeSymbols = true;
 				settings.NoRestore = true;
 				settings.Verbosity = DotNetVerbosity.Diagnostic;

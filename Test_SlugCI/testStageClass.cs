@@ -10,7 +10,9 @@ namespace Test_SlugCI
 		internal testStageClass (string name, CISession ciSession) : base(name, ciSession) {
 		}
 
-
-
+		protected override StageCompletionStatusEnum ExecuteProcess() {
+			int x = 0;
+			return StageCompletionStatusEnum.Success;
+		}
 	}
 }

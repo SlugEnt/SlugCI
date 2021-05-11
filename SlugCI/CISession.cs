@@ -69,6 +69,18 @@ namespace Slug.CI.NukeClasses
 
 
 		/// <summary>
+		/// Where coverage reports are located
+		/// </summary>
+		public AbsolutePath CoveragePath { get;  set; }
+
+
+		/// <summary>
+		/// Test output location
+		/// </summary>
+		public AbsolutePath TestOutputPath { get; set; }
+
+
+		/// <summary>
 		/// Path of the folder containing the .sln file.
 		/// </summary>
 		public AbsolutePath SolutionPath { get; set; }
@@ -85,6 +97,10 @@ namespace Slug.CI.NukeClasses
 		public Solution Solution { get; set; }
 
 
+		/// <summary>
+		/// The SlugCIConfig object that contains numerous settings and project info
+		/// </summary>
+		public SlugCIConfig SlugCIConfigObj { get; set; }
 
 		/// <summary>
 		/// If true the SlugCIConfig file is not validated or updated with the latest changes to both SlugCI Config changes as well as solution changes to projects, such as add or deletes..

@@ -96,22 +96,30 @@ namespace Slug.CI {
 		/// <summary>
 		/// Projects in the solution
 		/// </summary>
-		public List<Project> Projects { get; set; }
+		public List<SlugCIProject> Projects { get; set; }
 
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		public SlugCIConfig () {
-			Projects = new List<Project>();
+			Projects = new List<SlugCIProject>();
 		}
+
 
 		/// <summary>
 		/// Returns the project with the given name
 		/// </summary>
 		/// <param name="name"></param>
 		/// <returns></returns>
-		public Project GetProjectByName (string name) { return Projects.FirstOrDefault(project => project.Name == name); }
+		public SlugCIProject GetProjectByName (string name) {
+			string value = name.ToLower();
+			foreach ( SlugCIProject slugCiProject in Projects ) {
+				if ( slugCiProject.Name.ToLower() == value ) return slugCiProject;
+			}
+
+			return null;
+		}
 
 
 		public static JsonSerializerOptions SerializerOptions () {
@@ -218,7 +226,7 @@ namespace Slug.CI {
 			b.DeployToAssemblyFolders = DeployToAssemblyFolders;
 			b.DeployToVersionedFolder = DeployToVersionedFolder;
 			b.UseCodeCoverage = UseCodeCoverage;
-			foreach ( Project project in Projects ) {
+			foreach ( SlugCIProject project in Projects ) {
 				b.Projects.Add(project.Copy());
 			}
 
@@ -251,9 +259,9 @@ namespace Slug.CI {
 
 			// Loop thru projects looking for complete matches
 			bool projectsEqual = true;
-			foreach ( Project project in Projects ) {
+			foreach ( SlugCIProject project in Projects ) {
 				// Find project in other object
-				Project c =  b.Projects.Find(p => p.Name == project.Name);
+				SlugCIProject c =  b.Projects.Find(p => p.Name == project.Name);
 				if ( c == null ) return false;
 				if ( c != project ) return false;
 			}
@@ -280,76 +288,4 @@ namespace Slug.CI {
 		public static bool operator !=(SlugCIConfig lhs, SlugCIConfig rhs) => !(lhs == rhs);
 	}
 
-
-
-	/// <summary>
-	/// Represents a SlugCI Config Project 
-	/// </summary>
-	public class Project {
-		public string Name { get; set; }
-
-		public SlugCIDeployMethod Deploy { get; set; }
-
-		public string Framework { get; set; }
-
-		public bool IsTestProject { get; set; }
-
-		public override string ToString () { return Name; }
-
-
-		/// <summary>
-		/// Returns an exact copy of the current project
-		/// </summary>
-		/// <returns></returns>
-		public Project Copy () {
-			Project b = new Project();
-			b.Name = Name;
-			b.Deploy = Deploy;
-			b.Framework = Framework;
-			b.IsTestProject = IsTestProject;
-			return b;
-		}
-
-		
-		public bool Equals([AllowNull] Project b)
-		{
-			if (b is null)
-				return false;
-
-			// Optimization for a common success case.
-			if (Object.ReferenceEquals(this, b))
-				return true;
-
-			// If run-time types are not exactly the same, return false.
-			if (this.GetType() != b.GetType())
-				return false;
-
-			if ( b.Name != Name ) return false;
-			if ( b.Deploy != Deploy ) return false;
-			if ( b.Framework != Framework ) return false;
-			if ( b.IsTestProject != IsTestProject ) return false;
-
-			return true;
-		}
-
-
-		public static bool operator ==(Project lhs, Project rhs)
-		{
-			if (lhs is null)
-			{
-				if (rhs is null)
-				{
-					return true;
-				}
-
-				// Only the left side is null.
-				return false;
-			}
-			// Equals handles case of null on right side.
-			return lhs.Equals(rhs);
-		}
-
-		public static bool operator !=(Project lhs, Project rhs) => !(lhs == rhs);
-
-	}
 }

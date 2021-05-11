@@ -51,6 +51,11 @@ namespace Slug.CI
 			CISession.SlugCIFileName = CISession.SlugCIPath / SLUG_CI_CONFIG_FILE;
 
 
+			CISession.CoveragePath = CISession.OutputDirectory / "Coverage";
+			CISession.TestOutputPath = CISession.OutputDirectory / "Tests";
+
+
+
 			// Location Solution and set solution related variables
 			LoadSolutionInfo();
 
@@ -65,6 +70,7 @@ namespace Slug.CI
 			if (converter.SolutionWasMoved) 
 				LoadSolutionInfo();
 
+			MergeVSProjectIntoSlugCI();
 
 			CheckForEnvironmentVariables();
 		}
@@ -77,8 +83,19 @@ namespace Slug.CI
 			CISession.SolutionFileName = solutionFiles[0];
 			CISession.Solution = SolutionSerializer.DeserializeFromFile<Solution>(CISession.SolutionFileName);
 			CISession.SolutionPath = CISession.Solution.Directory;
+		}
+
+
+		private void MergeVSProjectIntoSlugCI ()
+		{
+			foreach (Nuke.Common.ProjectModel.Project x in CISession.Solution.AllProjects) {
+				SlugCIProject slugCIProject = CISession.SlugCIConfigObj.GetProjectByName(x.Name);
+				if (slugCIProject == null) throw new ApplicationException("Trying to match SlugCIConfig Projects with Visual Studio Solution Projects failed.  This is unexpected... Visual Studio Project = [" + x.Name + "]");
+				slugCIProject.VSProject = x;
+			}
 
 		}
+
 
 
 		[CanBeNull]

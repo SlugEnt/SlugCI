@@ -211,11 +211,13 @@ namespace Slug.CI
 					string Json = File.ReadAllText(CISession.SlugCIFileName);
 					slugCiConfig = JsonSerializer.Deserialize<SlugCIConfig>(Json, SlugCIConfig.SerializerOptions());
 					SlugCIConfig = slugCiConfig;
+					CISession.SlugCIConfigObj = slugCiConfig;
 					return SlugCIConfig;
 				}
 
 				return null;
 			}
+
 
 			return SlugCIConfig;
 		}
@@ -249,11 +251,11 @@ namespace Slug.CI
 			// Now go thru the projects and update the config
 			foreach (VisualStudioProject project in Projects)
 			{
-				Slug.CI.Project slugCIProject = slugCiConfig.GetProjectByName(project.Name);
+				Slug.CI.SlugCIProject slugCIProject = slugCiConfig.GetProjectByName(project.Name);
 				if (slugCIProject == null)
 				{
 					updateProjectAdd = true;
-					slugCIProject = new Project() { Name = project.Name };
+					slugCIProject = new SlugCIProject() { Name = project.Name };
 					slugCIProject.Framework = project.Framework;
 					slugCIProject.IsTestProject = project.IsTestProject;
 
