@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
@@ -33,7 +34,11 @@ namespace Slug.CI.SlugBuildStages
 		/// <returns></returns>
 		protected override StageCompletionStatusEnum ExecuteProcess()
 		{
-			Misc.WriteMainHeader("SlugBuilder:: CodeCoverage");
+			if ( !CISession.SlugCIConfigObj.UseCodeCoverage ) {
+				Logger.Info("Code Coverage is not enabled for this solution.");
+				return StageCompletionStatusEnum.Skipped;
+			}
+
 			FileSystemTasks.EnsureExistingDirectory(CISession.CoveragePath);
 			ReportGeneratorTasks.ReportGenerator(r => r.SetTargetDirectory(CISession.CoveragePath)
 			                                           .SetProcessWorkingDirectory(CISession.CoveragePath)

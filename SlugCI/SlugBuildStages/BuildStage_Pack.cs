@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Nuke.Common.IO;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
+using Nuke.Common.Utilities.Collections;
 using Slug.CI.NukeClasses;
+using static Nuke.Common.IO.FileSystemTasks;
 
 namespace Slug.CI.SlugBuildStages
 {
@@ -28,19 +31,18 @@ namespace Slug.CI.SlugBuildStages
 		/// <returns></returns>
 		protected override StageCompletionStatusEnum ExecuteProcess()
 		{
-			// TODO Is this necessry or can it be deleted.
-			//OutputDirectory.GlobFiles("*.nupkg", "*symbols.nupkg").ForEach(DeleteFile);
+			CISession.OutputDirectory.GlobFiles("*.nupkg", "*symbols.nupkg").ForEach(DeleteFile);
 
 			DotNetPackSettings settings = new DotNetPackSettings();
-			foreach (Nuke.Common.ProjectModel.Project x in CISession.Solution.AllProjects)
-			{
-				
-				settings.Project = x.Path;
-				//settings.SetProject(x.Path);
+			foreach ( SlugCIProject slugCiProject in CISession.SlugCIConfigObj.Projects ) {
+				if ( slugCiProject.Deploy != SlugCIDeployMethod.Nuget ) continue;
+
+				settings.Project = slugCiProject.VSProject.Path;
 				settings.OutputDirectory = CISession.OutputDirectory;
 				settings.IncludeSymbols = true;
 				settings.NoRestore = true;
-				settings.Verbosity = DotNetVerbosity.Diagnostic;
+				settings.Verbosity = DotNetVerbosity.Normal;
+
 				// TODO - FIX version
 				settings.SetFileVersion("4.5.6");
 				IReadOnlyCollection<Output> output = DotNetTasks.DotNetPack(settings);

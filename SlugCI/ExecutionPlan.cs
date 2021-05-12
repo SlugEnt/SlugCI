@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.CommandLine.Rendering;
+using System.Drawing;
 using System.Text;
 using Nuke.Common;
 
@@ -74,8 +76,7 @@ namespace Slug.CI
 		/// Builds the planned processing sequence for the build stages, depending on the final requested build stage
 		/// </summary>
 		/// <param name="endingStageName">The final build stage to stop at.</param>
-		public void BuildExecutionPlan(string endingStageName)
-		{
+		public void BuildExecutionPlan(string endingStageName) {
 			BuildStage buildStage = GetBuildStage(endingStageName);
 			AddBuildStage_ToExecutionPlan(buildStage, null);
 		}

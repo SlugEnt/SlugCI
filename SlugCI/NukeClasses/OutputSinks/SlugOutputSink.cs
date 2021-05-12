@@ -40,7 +40,6 @@ namespace Nuke.Common.OutputSinks
         
         internal readonly List<OutputRecord> SevereMessages = new List<OutputRecord>();
 
-        //internal readonly List<Tuple<LogLevel, string>> SevereMessages = new List<Tuple<LogLevel, string>>();
 
         internal virtual IDisposable WriteBlock(string text)
         {
@@ -97,45 +96,17 @@ namespace Nuke.Common.OutputSinks
 		            }
 	            }
             }
-            /*
-            bool HasHighUsage()
-                => // interface implementations
-                   build.GetType().GetInterfaces().Length > 1 ||
-                   // configuration generation
-                   build.GetType().GetCustomAttributes<ConfigurationAttributeBase>().Any() ||
-                   // global tool
-                   NukeBuild.BuildProjectFile == null;
-            
-            T TryGetValue<T>(Func<T> func)
-            {
-                try
-                {
-                    return func.Invoke();
-                }
-                catch
-                {
-                    return default;
-                }
-            }
-
-            if (build.IsSuccessful &&
-                HasHighUsage() &&
-                TryGetValue(() => GitRepository.FromLocalDirectory(NukeBuild.RootDirectory)) is { } repository &&
-                TryGetValue(() => repository.GetDefaultBranch().GetAwaiter().GetResult()) == null)
-            {
-                WriteNormal();
-            }
-            */
         }
+
 
         protected virtual void WriteSuccessfulBuild()
         {
-            WriteSuccess($"Build succeeded on {DateTime.Now.ToString(CultureInfo.CurrentCulture)}. ＼（＾ᴗ＾）／");
+            WriteSuccess($"Build succeeded on {DateTime.Now.ToString(CultureInfo.CurrentCulture)}");
         }
 
         protected virtual void WriteFailedBuild()
         {
-            WriteError($"Build failed on {DateTime.Now.ToString(CultureInfo.CurrentCulture)}. (╯°□°）╯︵ ┻━┻");
+            WriteError($"Build failed on {DateTime.Now.ToString(CultureInfo.CurrentCulture)}");
         }
 
 

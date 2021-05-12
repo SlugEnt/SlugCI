@@ -59,6 +59,7 @@ namespace Slug.CI
 			// Location Solution and set solution related variables
 			LoadSolutionInfo();
 
+
 			// Ensure Solution is in SlugCI format. If not migrate it.
 			ConvertToSlugCI converter = new ConvertToSlugCI(CISession);
 			if ( !converter.IsInSlugCIFormat ) {
@@ -73,6 +74,16 @@ namespace Slug.CI
 			MergeVSProjectIntoSlugCI();
 
 			CheckForEnvironmentVariables();
+
+			// Quick stats on number of Deploy targets by type
+			short deployNone = 0;
+			foreach ( SlugCIProject slugCiProject in ciSession.SlugCIConfigObj.Projects ) {
+				if ( slugCiProject.Deploy == SlugCIDeployMethod.Copy ) ciSession.CountOfDeployTargetsCopy++;
+				else if ( slugCiProject.Deploy == SlugCIDeployMethod.Nuget )
+					ciSession.CountOfDeployTargetsNuget++;
+				else
+					deployNone++;
+			}
 		}
 
 
@@ -86,6 +97,10 @@ namespace Slug.CI
 		}
 
 
+
+		/// <summary>
+		/// Adds the Visual Studio project to the related SlugCIProject to make later looping thru projects easier...
+		/// </summary>
 		private void MergeVSProjectIntoSlugCI ()
 		{
 			foreach (Nuke.Common.ProjectModel.Project x in CISession.Solution.AllProjects) {
@@ -93,20 +108,8 @@ namespace Slug.CI
 				if (slugCIProject == null) throw new ApplicationException("Trying to match SlugCIConfig Projects with Visual Studio Solution Projects failed.  This is unexpected... Visual Studio Project = [" + x.Name + "]");
 				slugCIProject.VSProject = x;
 			}
-
 		}
 
-
-
-		[CanBeNull]
-		private static AbsolutePath GetSlugCIExecutingDirectory()
-		{
-			var entryAssembly = Assembly.GetEntryAssembly();
-			if (entryAssembly == null || entryAssembly.GetTypes().All(x => !x.IsSubclassOf(typeof(SlugCI))))
-				return null;
-
-			return (AbsolutePath)Path.GetDirectoryName(entryAssembly.Location).NotNull();
-		}
 
 
 
@@ -118,10 +121,6 @@ namespace Slug.CI
 
 			slugBuilder.CopyCompiledProject(@"C:\temp\slugcitest", @"C:\temp\cideploy");
 			return;
-			slugBuilder.Test();
-
-			//slugBuilder.Pack();
-			slugBuilder.CodeCoverage();
 
 		}
 
@@ -136,7 +135,10 @@ namespace Slug.CI
 				"SLUGCI_DEPLOY_PROD",
 				"SLUGCI_DEPLOY_TEST",
 				"SLUGCI_DEPLOY_DEV",
-				"GITVERSION_EXE",		// GitVersion Tooling requires this
+				"NugetRepoUrl",
+				"NugetApiKey"
+				// TODO - May or may not be necessary in future
+				//"GITVERSION_EXE",		// GitVersion Tooling requires this
 			};
 
 			List<string> missingEnvironmentVariables = new List<string>();
@@ -145,6 +147,15 @@ namespace Slug.CI
 			{
 				string result = Environment.GetEnvironmentVariable(name);
 				if (result == null) missingEnvironmentVariables.Add(name);
+				else {
+					// Load the Environment Variables
+					switch ( name ) {
+						case "NugetRepoUrl": CISession.NugetRepoURL = result;
+							break;
+						case "NugetApiKey": CISession.NugetAPIKey = result;
+							break;
+					}
+				}
 			}
 
 			if (missingEnvironmentVariables.Count == 0)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
+using Nuke.Common;
 using Nuke.Common.IO;
 using Slug.CI.NukeClasses;
 using Slug.CI.NukeClasses;
@@ -26,12 +27,8 @@ namespace Slug.CI.SlugBuildStages
 		/// Run Clean process
 		/// </summary>
 		/// <returns></returns>
-		protected override StageCompletionStatusEnum ExecuteProcess()
-		{
-			//AbsolutePath SourceDirectory = (AbsolutePath)@"C:\A_Dev\SlugEnt\NukeTestControl\src\Printer";
+		protected override StageCompletionStatusEnum ExecuteProcess() {
 			IReadOnlyCollection<AbsolutePath> directoriesToClean = CISession.SolutionPath.GlobDirectories("**/bin", "**/obj");
-
-			//TestsDirectory.GlobDirectories("**/bin", "**/obj").ForEach(DeleteDirectory);
 			foreach (AbsolutePath dir in directoriesToClean)
 			{
 				FileSystemTasks.EnsureCleanDirectory(dir);

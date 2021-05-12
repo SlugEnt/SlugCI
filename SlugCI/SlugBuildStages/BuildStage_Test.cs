@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Nuke.Common;
 using Nuke.Common.IO;
+using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Slug.CI.NukeClasses;
 using Slug.CI.SlugBuildStages;
+using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 namespace Slug.CI.SlugBuildStages
 {
@@ -17,7 +20,7 @@ namespace Slug.CI.SlugBuildStages
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public BuildStage_Test(CISession ciSession) : base(BuildStageStatic.STAGE_COMPILE, ciSession)
+		public BuildStage_Test(CISession ciSession) : base(BuildStageStatic.STAGE_TEST, ciSession)
 		{
 			PredecessorList.Add(BuildStageStatic.STAGE_COMPILE);
 		}
@@ -29,7 +32,6 @@ namespace Slug.CI.SlugBuildStages
 		/// <returns></returns>
 		protected override StageCompletionStatusEnum ExecuteProcess()
 		{
-			Misc.WriteMainHeader("SlugBuilder:: Run Unit Tests");
 			FileSystemTasks.EnsureExistingDirectory(CISession.CoveragePath);
 
 			DotNetTestSettings settings = new DotNetTestSettings()
@@ -37,13 +39,14 @@ namespace Slug.CI.SlugBuildStages
 				ProjectFile = CISession.Solution,
 				NoRestore = true,
 				NoBuild = true,
+				Verbosity = DotNetVerbosity.Normal,
 				ProcessLogOutput = true,
 				ResultsDirectory = CISession.TestOutputPath,
 				ProcessArgumentConfigurator = arguments => arguments.Add("/p:CollectCoverage={0}", true)
 				                                                    .Add("", false)
 				                                                    .Add("/p:CoverletOutput={0}/", CISession.CoveragePath)
 				                                                    .Add("/p:CoverletOutputFormat={0}", "cobertura")
-				                                                    //.Add("/p:Threshold={0}", SlugCIConfig.CodeCoverageThreshold)
+				                                                    .Add("/p:Threshold={0}", CISession.SlugCIConfigObj.CodeCoverageThreshold)
 				                                                    .Add("/p:Threshold={0}", 5)
 				                                                    .Add("/p:SkipAutoProps={0}", true)
 				                                                    .Add("/p:ExcludeByAttribute={0}",
@@ -51,6 +54,8 @@ namespace Slug.CI.SlugBuildStages
 				                                                    .Add("/p:UseSourceLink={0}", true)
 
 			};
+
+			DotNetTest(settings);
 
 			return StageCompletionStatusEnum.Success;
 		}

@@ -28,6 +28,7 @@ namespace Slug.CI.SlugBuildStages
 		{
 			DotNetRestoreSettings settings = new DotNetRestoreSettings();
 			settings.ProjectFile = CISession.Solution;
+			settings.Verbosity = DotNetVerbosity.Minimal;
 			IReadOnlyCollection<Output> outputs = DotNetTasks.DotNetRestore(settings);
 
 			return StageCompletionStatusEnum.Success;

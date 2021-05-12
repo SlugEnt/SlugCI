@@ -34,7 +34,7 @@ namespace Slug.CI.SlugBuildStages
 			};
 			dotNetBuildSettings.SetProjectFile(CISession.Solution);
 			dotNetBuildSettings.SetFileVersion("9.4.5");
-			dotNetBuildSettings.SetVerbosity(DotNetVerbosity.Diagnostic);
+			dotNetBuildSettings.SetVerbosity(DotNetVerbosity.Normal);
 			dotNetBuildSettings.EnableNoRestore();
 
 			IReadOnlyCollection<Output> out1 = DotNetTasks.DotNetBuild(dotNetBuildSettings);

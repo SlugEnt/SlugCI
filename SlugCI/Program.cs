@@ -33,7 +33,13 @@ namespace Slug.CI
 		/// 
 		/// </summary>
 		/// <returns></returns>
-		public static int Main(string rootdir = "", string deployto = "test", string compileconfig = "", bool faststart = false, string verbosity = "", bool interactive = true) {
+		public static int Main(string rootdir = "", 
+		                       string deployto = "test", 
+		                       string compileconfig = "", 
+		                       bool faststart = false, 
+		                       string verbosity = "", 
+		                       bool interactive = true,
+		                       bool skipnuget = false) {
 			try {
 				Misc.WriteAppHeader();
 				CISession ciSession = new CISession();
@@ -80,6 +86,9 @@ namespace Slug.CI
 				// Interactive mode
 				ciSession.IsInteractiveRun = interactive;
 
+
+				// Skip Nuget
+				ciSession.SkipNuget = skipnuget;
 
 				// Create the SlugCI which is main processing class.
 				SlugCI slugCI = new SlugCI(ciSession);

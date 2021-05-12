@@ -8,7 +8,7 @@
     },
     "PracticeF Init": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir c:\\a_dev\\practice\\practiceG --faststart --verbosity gitversion:debug|compile:info",
+      "commandLineArgs": "--rootdir c:\\a_dev\\practice\\practiceG --faststart --verbosity gitversion:debug|compile:info --skipnuget --deployto test",
       "environmentVariables": {
         "Key": "Value",
         "SLUGCI_DEPLOY_DEV": "C:\\temp\\cideploy\\Dev",

@@ -133,6 +133,47 @@ namespace Slug.CI.NukeClasses
 
 
 		/// <summary>
+		/// The URL where Nuget Deploy targets are to be pushed to.
+		/// </summary>
+		public string NugetRepoURL { get; set; }
+
+
+		/// <summary>
+		/// The API key that grants access to read/write to the nuget repository.
+		/// </summary>
+		public string NugetAPIKey { get; set; }
+
+
+		/// <summary>
+		/// The standard log level that should be used for each Stage Execution.
+		/// </summary>
+		public LogLevel LoggingLevel { get; set; } = LogLevel.Normal;
+
+
+		/// <summary>
+		/// If true, Nuget Deploys will not actually publish to the Nuget URL.  The package will still be built, but it will not be sent to Nuget or local Repository.
+		/// </summary>
+		public bool SkipNuget { get; set; } 
+
+
+		/// <summary>
+		/// The number of projects whose deploy target is set to Nuget
+		/// </summary>
+		public short CountOfDeployTargetsNuget { get; set; }
+
+
+		/// <summary>
+		/// The number of projects whose deploy target is set to Copy
+		/// </summary>
+		public short CountOfDeployTargetsCopy { get; set; }
+
+
+		/// <summary>
+		/// Contains the results of the Publish Stage for each project
+		/// </summary>
+		public List<PublishResultRecord> PublishResults = new List<PublishResultRecord>();
+
+		/// <summary>
 		/// List of all the stages run and their statistics and status
 		/// </summary>
 		public List<BuildStage> StageStats { get; private set; } = new List<BuildStage>();

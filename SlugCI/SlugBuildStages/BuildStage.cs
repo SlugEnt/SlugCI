@@ -107,6 +107,9 @@ namespace Slug.CI
 
 				System.Console.WriteLine("", Color.DarkGray);
 
+				// Set log level to std.  Let the process override if necessary.
+				Logger.LogLevel = LogLevel.Normal;
+
 				Finished(ExecuteProcess());
 
 				if ( CompletionStatus == StageCompletionStatusEnum.Success ) return true;

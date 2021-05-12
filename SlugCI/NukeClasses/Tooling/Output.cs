@@ -13,5 +13,6 @@ namespace Nuke.Common.Tooling
     {
         public OutputType Type;
         public string Text;
+        public override string ToString () { return "[" + Type + "] : " + Text; }
     }
 }
