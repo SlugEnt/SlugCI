@@ -215,8 +215,10 @@ namespace Nuke.Common.OutputSinks
         {
 	        SevereMessages.Add(new OutputRecord(LogLevel.Error, text, details));
             ReportError(text, details);
-            if (EnableWriteErrors)
-                WriteError(text, details);
+            if ( EnableWriteErrors ) {
+	            Console.WriteLine();
+	            WriteError("-->(ERROR):  " + text, details);
+            }
         }
 
 

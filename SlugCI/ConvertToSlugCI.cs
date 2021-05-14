@@ -325,7 +325,7 @@ namespace Slug.CI
 				//if ( config == Configuration.Debug ) name = "Test";
 
 				Misc.WriteSubHeader(name + ": Set Deploy Folder");
-				Console.WriteLine("This deployment folder is missing an entry, To ensure correct operation for ALL users you should set this value.",
+				Console.WriteLine("The [" + config + "] deployment folder is undefined in the SlugCI config file, You can enter a value OR press enter to force the system to look for and use environment variables.",
 				                  Color.DarkOrange);
 				Console.WriteLine(
 					"--: If you want to always use the environment variables for these entries, just hit the Enter key.  Otherwise enter a valid path to the root location they should be deployed too.",
@@ -532,7 +532,7 @@ namespace Slug.CI
 		{
 			// Determine csproj path
 			AbsolutePath csprojPath = vsProject.NewPath;
-			DotNet("add package coverlet.msbuild", csprojPath);
+			DotNet("add package coverlet.msbuild --version 3.0.3", csprojPath);
 			return true;
 		}
 

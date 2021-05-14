@@ -29,6 +29,11 @@ namespace Slug.CI
 	/// </summary>
 	public class SlugCI {
 		public const string SLUG_CI_CONFIG_FILE = "SlugCI_Config.json";
+		public const string ENV_SLUGCI_DEPLOY_PROD = "SLUGCI_DEPLOY_PROD";
+		public const string ENV_SLUGCI_DEPLOY_TEST = "SLUGCI_DEPLOY_TEST";
+		public const string ENV_SLUGCI_DEPLOY_DEV = "SLUGCI_DEPLOY_DEV";
+		public const string ENV_NUGET_REPO_URL = "NugetRepoUrl";
+		public const string ENV_NUGET_API_KEY = "NugetApiKey";
 
 		/// <summary>
 		/// The CI Session information 
@@ -55,6 +60,7 @@ namespace Slug.CI
 			CISession.TestOutputPath = CISession.OutputDirectory / "Tests";
 
 
+			CheckForEnvironmentVariables();
 
 			// Location Solution and set solution related variables
 			LoadSolutionInfo();
@@ -71,9 +77,12 @@ namespace Slug.CI
 			if (converter.SolutionWasMoved) 
 				LoadSolutionInfo();
 
+
+			// Combine the Visual Studio solution project info into the individual projects of the
+			// SlugCIConfig projects for easier access later on.
 			MergeVSProjectIntoSlugCI();
 
-			CheckForEnvironmentVariables();
+
 
 			// Quick stats on number of Deploy targets by type
 			short deployNone = 0;
@@ -84,8 +93,52 @@ namespace Slug.CI
 				else
 					deployNone++;
 			}
+
+
+			// If we have Deploy "Copy" targets then make sure the variables are set and folders are valid
+			bool deployFolderSpecified = false;
+			if ( ciSession.CountOfDeployTargetsCopy > 0 ) {
+				ciSession.DeployCopyPath = GetDeployFolder();
+				if ( ciSession.DeployCopyPath == null ) {
+					if ( ciSession.SlugCIConfigObj.IsRootFolderUsingEnvironmentVariable(ciSession.PublishTarget) )
+						ControlFlow.Assert(ciSession.DeployCopyPath != null,
+						                   "The deploy folder for Copy Targets is null.  The slugci config file says to use environment variables to determine this setting.....");
+					else
+						ControlFlow.Assert(ciSession.DeployCopyPath != null, "The deploy folder specified in slugci config file is empty..");
+				}
+			}
 		}
 
+
+		/// <summary>
+		/// Returns the deployment folder for this run.  
+		/// </summary>
+		/// <param name="fromEnvVariable"></param>
+		/// <returns></returns>
+		private AbsolutePath GetDeployFolder () {
+			bool useEnv = (CISession.SlugCIConfigObj.IsRootFolderUsingEnvironmentVariable(CISession.PublishTarget));
+
+			if ( useEnv ) {
+				string key = "";
+				if ( CISession.PublishTarget == PublishTargetEnum.Testing ) key = ENV_SLUGCI_DEPLOY_TEST;
+				else if ( CISession.PublishTarget == PublishTargetEnum.Production ) key = ENV_SLUGCI_DEPLOY_PROD;
+				else if ( CISession.PublishTarget == PublishTargetEnum.Development ) key = ENV_SLUGCI_DEPLOY_DEV;
+				else { ControlFlow.Assert(false == true, "Unable to determine the PublishTarget to get Deploy Environment Variable");}
+
+				bool found = CISession.EnvironmentVariables.TryGetValue(key, out string value);
+				if ( !found ) {
+					Logger.Error("Environment variable [" + key + "] is required to be set due to this slugci config files setting to use environment variables for deploy target root paths.");
+					return (AbsolutePath) null;
+				}
+				return (AbsolutePath) value;
+			}
+
+			if ( CISession.PublishTarget == PublishTargetEnum.Testing ) return (AbsolutePath)CISession.SlugCIConfigObj.DeployTestRoot;
+			if (CISession.PublishTarget == PublishTargetEnum.Production) return (AbsolutePath)CISession.SlugCIConfigObj.DeployProdRoot;
+			if (CISession.PublishTarget == PublishTargetEnum.Development) return (AbsolutePath)CISession.SlugCIConfigObj.DeployDevRoot;
+
+			return null;
+		}
 
 		private void LoadSolutionInfo () {
 			List<string> solutionFiles = SearchForSolutionFile(CISession.RootDirectory.ToString(), ".sln");
@@ -132,11 +185,11 @@ namespace Slug.CI
 		{
 			List<string> requiredEnvironmentVariables = new List<string>()
 			{
-				"SLUGCI_DEPLOY_PROD",
-				"SLUGCI_DEPLOY_TEST",
-				"SLUGCI_DEPLOY_DEV",
-				"NugetRepoUrl",
-				"NugetApiKey"
+				ENV_SLUGCI_DEPLOY_PROD,
+				ENV_SLUGCI_DEPLOY_TEST,
+				ENV_SLUGCI_DEPLOY_DEV,
+				ENV_NUGET_REPO_URL,
+				ENV_NUGET_API_KEY
 				// TODO - May or may not be necessary in future
 				//"GITVERSION_EXE",		// GitVersion Tooling requires this
 			};
@@ -148,11 +201,13 @@ namespace Slug.CI
 				string result = Environment.GetEnvironmentVariable(name);
 				if (result == null) missingEnvironmentVariables.Add(name);
 				else {
+					CISession.EnvironmentVariables.Add(name,result);
+
 					// Load the Environment Variables
 					switch ( name ) {
-						case "NugetRepoUrl": CISession.NugetRepoURL = result;
+						case ENV_NUGET_REPO_URL: CISession.NugetRepoURL = result;
 							break;
-						case "NugetApiKey": CISession.NugetAPIKey = result;
+						case ENV_NUGET_API_KEY: CISession.NugetAPIKey = result;
 							break;
 					}
 				}

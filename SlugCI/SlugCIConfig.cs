@@ -155,11 +155,12 @@ namespace Slug.CI {
 		/// </summary>
 		/// <param name="config"></param>
 		/// <returns></returns>
-		public bool IsRootFolderUsingEnvironmentVariable (Configuration config) {
-			if ( config == "Release" )
-				return (DeployProdRoot == "_");
+		public bool IsRootFolderUsingEnvironmentVariable (PublishTargetEnum config) {
+			if (config == PublishTargetEnum.Production) return (DeployProdRoot == "_");
+			else if (config == PublishTargetEnum.Testing) return (DeployTestRoot == "_");
+			else if (config == PublishTargetEnum.Development) return (DeployDevRoot == "_");
 			else
-				return (DeployTestRoot == "_");
+				throw new ArgumentException("PublishTargetEnum:  Value was not in IF logic.  Probably means a code update needs to be done.");
 		}
 
 

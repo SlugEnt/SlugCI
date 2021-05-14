@@ -15,6 +15,14 @@
         "SLUGCI_DEPLOY_PROD": "C:\\temp\\cideploy",
         "SLUGCI_DEPLOY_TEST": "C:\\temp\\cideploy\\Test"
       }
+    },
+    "NukeTestControl": {
+      "commandName": "Project",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\Practice\\NukeTestControl --faststart --verbosity gitversion:debug|compile:info --skipnuget --deployto test",
+      "environmentVariables": {
+        "Key": "Value",
+        "SLUGCI_DEPLOY_TEST": "c:\\temp\\deploy\\test"
+      }
     }
   }
 }

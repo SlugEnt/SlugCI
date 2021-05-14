@@ -46,7 +46,7 @@ namespace Slug.CI
 
 				// TODO Fix this code
 
-				GitRepository = GitRepository.FromLocalDirectory(@"C:\A_Dev\SlugEnt\NukeTestControl\");
+				GitRepository = GitRepository.FromLocalDirectory(ciSession.RootDirectory);
 
 			// Set Path properties
 

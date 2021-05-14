@@ -173,10 +173,25 @@ namespace Slug.CI.NukeClasses
 		/// </summary>
 		public List<PublishResultRecord> PublishResults = new List<PublishResultRecord>();
 
+
+		/// <summary>
+		/// Environment variables we need.
+		/// </summary>
+		public Dictionary<string, string> EnvironmentVariables = new Dictionary<string, string>();
+
+
 		/// <summary>
 		/// List of all the stages run and their statistics and status
 		/// </summary>
 		public List<BuildStage> StageStats { get; private set; } = new List<BuildStage>();
+
+
+		/// <summary>
+		/// Where the root of projects that need to be deployed is
+		/// </summary>
+		public AbsolutePath DeployCopyPath {
+			get; set;
+		}
 
 
 		/// <summary>
