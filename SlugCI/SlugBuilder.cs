@@ -46,7 +46,7 @@ namespace Slug.CI
 
 				// TODO Fix this code
 
-				GitRepository = GitRepository.FromLocalDirectory(ciSession.RootDirectory);
+			//	GitRepository = GitRepository.FromLocalDirectory(ciSession.RootDirectory);
 
 			// Set Path properties
 
@@ -54,7 +54,7 @@ namespace Slug.CI
 			// Load All Known Build Stages
 
 			// TODO - Uncomment
-			//GitProcessorStartup();
+			GitProcessorStartup();
 
 
 			// Setup Build Execution Plan based upon caller's Final Build Request Target
@@ -126,7 +126,8 @@ namespace Slug.CI
 		{
 			// Setup the GitProcessor
 			_gitProcessor = new GitProcessor(CISession);
-			if (_gitProcessor.GitVersion == null) Logger.Error("GitProcessor:  Unable to load the GitVersion not Loaded");
+			// TODO - Removing GitVersion
+			//if (_gitProcessor.GitVersion == null) Logger.Error("GitProcessor:  Unable to load the GitVersion not Loaded");
 
 			// Get current branch and ensure there are no uncommitted updates.  These methods will throw if anything is out of sorts.
 			_gitProcessor.GetCurrentBranch();
