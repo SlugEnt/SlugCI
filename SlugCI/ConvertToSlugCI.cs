@@ -81,13 +81,15 @@ namespace Slug.CI
 			
 			if ( ciSession.IsFastStart ) {
 				Misc.WriteSubHeader("FastStart:  Skipping normal checks and validations");
-				SlugCIConfig slugCiConfig = GetSlugCIConfig();
-				if (slugCiConfig == null)
-					throw new ApplicationException("The FastStart option was set, but there is not a valid SlugCIConfig file.  Either remove FastStart option or fix the problem.");
-				IsInSlugCIFormat = true;
 			}
 			else
 				PreCheck();
+
+			// Load Config file
+			SlugCIConfig slugCiConfig = GetSlugCIConfig();
+			if (slugCiConfig == null)
+				throw new ApplicationException("The FastStart option was set, but there is not a valid SlugCIConfig file.  Either remove FastStart option or fix the problem.");
+			IsInSlugCIFormat = true;
 		}
 
 
@@ -266,25 +268,23 @@ namespace Slug.CI
 						// Also add the Required Nuget Coverage package
 						CoverletInstall(project);
 					}
-					else
-						slugCIProject.Deploy = SlugCIDeployMethod.Copy;
-
+					else {
+						slugCIProject.Deploy = PromptUserForDeployMethod(project.Name);
+						
+					}
 					slugCiConfig.Projects.Add(slugCIProject);
 				}
-				else
-				{
+				else {
 					// Check for updated values:
-					if (slugCIProject.Framework != project.Framework)
-					{
-						slugCIProject.Framework = project.Framework;
-					}
+					if ( slugCIProject.Framework != project.Framework ) { slugCIProject.Framework = project.Framework; }
 
-					if (slugCIProject.IsTestProject)
+					if ( slugCIProject.IsTestProject )
 						// Also add the Required Nuget Coverage package
 						CoverletInstall(project);
-
-					if (slugCIProject.Deploy == SlugCIDeployMethod.Copy) hasCopyDeployMethod = true;
 				}
+
+				if (slugCIProject.Deploy == SlugCIDeployMethod.Copy) hasCopyDeployMethod = true;
+
 			}
 
 
@@ -300,7 +300,7 @@ namespace Slug.CI
 			if ( origSlugCiConfig != slugCiConfig ) {
 				string json = JsonSerializer.Serialize<SlugCIConfig>(slugCiConfig, SlugCIConfig.SerializerOptions());
 				File.WriteAllText(CISession.SlugCIFileName, json);
-				SlugCIConfig = slugCiConfig;
+				SlugCIConfig = GetSlugCIConfig(true);
 				if ( updateProjectAdd ) {
 					Logger.Warn("The file: {0} was updated.  One ore more projects were added.  Ensure they have the correct Deploy setting.", CISession.SlugCIFileName);
 				}
@@ -308,6 +308,31 @@ namespace Slug.CI
 
 			return true;
 		}
+
+
+		/// <summary>
+		/// Prompts the user for the type of deployment the given project should use.
+		/// </summary>
+		/// <param name="projectName"></param>
+		/// <returns></returns>
+		private SlugCIDeployMethod PromptUserForDeployMethod (string projectName) {
+			Console.WriteLine();
+			Colorful.Console.WriteLine("Project - [" + projectName + "]  has been added to the SlugCI config file.  What deployment method does this project use?",Color.Yellow);
+			bool continuePrompting = true;
+			while ( continuePrompting ) {
+				Console.WriteLine("Press: ");
+				Console.WriteLine("   (N) For Nuget Deploy");
+				Console.WriteLine("   (C) For File Copy Deploy");
+				Console.WriteLine("   (0) For Not Specified");
+				ConsoleKeyInfo inputKey =  Console.ReadKey();
+				if ( inputKey.Key == ConsoleKey.N ) return SlugCIDeployMethod.Nuget;
+				if ( inputKey.Key == ConsoleKey.C ) return SlugCIDeployMethod.Copy;
+				if ( inputKey.Key == ConsoleKey.D0 ) return SlugCIDeployMethod.None;
+			}
+
+			return SlugCIDeployMethod.None;
+		}
+
 
 
 		/// <summary>
@@ -350,7 +375,7 @@ namespace Slug.CI
 					slugCiConfig.DeployProdRoot = answer;
 				else if ( config == PublishTargetEnum.Testing)
 					slugCiConfig.DeployTestRoot = answer;
-				else if ( config == PublishTargetEnum.Development ) SlugCIConfig.DeployDevRoot = answer;
+				else if ( config == PublishTargetEnum.Development ) slugCiConfig.DeployDevRoot = answer;
 			}
 			return true;
 		}

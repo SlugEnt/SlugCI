@@ -89,7 +89,8 @@ namespace Slug.CI
 			DotNetPath = ToolPathResolver.GetPathExecutable("dotnet");
 
 			IdentifyMainBranch();
-			Fetch_GitVersion();
+			// TODO This is GitVersion - We do not use anymore
+			//Fetch_GitVersion();
 			PrintGitCommandVersion();
 		}
 

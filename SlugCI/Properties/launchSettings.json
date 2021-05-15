@@ -16,13 +16,9 @@
         "SLUGCI_DEPLOY_TEST": "C:\\temp\\cideploy\\Test"
       }
     },
-    "NukeTestControl": {
+    "SlugCISample": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\Practice\\NukeTestControl --faststart --verbosity gitversion:debug|compile:info --skipnuget --deployto test",
-      "environmentVariables": {
-        "Key": "Value",
-        "SLUGCI_DEPLOY_TEST": "c:\\temp\\deploy\\test"
-      }
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity gitversion:debug|compile:info --skipnuget --deployto test"
     }
   }
 }
