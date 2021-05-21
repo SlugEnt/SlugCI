@@ -6,6 +6,7 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.GitVersion;
+using Semver;
 
 namespace Slug.CI.NukeClasses
 {
@@ -98,6 +99,12 @@ namespace Slug.CI.NukeClasses
 
 
 		/// <summary>
+		/// An instance of the GitProcessor
+		/// </summary>
+		public GitProcessor GitProcessor { get; set; }
+
+
+		/// <summary>
 		/// The SlugCIConfig object that contains numerous settings and project info
 		/// </summary>
 		public SlugCIConfig SlugCIConfigObj { get; set; }
@@ -130,6 +137,11 @@ namespace Slug.CI.NukeClasses
 		/// Level of verbosity for the Pack Stage
 		/// </summary>
 		public DotNetVerbosity VerbosityPack { get; set; }
+
+		/// <summary>
+		/// Level of verbosity for the CalcVersion Stage
+		/// </summary>
+		public Verbosity VerbosityCalcVersion { get; set; }
 
 
 		/// <summary>
@@ -192,6 +204,12 @@ namespace Slug.CI.NukeClasses
 		public AbsolutePath DeployCopyPath {
 			get; set;
 		}
+
+			
+		/// <summary>
+		/// The semantic version that will be set during this run!
+		/// </summary>
+		public SemVersion SemVersion { get; set; }
 
 
 		/// <summary>

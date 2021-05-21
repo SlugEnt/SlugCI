@@ -20,7 +20,7 @@ namespace Slug.CI
 		/// <summary>
 		/// Main Entry Point
 		/// <param name="rootdir">(Optional) The entry point folder for the solution - usually where the .git folder for the solution is.  If not specified will use current directory.</param>
-		/// <param name="deployto">Where you are wanting to deploy this to.  Valid values are (dev, test, prod)</param>
+		/// <param name="deployto">Where you are wanting to deploy this to.  Valid values are (dev, alpha, beta, prod)</param>
 		/// <param name="compileconfig">This is the visual Studio Configuration value.  Standard values are Debug and Release.  But you can define your own also.
 		/// <para>   If not specified then it will be set to Debug if the deployto is not production and set to Release if deployto is Production.</para></param>
 		/// <param name="faststart">Skips checking the config file and updating it.  Generally should only be used when testing.</param>
@@ -30,7 +30,7 @@ namespace Slug.CI
 		/// <para>    compile, pack, gitversion</para>
 		/// <para>  Valid values are:</para>
 		/// <para>    debug, warn, info</para></param>
-		/// 
+		/// <param name="info">Displays detailed information about the config and the repo and other vital stats</param>
 		/// </summary>
 		/// <returns></returns>
 		public static int Main(string rootdir = "", 
@@ -39,7 +39,8 @@ namespace Slug.CI
 		                       bool faststart = false, 
 		                       string verbosity = "", 
 		                       bool interactive = true,
-		                       bool skipnuget = false) {
+		                       bool skipnuget = false,
+		                       bool info = false) {
 			try {
 				Misc.WriteAppHeader();
 				CISession ciSession = new CISession();
@@ -56,7 +57,8 @@ namespace Slug.CI
 				deployto = deployto.ToLower();
 				ciSession.PublishTarget = deployto switch
 				{
-					"test" => PublishTargetEnum.Testing,
+					"alpha" => PublishTargetEnum.Alpha,
+					"beta" => PublishTargetEnum.Beta,
 					"dev" => PublishTargetEnum.Development,
 					"prod" => PublishTargetEnum.Production,
 					_ => PublishTargetEnum.Development,
@@ -90,20 +92,26 @@ namespace Slug.CI
 				// Skip Nuget
 				ciSession.SkipNuget = skipnuget;
 
+				// Perform Validation 
+				ValidateDependencies validation = new ValidateDependencies(ciSession);
+				if (!validation.Validate()) throw new ApplicationException("One or more required features is missing from this pc.");
+
+
 				// Create the SlugCI which is main processing class.
 				SlugCI slugCI = new SlugCI(ciSession);
 
 
-				// Perform Validation 
-				ValidateDependencies validation = new ValidateDependencies(ciSession);
-				if (!validation.Validate()) throw new ApplicationException("One or more required features is missing from this pc.");
+				// If user wanted info then display it and exit.
+				if ( info ) {
+					slugCI.DisplayInfo();
+					return 0;
+				}
 
 
 				// Begin Executing
 				slugCI.Execute();
 
 				return 0;
-
 
 				Console.WriteLine("Hello World!");
 			}
@@ -143,6 +151,12 @@ namespace Slug.CI
 						else if ( splits [1] == "info" )
 							ciSession.VerbosityGitVersion = GitVersionVerbosity.info;
 						else ciSession.VerbosityGitVersion = GitVersionVerbosity.warn;
+						break;
+					case "calcversion":
+						if ( splits [1] == "debug" )
+							ciSession.VerbosityCalcVersion = Verbosity.Verbose;
+						else
+							ciSession.VerbosityCalcVersion = Verbosity.Normal;
 						break;
 
 				}

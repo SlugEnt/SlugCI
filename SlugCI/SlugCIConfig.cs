@@ -63,9 +63,15 @@ namespace Slug.CI {
 		public string DeployProdRoot { get; set; }
 
 		/// <summary>
-		/// The root folder to deploy Test to
+		/// The root folder to deploy Alpha to
 		/// </summary>
-		public string DeployTestRoot { get; set; }
+		public string DeployAlphaRoot { get; set; }
+
+
+		/// <summary>
+		/// The root folder to deploy Beta to
+		/// </summary>
+		public string DeployBetaRoot { get; set; }
 
 
 		/// <summary>
@@ -92,6 +98,11 @@ namespace Slug.CI {
 		/// </summary>
 		public bool DeployToAssemblyFolders { get; set; } = false;
 
+
+		/// <summary>
+		///  The Git Remote name.  Typically is Origin.  If null, we use Origin.
+		/// </summary>
+		public string GitRemote { get; set; } = null;
 
 		/// <summary>
 		/// Projects in the solution
@@ -138,7 +149,8 @@ namespace Slug.CI {
 		public bool IsRootFolderSpecified (PublishTargetEnum config) {
 			string value ="";
 			if ( config == PublishTargetEnum.Production ) value = DeployProdRoot;
-			else if ( config == PublishTargetEnum.Testing ) value = DeployTestRoot;
+			else if (config == PublishTargetEnum.Beta ) value = DeployBetaRoot;
+			else if ( config == PublishTargetEnum.Alpha ) value = DeployAlphaRoot;
 			else if ( config == PublishTargetEnum.Development ) value = DeployDevRoot;
 			else 
 				throw new ArgumentException("PublishTargetEnum:  Value was not in IF logic.  Probably means a code update needs to be done.");
@@ -157,7 +169,8 @@ namespace Slug.CI {
 		/// <returns></returns>
 		public bool IsRootFolderUsingEnvironmentVariable (PublishTargetEnum config) {
 			if (config == PublishTargetEnum.Production) return (DeployProdRoot == "_");
-			else if (config == PublishTargetEnum.Testing) return (DeployTestRoot == "_");
+			else if (config == PublishTargetEnum.Beta) return (DeployBetaRoot == "_");
+			else if (config == PublishTargetEnum.Alpha) return (DeployAlphaRoot == "_");
 			else if (config == PublishTargetEnum.Development) return (DeployDevRoot == "_");
 			else
 				throw new ArgumentException("PublishTargetEnum:  Value was not in IF logic.  Probably means a code update needs to be done.");
@@ -172,46 +185,8 @@ namespace Slug.CI {
 			if ( config == "Release" )
 				DeployProdRoot = "_";
 			else
-				DeployTestRoot = "_";
+				DeployAlphaRoot = "_";
 		}
-
-		/*
-		/// <summary>
-		/// Checks to ensure that if any of the projects have a Deploy method of Copy that the DeployRoot folders are specified.
-		/// </summary>
-		/// <returns></returns>
-		public bool CheckRootFolders () {
-			bool hasCopyMethod = false;
-
-			foreach ( Project project in Projects ) {
-				if ( project.Deploy == SlugCIDeployMethod.Copy ) hasCopyMethod = true;
-			}
-
-			// If no projects require a root folder then it is ok.
-			if ( !hasCopyMethod ) return true;
-
-			// Ensure Deploy Roots have values if at least one of the projects has a deploy method of Copy
-			for (int i = 0; i< 2; i++ ) {
-				Configuration config;
-
-				if (i == 0 ) {
-					config = Configuration.Release;
-				}
-				else {
-					config = Configuration.Debug;
-				}
-
-				if (!IsRootFolderSpecified(config))
-				{
-					Console.WriteLine("There are 1 or more projects with a Deploy method of Copy, but no Deploy Root folders have been specified.");
-					return false;
-				}
-			}
-
-			return true;
-		}
-		*/
-
 
 		/// <summary>
 		/// Creates a new Exact copy of the current SlugCIConfig object
@@ -222,11 +197,12 @@ namespace Slug.CI {
 			b.CodeCoverageThreshold = CodeCoverageThreshold;
 			b.DeployFolderUsesSemVer = DeployFolderUsesSemVer;
 			b.DeployProdRoot = DeployProdRoot;
-			b.DeployTestRoot = DeployTestRoot;
+			b.DeployAlphaRoot = DeployAlphaRoot;
 			b.DeployDevRoot = DeployDevRoot;
 			b.DeployToAssemblyFolders = DeployToAssemblyFolders;
 			b.DeployToVersionedFolder = DeployToVersionedFolder;
 			b.UseCodeCoverage = UseCodeCoverage;
+			b.GitRemote = GitRemote;
 			foreach ( SlugCIProject project in Projects ) {
 				b.Projects.Add(project.Copy());
 			}
@@ -251,11 +227,12 @@ namespace Slug.CI {
 			if ( b.DeployFolderUsesSemVer != DeployFolderUsesSemVer ) return false;
 			if ( b.DeployToAssemblyFolders != DeployToAssemblyFolders ) return false;
 			if ( b.DeployToVersionedFolder != DeployToVersionedFolder ) return false;
-			if ( b.DeployTestRoot != DeployTestRoot ) return false;
+			if ( b.DeployAlphaRoot != DeployAlphaRoot ) return false;
 			if ( b.DeployProdRoot != DeployProdRoot ) return false;
 			if ( b.DeployDevRoot != DeployDevRoot ) return false;
 			if ( b.UseCodeCoverage != UseCodeCoverage ) return false;
 			if ( b.Projects.Count != Projects.Count ) return false;
+			if ( b.GitRemote != GitRemote ) return false;
 
 
 			// Loop thru projects looking for complete matches

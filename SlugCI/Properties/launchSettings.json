@@ -1,7 +1,7 @@
 {
   "profiles": {
     "SlugCI": {
-      "commandName": "Project"
+      "commandName": "Executable"
     },
     "No Args": {
       "commandName": "Project"
@@ -18,7 +18,22 @@
     },
     "SlugCISample": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity gitversion:debug|compile:info --skipnuget --deployto test"
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity gitversion:info|compile:info|calcversion:debug --skipnuget --deployto alpha",
+      "environmentVariables": {
+        "SLUGCI_DEPLOY_ALPHA": "c:\\temp\\DeployAlpha",
+        "SLUGCI_DEPLOY_BETA": "c:\\temp\\DeployBeta"
+      }
+    },
+    "Info": {
+      "commandName": "Project",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity gitversion:debug|compile:info --skipnuget --deployto test --info"
+    },
+    "DeployMain": {
+      "commandName": "Project",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity gitversion:info|compile:info|calcversion:debug --skipnuget --deployto prod",
+      "environmentVariables": {
+        "SLUGCI_DEPLOY_PROD": "C:\\temp\\deployProd"
+      }
     }
   }
 }

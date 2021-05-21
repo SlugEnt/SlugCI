@@ -17,8 +17,10 @@ using static Nuke.Common.IO.FileSystemTasks;
 using System.Xml.XPath;
 using JetBrains.Annotations;
 using Nuke.Common.ProjectModel;
+using Semver;
 using Slug.CI;
 using Slug.CI.NukeClasses;
+using Slug.CI.SlugBuildStages;
 using Console = Colorful.Console;
 
 
@@ -30,7 +32,8 @@ namespace Slug.CI
 	public class SlugCI {
 		public const string SLUG_CI_CONFIG_FILE = "SlugCI_Config.json";
 		public const string ENV_SLUGCI_DEPLOY_PROD = "SLUGCI_DEPLOY_PROD";
-		public const string ENV_SLUGCI_DEPLOY_TEST = "SLUGCI_DEPLOY_TEST";
+		public const string ENV_SLUGCI_DEPLOY_BETA = "SLUGCI_DEPLOY_BETA";
+		public const string ENV_SLUGCI_DEPLOY_ALPHA = "SLUGCI_DEPLOY_ALPHA";
 		public const string ENV_SLUGCI_DEPLOY_DEV = "SLUGCI_DEPLOY_DEV";
 		public const string ENV_NUGET_REPO_URL = "NugetRepoUrl";
 		public const string ENV_NUGET_API_KEY = "NugetApiKey";
@@ -58,6 +61,21 @@ namespace Slug.CI
 
 			CISession.CoveragePath = CISession.OutputDirectory / "Coverage";
 			CISession.TestOutputPath = CISession.OutputDirectory / "Tests";
+
+
+
+			ciSession.GitProcessor = new GitProcessor(ciSession);
+			if (ciSession.GitProcessor.AreUncommitedChangesOnLocalBranch) 
+				throw new ApplicationException("There are uncommited changes on the current branch: " + ciSession.GitProcessor.CurrentBranch +  "  Commit or discard existing changes and then try again.");
+
+			// TODO Remove this.  This is for testing only
+			BuildStage_CalcVersion calc = new BuildStage_CalcVersion(CISession);
+			calc.Execute();
+
+			BuildStage_GitCommit gitCommit = new BuildStage_GitCommit(ciSession);
+			gitCommit.Execute();
+
+			// END TODO
 
 
 			CheckForEnvironmentVariables();
@@ -110,6 +128,50 @@ namespace Slug.CI
 		}
 
 
+		public void DisplayInfo () {
+			Misc.WriteMainHeader("SlugCI / Repository Info");
+			Console.Write("    {0,-25}","Project Root:",Color.WhiteSmoke);
+			Console.WriteLine(CISession.RootDirectory,Color.Cyan);
+
+			Console.Write("    {0,-25}", "Source Folder:", Color.WhiteSmoke);
+			Console.WriteLine(CISession.SourceDirectory, Color.Cyan);
+
+			Console.Write("    {0,-25}", "Tests Folder:", Color.WhiteSmoke);
+			Console.WriteLine(CISession.TestsDirectory, Color.Cyan);
+
+			Console.Write("    {0,-25}", "Output Folder:", Color.WhiteSmoke);
+			Console.WriteLine(CISession.OutputDirectory, Color.Cyan);
+
+			Console.Write("    {0,-25}", "Solution At:", Color.WhiteSmoke);
+			Console.WriteLine(CISession.Solution.Path, Color.Cyan);
+
+			Console.Write("    {0,-25}", "Nuget API Key:", Color.WhiteSmoke);
+			Console.WriteLine(CISession.NugetAPIKey, Color.Cyan);
+
+			Console.Write("    {0,-25}", "Nuget Repo URL:", Color.WhiteSmoke);
+			Console.WriteLine(CISession.NugetRepoURL, Color.Cyan);
+
+			Console.WriteLine("-------------------------------------------------------------");
+			Console.WriteLine("                  GIT  Information");
+			Console.WriteLine("-------------------------------------------------------------");
+
+			Console.Write("    {0,-25}", "Main Branch Name:", Color.WhiteSmoke);
+			Console.WriteLine(CISession.GitProcessor.MainBranchName, Color.Cyan);
+
+			Console.Write("    {0,-25}", "Current Branch Name:", Color.WhiteSmoke);
+			Console.WriteLine(CISession.GitProcessor.CurrentBranch, Color.Cyan);
+
+
+			Console.Write("    {0,-25}", "Git CommandLine Version:", Color.WhiteSmoke);
+			Console.WriteLine(CISession.GitProcessor.GitCommandVersion, Color.Cyan);
+
+
+			//Console.Write("    {0,-25}", "Current Branch Name:", Color.WhiteSmoke);
+			//Console.WriteLine(CISession.GitProcessor., Color.Cyan);
+
+		}
+
+
 		/// <summary>
 		/// Returns the deployment folder for this run.  
 		/// </summary>
@@ -120,8 +182,9 @@ namespace Slug.CI
 
 			if ( useEnv ) {
 				string key = "";
-				if ( CISession.PublishTarget == PublishTargetEnum.Testing ) key = ENV_SLUGCI_DEPLOY_TEST;
+				if ( CISession.PublishTarget == PublishTargetEnum.Alpha ) key = ENV_SLUGCI_DEPLOY_ALPHA;
 				else if ( CISession.PublishTarget == PublishTargetEnum.Production ) key = ENV_SLUGCI_DEPLOY_PROD;
+				else if (CISession.PublishTarget == PublishTargetEnum.Beta) key = ENV_SLUGCI_DEPLOY_BETA;
 				else if ( CISession.PublishTarget == PublishTargetEnum.Development ) key = ENV_SLUGCI_DEPLOY_DEV;
 				else { ControlFlow.Assert(false == true, "Unable to determine the PublishTarget to get Deploy Environment Variable");}
 
@@ -133,7 +196,8 @@ namespace Slug.CI
 				return (AbsolutePath) value;
 			}
 
-			if ( CISession.PublishTarget == PublishTargetEnum.Testing ) return (AbsolutePath)CISession.SlugCIConfigObj.DeployTestRoot;
+			if ( CISession.PublishTarget == PublishTargetEnum.Alpha ) return (AbsolutePath)CISession.SlugCIConfigObj.DeployAlphaRoot;
+			if (CISession.PublishTarget == PublishTargetEnum.Beta) return (AbsolutePath)CISession.SlugCIConfigObj.DeployBetaRoot;
 			if (CISession.PublishTarget == PublishTargetEnum.Production) return (AbsolutePath)CISession.SlugCIConfigObj.DeployProdRoot;
 			if (CISession.PublishTarget == PublishTargetEnum.Development) return (AbsolutePath)CISession.SlugCIConfigObj.DeployDevRoot;
 
@@ -186,7 +250,8 @@ namespace Slug.CI
 			List<string> requiredEnvironmentVariables = new List<string>()
 			{
 				ENV_SLUGCI_DEPLOY_PROD,
-				ENV_SLUGCI_DEPLOY_TEST,
+				ENV_SLUGCI_DEPLOY_BETA,
+				ENV_SLUGCI_DEPLOY_ALPHA,
 				ENV_SLUGCI_DEPLOY_DEV,
 				ENV_NUGET_REPO_URL,
 				ENV_NUGET_API_KEY

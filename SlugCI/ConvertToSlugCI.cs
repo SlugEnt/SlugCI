@@ -373,8 +373,10 @@ namespace Slug.CI
 
 				if ( config == PublishTargetEnum.Production) 
 					slugCiConfig.DeployProdRoot = answer;
-				else if ( config == PublishTargetEnum.Testing)
-					slugCiConfig.DeployTestRoot = answer;
+				else if ( config == PublishTargetEnum.Alpha)
+					slugCiConfig.DeployAlphaRoot = answer;
+				else if ( config == PublishTargetEnum.Beta )
+					slugCiConfig.DeployBetaRoot = answer;
 				else if ( config == PublishTargetEnum.Development ) slugCiConfig.DeployDevRoot = answer;
 			}
 			return true;

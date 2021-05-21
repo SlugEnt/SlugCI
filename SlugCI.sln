@@ -5,7 +5,12 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SlugCI", "SlugCI\SlugCI.csproj", "{1FDEE659-120F-4121-9CEC-E5B7E43BF3DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_SlugCI", "Test_SlugCI\Test_SlugCI.csproj", "{01F0E101-8DAD-4CE4-B1A9-BA36093F2725}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test_SlugCI", "Test_SlugCI\Test_SlugCI.csproj", "{01F0E101-8DAD-4CE4-B1A9-BA36093F2725}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CF9FFF8D-3250-4E98-A1A5-D4E1EFAC4CE9}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

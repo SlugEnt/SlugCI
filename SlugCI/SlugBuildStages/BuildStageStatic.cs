@@ -9,6 +9,7 @@ namespace Slug.CI.SlugBuildStages
 	/// All of the build stages
 	/// </summary>
 	public static class BuildStageStatic {
+		public const string STAGE_CALCVERSION = "Calculate Version #";
 		public const string STAGE_COVER = "Code Coverage";
 		public const string STAGE_PUBLISH = "Publish";
 		public const string STAGE_PACK = "Pack";
@@ -16,6 +17,7 @@ namespace Slug.CI.SlugBuildStages
 		public const string STAGE_COMPILE = "Compile";
 		public const string STAGE_RESTORE = "Restore";
 		public const string STAGE_CLEAN = "Clean";
+		public const string STAGE_GITCOMMIT = "GitCommit";
 
 	}
 }

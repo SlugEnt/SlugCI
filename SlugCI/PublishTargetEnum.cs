@@ -15,9 +15,15 @@ namespace Slug.CI
 		Development = 20,
 
 		/// <summary>
-		/// Publish to Test
+		/// Publish to Alpha-Test
 		/// </summary>
-		Testing = 100,
+		Alpha = 100,
+
+
+		/// <summary>
+		/// Publish to Beta-Test
+		/// </summary>
+		Beta = 175,
 
 
 		/// <summary>

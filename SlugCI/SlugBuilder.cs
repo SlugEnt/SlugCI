@@ -76,17 +76,17 @@ namespace Slug.CI
 		/// Adds all the known Build stages to a list. 
 		/// </summary>
 		private void LoadBuildStages () {
+			_executionPlan.AddKnownStage(new BuildStage_GitCommit(CISession));
+
 			_executionPlan.AddKnownStage(new BuildStage_Clean(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_Restore(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_Compile(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_Test(CISession));
-			_executionPlan.AddKnownStage(new BuildStage_Pack(CISession));
+
 			_executionPlan.AddKnownStage(new BuildStage_Cover(CISession));
+			_executionPlan.AddKnownStage(new BuildStage_Pack(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_Publish(CISession));
 		}
-
-
-
 
 
 		public bool Info () {
@@ -109,8 +109,6 @@ namespace Slug.CI
 
 
 
-
-		
 		public bool CopyCompiledProject (string source, string destination) {
 			Misc.WriteMainHeader("SlugBuilder:: Deploy Via Copy");
 			FileSystemTasks.CopyDirectoryRecursively(source,destination);
@@ -131,8 +129,8 @@ namespace Slug.CI
 
 			// Get current branch and ensure there are no uncommitted updates.  These methods will throw if anything is out of sorts.
 			_gitProcessor.GetCurrentBranch();
-			_gitProcessor.IsUncommittedChanges();
-			_gitProcessor.IsBranchUpToDate();
+			_gitProcessor.RefreshUncommittedChanges();
+			_gitProcessor.RefreshLocalBranchStatus();
 
 			if (_gitProcessor.IsCurrentBranchMainBranch() && CISession.PublishTarget != PublishTargetEnum.Production)
 			{
