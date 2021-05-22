@@ -23,7 +23,13 @@ namespace Slug.CI.SlugBuildStages
 		private List<RecordBranchLatestCommit> latestCommits;
 		private Dictionary<string, GitBranchInfo> branches = new Dictionary<string, GitBranchInfo>();
 		private string currentBranchName;
+		private GitBranchInfo mainBranch;
 
+		private bool incrementMinor;
+		private bool incrementPatch;
+
+		private SemVersion newVersion = null;
+		private SemVersion mostRecentBranchTypeVersion;
 
 		/// <summary>
 		/// Constructor
@@ -81,32 +87,32 @@ namespace Slug.CI.SlugBuildStages
 			if ( CISession.PublishTarget == PublishTargetEnum.Alpha ) branchToFind = "alpha";
 			if ( CISession.PublishTarget == PublishTargetEnum.Beta ) branchToFind = "beta";
 
-			//if ( CISession.PublishTarget == PublishTargetEnum.Production ) throw new NotImplementedException();
+			if ( CISession.PublishTarget == PublishTargetEnum.Production ) branchToFind = CISession.GitProcessor.MainBranchName;
 
 			// The branch does not exist, user must create it.
 			if ( !branches.TryGetValue(branchToFind, out comparisonBranch) )
 				ControlFlow.Assert(true == false, "The destination branch [" + branchToFind + "] does not exist.  You must manually create this branch.");
 
 			// Get Main Branch info
-			GitBranchInfo mainBranch = branches [CISession.GitProcessor.MainBranchName];
+			mainBranch = branches [CISession.GitProcessor.MainBranchName];
 
 
 			// Determine the branch we are coming from
 			//string branchLC = CISession.GitProcessor.CurrentBranch.ToLower();
-			bool incrementPatch = (currentBranchName.StartsWith("fix") || currentBranchName.StartsWith("bug"));
-			bool incrementMinor = (currentBranchName.StartsWith("feature") || currentBranchName.StartsWith("feat"));
+			incrementPatch = (currentBranchName.StartsWith("fix") || currentBranchName.StartsWith("bug"));
+			incrementMinor = (currentBranchName.StartsWith("feature") || currentBranchName.StartsWith("feat"));
 
 			string destBranchType = "alpha";
-			if ( incrementMinor ) destBranchType = "beta";
+			if (incrementMinor) destBranchType = "beta";
 
-			SemVersion newVersion = null;
-			// If comparison is null then we are deploying to main
+			// Get most recent Version Tag for the desired branch type
+			mostRecentBranchTypeVersion = CISession.GitProcessor.GetMostRecentVersionTagOfBranch(destBranchType);
+
+
 			if ( CISession.PublishTarget== PublishTargetEnum.Production) {
-				throw new NotImplementedException();
+				CalculateMainVersion();
 			}
 			else {
-				// Get most recent Version Tag for the desired branch type
-				SemVersion mostRecentBranchTypeVersion = CISession.GitProcessor.GetMostRecentVersionTagOfBranch(destBranchType);
 
 				// See if main is newer and if it's tag is newer.  If so we need to set the comparison's
 				// tag to the main version and then add the alpha / beta to it...
@@ -132,6 +138,32 @@ namespace Slug.CI.SlugBuildStages
 			CISession.SemVersion = newVersion;
 			
 			return StageCompletionStatusEnum.Success;
+		}
+
+
+
+		/// <summary>
+		/// Calculations to compute the new version when it's a production push.
+		/// </summary>
+		private void CalculateMainVersion () {
+			// Strip out the prerelease portion to determine if main is newer or not
+			SemVersion tempVersion =
+				new SemVersion(mostRecentBranchTypeVersion.Major, mostRecentBranchTypeVersion.Minor, mostRecentBranchTypeVersion.Patch);
+			if (mainBranch.LatestSemVersionOnBranch < tempVersion) newVersion = new SemVersion(tempVersion.Major, tempVersion.Minor, tempVersion.Patch);
+			else
+			{
+				int major = mainBranch.LatestSemVersionOnBranch.Major;
+				int minor = mainBranch.LatestSemVersionOnBranch.Minor;
+				int patch = mainBranch.LatestSemVersionOnBranch.Patch;
+				if (incrementMinor)
+				{
+					minor++;
+					patch = 0;
+				}
+
+				if (incrementPatch) patch++;
+				newVersion = new SemVersion(major, minor, patch);
+			}
 		}
 
 

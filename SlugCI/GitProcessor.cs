@@ -427,15 +427,14 @@ namespace Slug.CI
 		/// <summary>
 		/// Used to push the app into a Development commit, which means it is tagged with a SemVer tag, such as 2.5.6-alpha1001
 		/// </summary>
-		public void CommitSemVersionChanges (SemVersion version) {
+		public void CommitSemVersionChanges (string tagVersion,string tagDescription) {
 			try {
 				//if ( WasVersionPreviouslyCommitted ) return;
 				string commitErrStart = "CommitSemVersionChanges:::  Git Command Failed:  git ";
-				string gitTagName = "Ver" + version;
-				string gitTagDesc = "Deployed Version:  " + PrettyPrintBranchName(CurrentBranch) + "  |  " + version;
+				
 				string gitArgs = "";
 
-				gitArgs = string.Format("tag -a {0} -m \"{1}\"", gitTagName, gitTagDesc);
+				gitArgs = string.Format("tag -a {0} -m \"{1}\"", tagVersion, tagDescription);
 				if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException(commitErrStart + gitArgs);
 
 				gitArgs = "push --set-upstream origin " + CurrentBranch;
@@ -455,6 +454,7 @@ namespace Slug.CI
 		/// Gets the next version and the GitTags
 		/// </summary>
 		/// <param name="isMainBranchBuild"></param>
+		/*
 		public void GetNextVersionAndTags (bool isMainBranchBuild) {
 			string gitArgs;
 			string commitErrStart = "GetNextVersionAndTags:::  Git Command Failed:  git ";
@@ -500,14 +500,14 @@ namespace Slug.CI
 				throw e;
 			}
 		}
-
+		*/
 
 
 
 		/// <summary>
 		/// This is the Main Branch Commit stage
 		/// </summary>
-		public void CommitMainVersionChanges () {
+		public void CommitMainVersionChanges (string tagVersion, string tagDescription) {
 			string gitArgs;
 			List<Output> gitOutput;
 
@@ -520,28 +520,28 @@ namespace Slug.CI
 					gitArgs = "checkout " + MainBranchName;
 					if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitMainVersionChanges:::  .Git Command failed:  git " + gitArgs);
 
-					gitArgs = string.Format("merge {0} --no-ff --no-edit -m \"Merging Branch: {0}   |  {1}\"", CurrentBranch, GitVersion.MajorMinorPatch);
+					gitArgs = string.Format("merge {0} --no-ff --no-edit -m \"Merging Branch: {0}   |  {1}\"", CurrentBranch, CISesion.SemVersion);
 					if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitMainVersionChanges:::  .Git Command failed:  git " + gitArgs);
 				}
 
 
 				gitArgs = "add .";
-				if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitVersionChanges:::  .Git Command failed:  git " + gitArgs);
+				if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitMainVersionChanges:::  .Git Command failed:  git " + gitArgs);
 
-				gitArgs = string.Format("commit -m \"{0} {1}", COMMIT_MARKER, GitTagDesc);
+				gitArgs = string.Format("commit -m \"{0} {1}", COMMIT_MARKER, tagDescription);
 				if ( !ExecuteGit(gitArgs, out gitOutput) ) {
 					if ( !gitOutput.Last().Text.Contains("nothing to commit") )
-						throw new ApplicationException("CommitVersionChanges:::   .Git Command failed:  git " + gitArgs);
+						throw new ApplicationException("CommitMainVersionChanges:::   .Git Command failed:  git " + gitArgs);
 				}
 
-				gitArgs = string.Format("tag -a {0} -m \"{1}\"", GitTagName, GitTagDesc);
-				if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitVersionChanges:::   .Git Command failed:  git " + gitArgs);
+				gitArgs = string.Format("tag -a {0} -m \"{1}\"", tagVersion, tagDescription);
+				if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitMainVersionChanges:::   .Git Command failed:  git " + gitArgs);
 
 				gitArgs = "push origin ";
-				if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitVersionChanges:::   .Git Command failed:  git " + gitArgs);
+				if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitMainVersionChanges:::   .Git Command failed:  git " + gitArgs);
 
 				gitArgs = "push --tags origin";
-				if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitVersionChanges:::   .Git Command failed:  git " + gitArgs);
+				if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitMainVersionChanges:::   .Git Command failed:  git " + gitArgs);
 
 				// Delete the Feature Branch
 				if ( CurrentBranch != MainBranchName ) {
@@ -802,22 +802,6 @@ namespace Slug.CI
 		*/
 
 
-		/// <summary>
-		/// adds spaces between every slash it finds in the branch name.
-		/// </summary>
-		/// <param name="branch"></param>
-		/// <returns></returns>
-		public string PrettyPrintBranchName (string branch) {
-			string [] parts = branch.Split('/');
-			string newName = "";
-			foreach ( string item in parts ) {
-				if ( newName != string.Empty )
-					newName = newName + " / " + item;
-				else
-					newName = item;
-			}
 
-			return newName;
-		}
 	}
 }
