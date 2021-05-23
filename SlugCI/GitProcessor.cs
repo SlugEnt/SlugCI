@@ -305,7 +305,8 @@ namespace Slug.CI
 
 			string[] versionSplit = version.Substring(3).Split(separators, 4);
 
-			ControlFlow.Assert(versionSplit.Length > 2, "Version [" + version + "]  is not in proper format of Ver#.#.#-a#");
+			ControlFlow.Assert(versionSplit.Length > 2, "Version [" + version + "]  is not in proper format of Ver#.#.#-a#.  To fix this, you may need to make a commit to the branch and manually set a version tag in the format Ver#.#.#.  Be sure and push the change to remote.");
+
 			string alpha = "";
 			if (versionSplit.Length == 4) alpha = versionSplit[3];
 

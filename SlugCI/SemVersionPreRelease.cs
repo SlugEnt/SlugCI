@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Semver;
 
 namespace Slug.CI
 {
@@ -159,5 +160,7 @@ namespace Slug.CI
 			string value = ReleaseType + "." + ReleaseNumber.ToString("D4") + strIncrementType;
 			return value;
 		}
+
+		
 	}
 }
