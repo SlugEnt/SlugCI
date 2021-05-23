@@ -97,16 +97,15 @@ namespace Slug.CI.SlugBuildStages
 			mainBranch = branches [CISession.GitProcessor.MainBranchName];
 
 
-			// Determine the branch we are coming from
-			//string branchLC = CISession.GitProcessor.CurrentBranch.ToLower();
+			// Determine the potential version bump...
 			incrementPatch = (currentBranchName.StartsWith("fix") || currentBranchName.StartsWith("bug"));
 			incrementMinor = (currentBranchName.StartsWith("feature") || currentBranchName.StartsWith("feat"));
 
-			string destBranchType = "alpha";
-			if (incrementMinor) destBranchType = "beta";
-
+			string versionPreReleaseName = "alpha";
+			if ( CISession.PublishTarget == PublishTargetEnum.Beta ) versionPreReleaseName = "beta";
+			
 			// Get most recent Version Tag for the desired branch type
-			mostRecentBranchTypeVersion = CISession.GitProcessor.GetMostRecentVersionTagOfBranch(destBranchType);
+			mostRecentBranchTypeVersion = CISession.GitProcessor.GetMostRecentVersionTagOfBranch(versionPreReleaseName);
 
 
 			if ( CISession.PublishTarget== PublishTargetEnum.Production) {

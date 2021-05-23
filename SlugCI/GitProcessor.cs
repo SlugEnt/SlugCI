@@ -377,7 +377,7 @@ namespace Slug.CI
 
 		public SemVersion GetMostRecentVersionTagOfBranch (string branch) {
 			List<Output> gitOutput;
-			string gitArgs = "for-each-ref refs/tags/Ver*-alpha.* --count=1 --sort=-version:refname";
+			string gitArgs = "for-each-ref refs/tags/Ver*-" + branch + ".* --count=1 --sort=-version:refname";
 			ExecuteGitTryCatch("GetMostRecentVersionTagOfBranch", gitArgs, out gitOutput);
 			if (gitOutput.Count == 0)
 			{
@@ -392,9 +392,8 @@ namespace Slug.CI
 			string value = columns [2].Substring(10);
 			ControlFlow.Assert(value.StartsWith("Ver"),"Did not find the Version tag marker:  Ver in the output record: [" + outputRec + "]");
 			return ConvertVersionToSemVersion(value);
-
-			//git  for-each-ref refs/tags/Ver*-alpha.* --count=10 --sort=-version:refname
 		}
+
 
 		/// <summary>
 		/// Performs a remote refresh to ensure local git repo branch is current with remote
