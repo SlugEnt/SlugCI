@@ -112,7 +112,7 @@ namespace Slug.CI
 
 				Finished(ExecuteProcess());
 
-				if ( CompletionStatus == StageCompletionStatusEnum.Success ) return true;
+				if ( CompletionStatus >= StageCompletionStatusEnum.Warning ) return true;
 			}
 			catch ( ProcessException p ) {
 				CompletionStatus = StageCompletionStatusEnum.Failure;

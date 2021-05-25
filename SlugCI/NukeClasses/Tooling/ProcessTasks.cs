@@ -115,6 +115,7 @@ namespace Nuke.Common.Tooling
                 outputFilter);
         }
 
+
         [CanBeNull]
         private static string GetToolPathOverride(string toolPath)
         {

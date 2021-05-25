@@ -32,14 +32,15 @@ namespace Slug.CI
 
 
 		/// <summary>
-		/// Stage was purposefully skipped
-		/// </summary>
-		Skipped = 90,
-
-		/// <summary>
 		/// Stage completed, but it might not have done so successfully.
 		/// </summary>
 		Warning = 100,
+
+
+		/// <summary>
+		/// Stage was purposefully skipped
+		/// </summary>
+		Skipped = 200,
 
 		/// <summary>
 		/// Stage completed successfully

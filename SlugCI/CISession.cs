@@ -213,6 +213,13 @@ namespace Slug.CI.NukeClasses
 
 
 		/// <summary>
+		/// Indicates the branch has had no changes to it, so process, but do not bump version
+		/// or commit any changes...
+		/// </summary>
+		public bool WasPreviouslyCommitted { get; set; }
+
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		public CISession () {

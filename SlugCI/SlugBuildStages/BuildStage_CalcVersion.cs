@@ -4,6 +4,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Text;
+using System.Transactions;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
@@ -98,6 +99,17 @@ namespace Slug.CI.SlugBuildStages
 
 			// Get Main Branch info
 			mainBranch = branches [CISession.GitProcessor.MainBranchName];
+			GitBranchInfo currentBranch = branches [CISession.GitProcessor.CurrentBranch];
+
+			// If the top commit on branch is already version tagged, then we are assuming they want to
+			// finish off later steps that might not have run successfully previously.
+			SemVersion mostCurrentSemVerOnBranch = currentBranch.LatestCommitOnBranch.GetGreatestVersionTag();
+			SemVersion zero = new SemVersion(0, 0, 0);
+			if ( mostCurrentSemVerOnBranch > zero ) {
+				CISession.WasPreviouslyCommitted = true;
+				newVersion = mostCurrentSemVerOnBranch;
+				return StageCompletionStatusEnum.Success;
+			}
 
 
 			// Determine the potential version bump...

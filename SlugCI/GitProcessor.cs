@@ -572,9 +572,12 @@ namespace Slug.CI
 			// Log it
 			Output outputCmd = new Output();
 			outputCmd.Text = GIT_COMMAND_MARKER + command + " " + cmdArguments;
+
 			GitCommandOutputHistory.Add(outputCmd);
 
-			IProcess process = ProcessTasks.StartProcess(command, cmdArguments, CISesion.RootDirectory, logOutput: false);
+			//ProcessTasks.DefaultLogOutput = false;
+			IProcess process = ProcessTasks.StartProcess(command, cmdArguments, CISesion.RootDirectory,logOutput:false);
+			//,customLogger:GitProcessorLoggerNormal
 			process.AssertWaitForExit();
 			output = process.Output.ToList();
 
@@ -764,6 +767,20 @@ namespace Slug.CI
 
 
 
+
+		public static void GitProcessorLoggerVerbose(OutputType type, string output)
+		{
+			if ( type == OutputType.Std )
+					Logger.Normal(output);
+				else
+					Logger.Error(output);
+			
+		}
+
+		public static void GitProcessorLoggerNormal (OutputType type, string output) {
+				Logger.Error(output);
+		}
+	
 
 	}
 }
