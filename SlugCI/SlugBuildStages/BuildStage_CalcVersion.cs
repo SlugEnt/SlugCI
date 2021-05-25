@@ -6,6 +6,7 @@ using System.IO;
 using System.Text;
 using Nuke.Common;
 using Nuke.Common.IO;
+using Nuke.Common.Tooling;
 using Semver;
 using Slug.CI.NukeClasses;
 using Slug.CI.NukeClasses;
@@ -91,7 +92,7 @@ namespace Slug.CI.SlugBuildStages
 
 			if ( CISession.PublishTarget == PublishTargetEnum.Production ) branchToFind = CISession.GitProcessor.MainBranchName;
 
-			// The branch does not exist, user must create it.
+			// Make sure branch exists.
 			if ( !branches.TryGetValue(branchToFind, out comparisonBranch) )
 				ControlFlow.Assert(true == false, "The destination branch [" + branchToFind + "] does not exist.  You must manually create this branch.");
 
@@ -114,49 +115,14 @@ namespace Slug.CI.SlugBuildStages
 			if ( CISession.PublishTarget== PublishTargetEnum.Production) {
 				CalculateMainVersion();
 			}
-			else {
-				SemVersion tempVersion;
-				// See if main is newer and if it's tag is newer.  If so we need to set the comparison's
-				// tag to the main version and then add the alpha / beta to it...
-				if ( mainBranch.LatestSemVersionOnBranch > mostRecentBranchTypeVersion ) {
-					int major = mainBranch.LatestSemVersionOnBranch.Major;
-					int minor = mainBranch.LatestSemVersionOnBranch.Minor;
-					int patch = mainBranch.LatestSemVersionOnBranch.Patch;
-					if ( incrementMajor ) {
-						major++;
-						minor = 0;
-						patch = 0;
-					}
-					if ( incrementMinor ) {
-						minor++;
-						patch = 0;
-					}
-					if ( incrementPatch ) patch++;
-
-					tempVersion = new SemVersion(major,minor,patch, comparisonBranch.Name + ".0000");
-				}
-				else 
-					tempVersion = new SemVersion(mostRecentBranchTypeVersion.Major, mostRecentBranchTypeVersion.Minor, mostRecentBranchTypeVersion.Patch,mostRecentBranchTypeVersion.Prerelease);
-
-				SemVersionPreRelease semPre = new SemVersionPreRelease(tempVersion.Prerelease);
-					if (incrementMinor) semPre.BumpMinor();
-					else if (incrementPatch) semPre.BumpPatch();
-					else if (incrementMajor) semPre.BumpMajor();
-
-					newVersion = new SemVersion(tempVersion.Major, tempVersion.Minor, tempVersion.Patch, semPre.Tag());
-
-/*					string pre = mostRecentBranchTypeVersion.Prerelease;
-					int index = pre.IndexOf('.');
-					if (index == -1 ) ControlFlow.Assert(true == false, "Unable to find the . in the prerelease portion of the semanticVersion [" + comparisonBranch.LatestSemVersionOnBranch.Prerelease + "]");
-					bool isInt = int.TryParse(pre.Substring(++index), out int value);
-					ControlFlow.Assert(isInt, "PreRelease tag of [" + comparisonBranch.LatestSemVersionOnBranch.Prerelease + "] does not contain an integer component after the .");
-					value++;
-					pre = comparisonBranch.Name + "." + value.ToString("D4");*/
-
-					//newVersion = new SemVersion(mostRecentBranchTypeVersion.Major, mostRecentBranchTypeVersion.Minor,
-					//                            mostRecentBranchTypeVersion.Patch, semPre);
-					
+			else if (CISession.PublishTarget == PublishTargetEnum.Alpha) {
+				CalculateAlphaVersion(comparisonBranch);
 			}
+			else if ( CISession.PublishTarget == PublishTargetEnum.Beta ) {
+				CalculateBetaVersion(comparisonBranch);
+			}
+			else
+				throw new ApplicationException("Publish Target of [" + CISession.PublishTarget.ToString() + "]  has no implemented functionality");
 
 			// Store the version that should be set for the build.
 			CISession.SemVersion = newVersion;
@@ -165,6 +131,103 @@ namespace Slug.CI.SlugBuildStages
 		}
 
 
+		private void CalculateBetaVersion (GitBranchInfo comparisonBranch) {
+			SemVersion tempVersion;
+
+			// Find the parents max version number.
+
+			GitCommitInfo commitBeta = comparisonBranch.LatestCommitOnBranch;
+
+			// Look for the highest version number from one of its parents and keep it.
+			SemVersion newestVersion = new SemVersion(0, 0, 0);
+			foreach ( string commitHash in commitBeta.ParentCommits ) {
+				GitCommitInfo commitInfo = CISession.GitProcessor.GetCommitInfo(commitHash);
+				SemVersion parentVersion = commitInfo.GetGreatestVersionTag();
+				if ( parentVersion > newestVersion ) {
+					newestVersion = parentVersion;
+				}
+			}
+			SemVersionPreRelease updatedBeta;
+
+			// Build New PreRelease tag based upon old, but with new number and type set to Beta.
+			if ( mostRecentBranchTypeVersion >= newestVersion ) {
+				newestVersion = mostRecentBranchTypeVersion;
+				updatedBeta = new SemVersionPreRelease(newestVersion.Prerelease);
+			}
+			else {
+				// Get pre-release of the newest version, which is not a beta branch
+				SemVersionPreRelease preOld = new SemVersionPreRelease(newestVersion.Prerelease);
+
+				// Get pre-release of most current beta branch version
+				SemVersionPreRelease currentBeta = new SemVersionPreRelease(mostRecentBranchTypeVersion.Prerelease);
+
+				// Update the beta to be of the Increment Type
+				if ( currentBeta.IncrementType < preOld.IncrementType )
+					updatedBeta = new SemVersionPreRelease(currentBeta.ReleaseType, currentBeta.ReleaseNumber, preOld.IncrementType);
+				else {
+					updatedBeta = currentBeta;
+				}
+				newestVersion = new SemVersion(newestVersion.Major, newestVersion.Minor, newestVersion.Patch, updatedBeta.Tag());
+			}
+
+
+			// Increase version
+			if (incrementMinor) updatedBeta.BumpMinor();
+			else if (incrementPatch) updatedBeta.BumpPatch();
+			else if (incrementMajor) updatedBeta.BumpMajor();
+			else updatedBeta.BumpVersion();
+
+			newVersion = new SemVersion(newestVersion.Major, newestVersion.Minor, newestVersion.Patch, updatedBeta.Tag());
+		}
+
+
+		/// <summary>
+		/// Computes the version for the Alpha Branch.
+		/// </summary>
+		/// <param name="comparisonBranch"></para	m>
+		private void CalculateAlphaVersion (GitBranchInfo comparisonBranch) {
+			// See if main is newer and if it's tag is newer.  If so we need to set the comparison's
+			// tag to the main version and then add the alpha / beta to it...
+			SemVersion tempVersion = CompareToMainVersion(mostRecentBranchTypeVersion, comparisonBranch.Name);
+
+			SemVersionPreRelease semPre = new SemVersionPreRelease(tempVersion.Prerelease);
+			if (incrementMinor) semPre.BumpMinor();
+			else if (incrementPatch) semPre.BumpPatch();
+			else if (incrementMajor) semPre.BumpMajor();
+			else semPre.BumpVersion();
+
+			newVersion = new SemVersion(tempVersion.Major, tempVersion.Minor, tempVersion.Patch, semPre.Tag());
+		}
+
+
+		SemVersion CompareToMainVersion (SemVersion comparisonVersion,string comparisonBranchName) {
+			SemVersion tempVersion;
+
+			if (mainBranch.LatestSemVersionOnBranch > comparisonVersion)
+			{
+				int major = mainBranch.LatestSemVersionOnBranch.Major;
+				int minor = mainBranch.LatestSemVersionOnBranch.Minor;
+				int patch = mainBranch.LatestSemVersionOnBranch.Patch;
+				if (incrementMajor)
+				{
+					major++;
+					minor = 0;
+					patch = 0;
+				}
+				if (incrementMinor)
+				{
+					minor++;
+					patch = 0;
+				}
+				if (incrementPatch) patch++;
+
+				tempVersion = new SemVersion(major, minor, patch, comparisonBranchName + ".0000");
+			}
+			else
+				tempVersion = new SemVersion(comparisonVersion.Major, comparisonVersion.Minor, comparisonVersion.Patch, comparisonVersion.Prerelease);
+
+			return tempVersion;
+		}
 
 		/// <summary>
 		/// Calculations to compute the new version when it's a production push.
@@ -189,10 +252,7 @@ namespace Slug.CI.SlugBuildStages
 				newVersion = new SemVersion(major, minor, patch);
 			}
 		}
+	
 
-
-		private void DeployProduction () {
-
-		}
 	}
 }

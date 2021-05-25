@@ -63,7 +63,6 @@ namespace Slug.CI
 			CISession.TestOutputPath = CISession.OutputDirectory / "Tests";
 
 
-
 			ciSession.GitProcessor = new GitProcessor(ciSession);
 			if (ciSession.GitProcessor.AreUncommitedChangesOnLocalBranch) 
 				throw new ApplicationException("There are uncommited changes on the current branch: " + ciSession.GitProcessor.CurrentBranch +  "  Commit or discard existing changes and then try again.");

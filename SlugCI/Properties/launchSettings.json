@@ -34,6 +34,20 @@
       "environmentVariables": {
         "SLUGCI_DEPLOY_PROD": "C:\\temp\\deployProd"
       }
+    },
+    "Deploy Alpha": {
+      "commandName": "Project",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity gitversion:info|compile:info|calcversion:debug --skipnuget --deployto alpha",
+      "environmentVariables": {
+        "SLUGCI_DEPLOY_ALPHA": "c:\\temp\\DeployAlpha"
+      }
+    },
+    "Deploy Beta": {
+      "commandName": "Project",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity gitversion:info|compile:info|calcversion:debug --skipnuget --deployto beta",
+      "environmentVariables": {
+        "SLUGCI_DEPLOY_BETA": "c:\\temp\\DeployBeta"
+      }
     }
   }
 }

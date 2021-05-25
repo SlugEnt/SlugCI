@@ -30,7 +30,7 @@ namespace Slug.CI
 		/// <summary>
 		/// The most recent commit on this branch
 		/// </summary>
-		public RecordCommitInfo LatestCommitOnBranch { get; set; } = null;
+		public GitCommitInfo LatestCommitOnBranch { get; set; } = null;
 
 
 		/// <summary>
@@ -40,7 +40,6 @@ namespace Slug.CI
 		public GitBranchInfo (RecordBranchLatestCommit branchRecord, GitProcessor gitProcessor) {
 			Name = branchRecord.branch;
 
-
 			// Retrieve info about the latest commit on the branch
 			LatestCommitOnBranch = gitProcessor.GetCommitInfo(branchRecord.commitHash);
 			LatestSemVersionOnBranch = gitProcessor.FindLatestSemVersionOnBranch(Name);
@@ -48,7 +47,7 @@ namespace Slug.CI
 
 
 		public override string ToString () {
-			return Name + ": " + LatestSemVersionOnBranch + "  [ " + LatestCommitOnBranch.committedDate + " ]";
+			return Name + ": " + LatestSemVersionOnBranch + "  [ " + LatestCommitOnBranch.DateCommitted + " ]";
 		}
 
 
@@ -60,11 +59,7 @@ namespace Slug.CI
 		/// <param name="b"></param>
 		/// <returns></returns>
 		public bool IsSameAs (GitBranchInfo b, Verbosity verbosity) {
-/*			if ( verbosity == Verbosity.Verbose ) {
-				Color color = Compare(LatestCommitOnBranch.committedDate, b.LatestCommitOnBranch.committedDate);
-				Console.WriteLine("{0,-30  |  {1}", LatestCommitOnBranch.committedDate, b.LatestCommitOnBranch.committedDate, color);
-			}
-	*/		if ( LatestCommitOnBranch == b.LatestCommitOnBranch &&
+		if ( LatestCommitOnBranch == b.LatestCommitOnBranch &&
 			     LatestSemVersionOnBranch == b.LatestSemVersionOnBranch) return true;
 			return false;
 		}

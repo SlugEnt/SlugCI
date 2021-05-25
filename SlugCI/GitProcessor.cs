@@ -19,6 +19,7 @@ using Console = Colorful.Console;
 
 namespace Slug.CI
 {
+
 	/// <summary>
 	/// Identified Remotes
 	/// </summary>
@@ -41,16 +42,18 @@ namespace Slug.CI
 
 
 	/// <summary>
-	/// Detailed information about a commit from the Git show --format
-	/// </summary>
-	public record RecordCommitInfo (string commitHash, string committer, DateTimeOffset committedDate, string commitMsg, string references);
-
-
-	/// <summary>
 	///  Processes all Git Related stuff 
 	/// </summary>
 	public class GitProcessor {
 		private const string GIT_COMMAND = "git ";
+		public const string GIT_SHOW_SLUGCI = "M:slugci";
+		public const string GIT_SHOW_COMMIT = "commit:";
+		public const string GIT_SHOW_PARENTS = "parents:";
+		public const string GIT_SHOW_COMMITTER = "committer";
+		public const string GIT_SHOW_COMMITTED_DATE = "cdate:";
+		public const string GIT_SHOW_MESSAGE = "msg:";
+		public const string GIT_SHOW_REFS = "refs:";
+
 		const string COMMIT_MARKER = "|^|";
 		const string GIT_COMMAND_MARKER = "|";
 
@@ -185,19 +188,27 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="commitHash">The hash of the commit to retrieve info about</param>
 		/// <returns></returns>
-		public RecordCommitInfo GetCommitInfo (string commitHash) {
+		public GitCommitInfo GetCommitInfo (string commitHash) {
 			List<Output> gitOutput;
+			gitOutput = ShowCommit(commitHash);
+			return new GitCommitInfo(gitOutput);
+			/*
 			string gitArgs = "show --format=\"%h|%cn|%ct|%s|%d \" --no-patch " + commitHash;
 			ExecuteGitTryCatch("GetCommitInfo", gitArgs, out gitOutput);
 			if ( gitOutput.Count == 0 ) return null;
 
+			GitCommitInfo gitCommit = new GitCommitInfo(gitOutput [0].Text);
+			return gitCommit;
+			//return ConvertCommitInfoToRecord(gitOutput [0].Text);
+			
 			string [] results = gitOutput [0].Text.Split('|');
 			if (! long.TryParse(results [2], out long value)) ControlFlow.Assert(true == false,"The Git Commit date was unable to be converted to a Unix long time [" + results[2] + "]");
 			
 			DateTimeOffset date1 = DateTimeOffset.FromUnixTimeSeconds(value);
 			DateTime date2 = date1.ToOffset(new TimeSpan(0, -4, 0, 0)).UtcDateTime;
 			
-			return new RecordCommitInfo(commitHash, results [1], date1, results [3], results [4]);
+			//return new RecordCommitInfo(commitHash, results [1], date1, results [3], results [4]);
+			*/
 		}
 
 
@@ -380,8 +391,8 @@ namespace Slug.CI
 			List<Output> gitOutput;
 			string gitArgs = "for-each-ref refs/tags/Ver*-" + branch + ".* --count=1 --sort=-version:refname";
 			ExecuteGitTryCatch("GetMostRecentVersionTagOfBranch", gitArgs, out gitOutput);
-			if (gitOutput.Count == 0)
-			{
+			if (gitOutput.Count == 0) {
+				return new SemVersion(0, 0, 0);
 				PrintGitHistory();
 				ControlFlow.Assert(gitOutput.Count != 0, "GetMostRecentVersionTagOfBranch failed to return any results...");
 			}
@@ -448,60 +459,7 @@ namespace Slug.CI
 				throw e;
 			}
 		}
-
-
-		/// <summary>
-		/// Gets the next version and the GitTags
-		/// </summary>
-		/// <param name="isMainBranchBuild"></param>
-		/*
-		public void GetNextVersionAndTags (bool isMainBranchBuild) {
-			string gitArgs;
-			string commitErrStart = "GetNextVersionAndTags:::  Git Command Failed:  git ";
-
-			List<Output> gitOutput;
-
-			try {
-				GetNextVersion(isMainBranchBuild);
-
-				// Override GitTagName if main branch
-				if ( isMainBranchBuild ) {
-					GitTagName = "Ver" + Version;
-
-					// Lets validate that local master and remote master are up to date.  If not then no need to proceed with anything else - we will have problems later
-					RefreshLocalBranchStatus(MainBranchName);
-				}
-				else
-					GitTagName = "Ver" + SemVersion;
-
-
-				//GitTagName = "Ver" + Version;
-				GitTagDesc = "Deployed Version:  " + PrettyPrintBranchName(CurrentBranch) + "  |  " + Version;
-
-				// See if the Tag exists already, if so we will get errors later, better to stop now.  
-				gitArgs = "describe --tags --abbrev=0";
-
-				if ( !ExecuteGit(gitArgs, out gitOutput) ) {
-					if ( gitOutput.Count > 0 ) {
-						if ( gitOutput [0].Text.Contains("fatal: No names found") ) return;
-						throw new ApplicationException(commitErrStart + gitArgs);
-					}
-				}
-
-				if ( gitOutput.Count > 0 && gitOutput [0].Text == GitTagName ) {
-					WasVersionPreviouslyCommitted = true;
-					Logger.Warn(
-						"The Git Tag: {0} was previously committed.  We are assuming this is one of 2 things:  1) Just a rebuild of the current branch with no changes.  2) A run to correct a prior error in a later stage.  Certain code sections will be skipped.",
-						GitTagName);
-				}
-			}
-			catch ( Exception e ) {
-				PrintGitHistory();
-				throw e;
-			}
-		}
-		*/
-
+		
 
 
 		/// <summary>
@@ -646,7 +604,6 @@ namespace Slug.CI
 			}
 		}
 
-
 		public void GetNextVersion (bool isMainBranchBuild) {
 			Version = GitVersion.MajorMinorPatch;
 			SemVersion = GitVersion.SemVer;
@@ -768,38 +725,43 @@ namespace Slug.CI
 		/// Returns the GitVersion object
 		/// </summary>
 		public GitVersion GitVersion { get; private set; }
+		
 
-		/*
 		/// <summary>
-		/// Determines whether Main or Master is the "main" branch.
+		/// Executes the Git Cat-File command against a given command.
 		/// </summary>
-		private void IdentifyMainBranch () {
-			try {
-				string gitArgs = "branch";
-				if ( !ExecuteGit(gitArgs, out List<Output> output) )
-					throw new ApplicationException("IdentifyMainBranch:::   .Git Command failed:  git " + gitArgs);
-
-				char [] skipChars = new [] {' ', '*'};
-
-				bool found = false;
-				foreach ( Output branch in output ) {
-					string branchName = branch.Text.TrimStart(skipChars).TrimEnd();
-					if ( IsMainBranch(branchName) ) {
-						if ( found )
-							throw new ApplicationException(
-								"Appears to be a main and master branch in the repository.  This is not allowed.  Please cleanup the repo so only master or only main exists.");
-						found = true;
-						MainBranchName = branchName;
-					}
-				}
-			}
-			catch ( Exception e ) {
-				PrintGitHistory();
-				throw e;
-			}
-
+		/// <param name="commitHash"></param>
+		/// <returns></returns>
+		public List<Output> ShowCommit (string commitHash) {
+			List<Output> gitOutput;
+			// git show --format=format:"M:slugci%ncommit: %h%nparents: %P%ncommitter: %cn%ncdate: %ct%nrefs: %d%nmsg: %s" 65a8e5
+			string gitArgs = "show --format=format:\"" +
+			                 GIT_SHOW_SLUGCI +
+			                 "%n" +
+			                 GIT_SHOW_COMMIT +
+			                 " %h" +
+			                 "%n" +
+			                 GIT_SHOW_PARENTS +
+			                 " %P" +
+			                 "%n" +
+			                 GIT_SHOW_COMMITTER +
+			                 " %cn" +
+			                 "%n" +
+			                 GIT_SHOW_COMMITTED_DATE +
+			                 " %ct" +
+			                 "%n" +
+			                 GIT_SHOW_REFS +
+			                 " %d" +
+			                 "%n" +
+			                 GIT_SHOW_MESSAGE +
+			                 " %s" +
+							 "\" " +
+			                 commitHash;
+			                 
+			ExecuteGitTryCatch("GitCatFile_OnCommit", gitArgs, out gitOutput);
+			return gitOutput;
 		}
-		*/
+
 
 
 
