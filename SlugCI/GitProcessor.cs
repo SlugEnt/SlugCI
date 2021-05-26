@@ -42,6 +42,12 @@ namespace Slug.CI
 
 
 	/// <summary>
+	/// Output of BranchMerged command.
+	/// </summary>
+//	public record RecordBranchMerged (bool isCheckedOutBranch, string branchName);
+
+
+	/// <summary>
 	///  Processes all Git Related stuff 
 	/// </summary>
 	public class GitProcessor {
@@ -766,21 +772,70 @@ namespace Slug.CI
 		}
 
 
+		/// <summary>
+		/// Lists branches which have been merged into the current branch or a descendant
+		/// of the current branch.
+		/// </summary>
+		/// <param name="commitHash"></param>
+		/// <returns></returns>
+		public List<string> BranchMerged (string branchName, string commitHash) {
+			List<Output> gitOutput;
+			string gitArgs = "branch --merged " + commitHash;
+			ExecuteGitTryCatch("BranchMerged", gitArgs, out gitOutput);
+
+			//List<RecordBranchMerged> merged = new List<RecordBranchMerged>();
+			List<string> merged = new List<string>();
+
+			foreach ( Output output in gitOutput ) {
+				if ( output.Text.StartsWith("*") ) continue;
+
+				string branchFound = output.Text.Trim();
+				if ((branchFound != branchName))
+					merged.Add(branchFound);
+			//	RecordBranchMerged record = new RecordBranchMerged(isChecked,branchName);
+			//	merged.Add(record);
+			}
+
+			return merged;
+		}
 
 
-		public static void GitProcessorLoggerVerbose(OutputType type, string output)
-		{
-			if ( type == OutputType.Std )
-					Logger.Normal(output);
+		/// <summary>
+		/// Deletes a Branch
+		/// <param name="local">If true, the local branch is deleted.  If false, the remote</param>
+		/// </summary>
+		/// <param name="branchName"></param>
+		public bool DeleteBranch (string branchName, bool local = true) {
+			List<Output> gitOutput;
+			string gitArgs = "";
+			if ( local == false )
+				gitArgs = "push origin --delete " + branchName;
+			else
+				gitArgs = "branch -D " + branchName;
+
+				bool success = ExecuteGit(gitArgs, out gitOutput);
+				if ( !success ) {
+					// See if it is an acceptable error
+					foreach ( Output output in gitOutput ) {
+						if ( output.Text.Contains("remote ref does not exist") ) return false;
+					}
+
+					ControlFlow.Assert(true == false, "DeleteBranch Failed: " + gitOutput [0].Text);
+				}
 				else
-					Logger.Error(output);
-			
+					return true;
+			return true;
 		}
 
-		public static void GitProcessorLoggerNormal (OutputType type, string output) {
-				Logger.Error(output);
-		}
-	
 
+		/// <summary>
+		/// Fetches remote and removes any local branches that were removed from the remote
+		/// </summary>
+		public void FetchPrune ()
+		{
+			List<Output> gitOutput;
+			string gitArgs = "fetch -p";
+			ExecuteGitTryCatch("FetchPrune", gitArgs, out gitOutput);
+		}
 	}
 }

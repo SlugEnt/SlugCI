@@ -68,6 +68,9 @@ namespace Slug.CI
 				throw new ApplicationException("There are uncommited changes on the current branch: " + ciSession.GitProcessor.CurrentBranch +  "  Commit or discard existing changes and then try again.");
 
 			// TODO Remove this.  This is for testing only
+			BuildStage_GitCleanup cleanup = new BuildStage_GitCleanup(ciSession);
+			cleanup.Execute();
+
 			BuildStage_CalcVersion calc = new BuildStage_CalcVersion(CISession);
 			calc.Execute();
 

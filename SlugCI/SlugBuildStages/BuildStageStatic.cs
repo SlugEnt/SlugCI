@@ -18,6 +18,6 @@ namespace Slug.CI.SlugBuildStages
 		public const string STAGE_RESTORE = "Restore";
 		public const string STAGE_CLEAN = "Clean";
 		public const string STAGE_GITCOMMIT = "GitCommit";
-
+		public const string STAGE_GITCLEAN = "GitClean";
 	}
 }

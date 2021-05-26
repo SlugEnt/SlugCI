@@ -29,9 +29,11 @@ namespace Slug.CI.SlugBuildStages
 		/// <returns></returns>
 		protected override StageCompletionStatusEnum ExecuteProcess()
 		{
-			if ( CISession.WasPreviouslyCommitted ) 
+			if ( CISession.WasPreviouslyCommitted ) {
+				Logger.Warn("Skipping " + Name + " stage.  Branch was previously committed and versioned.");
 				return StageCompletionStatusEnum.Skipped;
-			
+			}
+
 			// Set Commit tag and description
 			string versionTag = "Ver" + CISession.SemVersion;
 			string gitTagDesc = "Deployed Version:  " + PrettyPrintBranchName(CISession.GitProcessor.CurrentBranch) + "  |  " + CISession.SemVersion;
