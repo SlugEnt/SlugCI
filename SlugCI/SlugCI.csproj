@@ -28,7 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="CustomNuke\" />
     <Folder Include="NukeClasses\NukeMisc\" />
+    <Folder Include="NukeClasses\Tools\GitVersion\" />
   </ItemGroup>
 
 </Project>

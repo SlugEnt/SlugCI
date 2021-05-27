@@ -9,7 +9,6 @@ using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.GitVersion;
 using Slug.CI.NukeClasses;
 
 namespace Slug.CI
@@ -147,10 +146,10 @@ namespace Slug.CI
 						break;
 					case "gitversion":
 						if (splits[1] == "debug")
-							ciSession.VerbosityGitVersion = GitVersionVerbosity.debug;
+							ciSession.VerbosityGitVersion = ProcessVerbosity.All;
 						else if ( splits [1] == "info" )
-							ciSession.VerbosityGitVersion = GitVersionVerbosity.info;
-						else ciSession.VerbosityGitVersion = GitVersionVerbosity.warn;
+							ciSession.VerbosityGitVersion = ProcessVerbosity.Commands;
+						else ciSession.VerbosityGitVersion = ProcessVerbosity.Nothing;
 						break;
 					case "calcversion":
 						if ( splits [1] == "debug" )

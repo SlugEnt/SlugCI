@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
-using Nuke.Common.Tools.GitVersion;
 using Semver;
 using Slug.CI.NukeClasses;
 using Console = Colorful.Console;
@@ -137,11 +136,11 @@ namespace Slug.CI {
 		public GitProcessor (CISession ciSession) {
 			CISesion = ciSession;
 
-			if ( CISesion.VerbosityGitVersion == GitVersionVerbosity.warn || ciSession.VerbosityGitVersion == GitVersionVerbosity.error || ciSession.VerbosityGitVersion == GitVersionVerbosity.none) {
+			if ( CISesion.VerbosityGitVersion == ProcessVerbosity.Nothing) {
 				logInvocationLogging = false;
 				logOutputLogging = false;
 			}
-			else if (ciSession.VerbosityGitVersion == GitVersionVerbosity.info ) {
+			else if (ciSession.VerbosityGitVersion == ProcessVerbosity.Commands ) {
 				logInvocationLogging = true;
 				logOutputLogging = false;
 			}
@@ -637,49 +636,7 @@ namespace Slug.CI {
 				throw e;
 			}
 		}
-
-
-		public void GetNextVersion (bool isMainBranchBuild) {
-			Version = GitVersion.MajorMinorPatch;
-			SemVersion = GitVersion.SemVer;
-
-			/* GitVersion Is not working correctly.
-			InformationalVersion = GitVersion.InformationalVersion;
-			SemVersionNugetCompatible = GitVersion.NuGetVersionV2;
-
-			return;
-			*/
-
-			if ( isMainBranchBuild ) {
-				SemVersion = Version;
-				SemVersionNugetCompatible = Version;
-				InformationalVersion = Version + "+" + GitVersion.Sha.Substring(0, 7);
-				return;
-			}
-
-
-			string label = GitVersion.PreReleaseLabel;
-			int commitNumber = GetBranchCommitCount();
-			ControlFlow.Assert(commitNumber > 0,
-			                   "There are no commits on branch [" + CurrentBranch + "].  Since this is a non-main branch there is nothing to do.");
-
-			//int commitNumber = Int32.Parse(GitVersion.CommitsSinceVersionSource);
-			//commitNumber++;
-			SemVersion = Version + "-" + label + "." + commitNumber;
-
-			// Calculate Nuget Version
-			string zeros = "";
-			if ( commitNumber > 99 )
-				zeros = "0";
-			else if ( commitNumber > 9 )
-				zeros = "00";
-			else
-				zeros = "000";
-			SemVersionNugetCompatible = Version + "-" + label + zeros + commitNumber;
-
-			InformationalVersion = SemVersion + "+" + GitVersion.Sha.Substring(0, 7);
-		}
-
+		
 
 		/// <summary>
 		/// Returns the number of commits on the current branch.
@@ -733,33 +690,6 @@ namespace Slug.CI {
 
 		}
 
-
-
-		/// <summary>
-		/// Sets up and queries the GitVersion.
-		/// </summary>
-		public void Fetch_GitVersion () {
-			Misc.WriteSubHeader("GitVersion:  Fetch");
-
-			GitVersionSettings settings = new GitVersionSettings()
-			{
-				ProcessWorkingDirectory = CISesion.RootDirectory,
-				Framework = "netcoreapp3.1",
-				NoFetch = false,
-				ProcessLogOutput = true,
-				Verbosity = CISesion.VerbosityGitVersion,
-				UpdateAssemblyInfo = true,
-			};
-
-			(GitVersion result, IReadOnlyCollection<Output> output) = GitVersionTasks_Custom.GitVersion(settings);
-
-		}
-
-
-		/// <summary>
-		/// Returns the GitVersion object
-		/// </summary>
-		public GitVersion GitVersion { get; private set; }
 
 
 		/// <summary>

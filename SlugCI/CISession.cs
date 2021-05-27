@@ -5,7 +5,6 @@ using static Nuke.Common.IO.FileSystemTasks;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.GitVersion;
 using Semver;
 
 namespace Slug.CI.NukeClasses
@@ -125,7 +124,7 @@ namespace Slug.CI.NukeClasses
 		/// <summary>
 		///  Level of verbosity for git Output
 		/// </summary>
-		public GitVersionVerbosity VerbosityGitVersion { get; set; } = GitVersionVerbosity.warn;
+		public ProcessVerbosity VerbosityGitVersion { get; set; } = ProcessVerbosity.Nothing;
 
 
 		/// <summary>
