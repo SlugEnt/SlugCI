@@ -7,6 +7,11 @@
     <RootNamespace>Slug.CI</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningsAsErrors>;NU1605</WarningsAsErrors>
+    <NoWarn>1701;1702;1591;1573</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Colorful.Console" Version="1.2.15" />
     <PackageReference Include="Glob" Version="1.1.8" />

@@ -17,8 +17,7 @@ using Console = Colorful.Console;
 
 [assembly: InternalsVisibleTo("Test_SlugCI")]
 
-namespace Slug.CI
-{
+namespace Slug.CI {
 
 	/// <summary>
 	/// Identified Remotes
@@ -28,6 +27,7 @@ namespace Slug.CI
 	/// <param name="operation">The operation this remote is for</param>
 	/// <returns></returns>
 	public record Remotes (string name, string url, string operation);
+
 
 	/// <summary>
 	/// Branch / Commit Information
@@ -80,12 +80,19 @@ namespace Slug.CI
 		public string SemVersion { get; private set; }
 		public string SemVersionNugetCompatible { get; private set; }
 		public string InformationalVersion { get; private set; }
-		public string GitTagName { get; private set; }
-		public string GitTagDesc { get; private set; }
 		public bool IsLocalBranchUptoDate { get; private set; }
 		public bool AreUncommitedChangesOnLocalBranch { get; private set; }
-		List<string> _versionList = new List<string>();
 		public string GitCommandVersion { get; private set; }
+
+		/// <summary>
+		/// If true, the current path and the command being executed are displayed.
+		/// </summary>
+		public bool logInvocationLogging { get; private set; }
+
+		/// <summary>
+		/// If true, the output of Git commands is displayed.
+		/// </summary>
+		public bool logOutputLogging { get; private set; }
 
 		public List<RecordBranchLatestCommit> AllBranchInfo { get; private set; } = new List<RecordBranchLatestCommit>();
 
@@ -107,9 +114,7 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="branchName"></param>
 		/// <returns></returns>
-		public bool IsMainBranch (string branchName) {
-			return branchName == MainBranchName;
-		}
+		public bool IsMainBranch (string branchName) { return branchName == MainBranchName; }
 
 
 		/// <summary>
@@ -132,6 +137,19 @@ namespace Slug.CI
 		public GitProcessor (CISession ciSession) {
 			CISesion = ciSession;
 
+			if ( CISesion.VerbosityGitVersion == GitVersionVerbosity.warn || ciSession.VerbosityGitVersion == GitVersionVerbosity.error || ciSession.VerbosityGitVersion == GitVersionVerbosity.none) {
+				logInvocationLogging = false;
+				logOutputLogging = false;
+			}
+			else if (ciSession.VerbosityGitVersion == GitVersionVerbosity.info ) {
+				logInvocationLogging = true;
+				logOutputLogging = false;
+			}
+			else {
+				logInvocationLogging = true;
+				logOutputLogging = true;
+			}
+
 			GetGitCommandVersion();
 			Colorful.Console.WriteLine("Git Command Version:  " + GitCommandVersion, Color.Yellow);
 
@@ -146,6 +164,7 @@ namespace Slug.CI
 		private void GetRepositoryInfo () {
 			RefreshLocalBranchStatus();
 			GetMainBranchName();
+
 			//IdentifyMainBranch();
 			GetCurrentBranch();
 			RefreshUncommittedChanges();
@@ -220,9 +239,8 @@ namespace Slug.CI
 
 
 		public List<RecordBranchLatestCommit> GetAllBranchesWithLatestCommit (bool refresh = false) {
-			if ( AllBranchInfo.Count != 0 && refresh == false )
-				return AllBranchInfo;
-			
+			if ( AllBranchInfo.Count != 0 && refresh == false ) return AllBranchInfo;
+
 			List<Output> gitOutput;
 			string gitArgs = "branch --sort=-committerdate --all -vv";
 			ExecuteGitTryCatch("GetAllBranchesWithLatestCommit", gitArgs, out gitOutput);
@@ -276,24 +294,25 @@ namespace Slug.CI
 		/// <returns>RecordGitDescribeTag</returns>
 		internal static RecordGitDescribeTag GetGitDescribeTag (string gitDescribeOutput) {
 			int gitMetaIndexStart = gitDescribeOutput.LastIndexOf("-g");
-			ControlFlow.Assert(gitMetaIndexStart != -1,"Git Describe out was not in expected format:  [" + gitDescribeOutput + "]");
+			ControlFlow.Assert(gitMetaIndexStart != -1, "Git Describe out was not in expected format:  [" + gitDescribeOutput + "]");
 
 			gitMetaIndexStart += 2;
 			string hash = gitDescribeOutput.Substring(gitMetaIndexStart);
-			
+
 			// Find the commit count
 			string substr = gitDescribeOutput.Substring(0, gitMetaIndexStart - 2);
 			int commitCountIndex = substr.LastIndexOf('-');
 			ControlFlow.Assert(commitCountIndex != -1, "Git Describe was not in in expected format.  Trying to find CommitCount:  [" + gitDescribeOutput + "]");
-			bool foundCommitCount = int.TryParse(substr.Substring(commitCountIndex + 1),out int commitCount);
-			if (!foundCommitCount)
-				ControlFlow.Assert(foundCommitCount,"Git Descrive was not in expected format.  Unable to determine the Git Commit Count Since. [" + gitDescribeOutput + "]");
+			bool foundCommitCount = int.TryParse(substr.Substring(commitCountIndex + 1), out int commitCount);
+			if ( !foundCommitCount )
+				ControlFlow.Assert(foundCommitCount,
+				                   "Git Descrive was not in expected format.  Unable to determine the Git Commit Count Since. [" + gitDescribeOutput + "]");
 
 			string tag = gitDescribeOutput.Substring(0, commitCountIndex);
 			RecordGitDescribeTag record = new RecordGitDescribeTag(tag, commitCount, hash);
 			return record;
 		}
-		
+
 
 
 		/// <summary>
@@ -316,27 +335,30 @@ namespace Slug.CI
 		/// <param name="version"></param>
 		/// <returns></returns>
 		public static SemVersion ConvertVersionToSemVersion (string version) {
-			char[] separators = new char[] { '.', '-' };
+			char [] separators = new char [] {'.', '-'};
 
-			ControlFlow.Assert(version.StartsWith("Ver"),"A slugCI version tag must start with Ver");
+			ControlFlow.Assert(version.StartsWith("Ver"), "A slugCI version tag must start with Ver");
 
-			string[] versionSplit = version.Substring(3).Split(separators, 4);
+			string [] versionSplit = version.Substring(3).Split(separators, 4);
 
-			ControlFlow.Assert(versionSplit.Length > 2, "Version [" + version + "]  is not in proper format of Ver#.#.#-a#.  To fix this, you may need to make a commit to the branch and manually set a version tag in the format Ver#.#.#.  Be sure and push the change to remote.");
+			ControlFlow.Assert(versionSplit.Length > 2,
+			                   "Version [" +
+			                   version +
+			                   "]  is not in proper format of Ver#.#.#-a#.  To fix this, you may need to make a commit to the branch and manually set a version tag in the format Ver#.#.#.  Be sure and push the change to remote.");
 
 			string alpha = "";
-			if (versionSplit.Length == 4) alpha = versionSplit[3];
+			if ( versionSplit.Length == 4 ) alpha = versionSplit [3];
 
 			// Make sure the first three elements are numbers
 			if ( !int.TryParse(versionSplit [0], out int major) ) {
 				ControlFlow.Assert(true == false, "Version number is not in proper format.  Major part is not a number:  [" + version + "]");
 			}
-			if (!int.TryParse(versionSplit[1], out int minor))
-			{
+
+			if ( !int.TryParse(versionSplit [1], out int minor) ) {
 				ControlFlow.Assert(true == false, "Version number is not in proper format.  Minor part is not a number:  [" + version + "]");
 			}
-			if (!int.TryParse(versionSplit[2], out int patch))
-			{
+
+			if ( !int.TryParse(versionSplit [2], out int patch) ) {
 				ControlFlow.Assert(true == false, "Version number is not in proper format.  Patch part is not a number:  [" + version + "]");
 			}
 
@@ -367,6 +389,7 @@ namespace Slug.CI
 					return;
 				}
 			}
+
 			ControlFlow.Assert(true == false, "Did not find the required output text from the git command to determine the main branch name");
 		}
 
@@ -382,7 +405,8 @@ namespace Slug.CI
 				if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("RefreshUncommittedChanges::: Git Command failed:  git " + gitArgs);
 
 				gitArgs = "diff-index --quiet HEAD --";
-				if ( !ExecuteGit_NoOutput(gitArgs) ) AreUncommitedChangesOnLocalBranch = true;
+				if ( !ExecuteGit_NoOutput(gitArgs) )
+					AreUncommitedChangesOnLocalBranch = true;
 				else
 					AreUncommitedChangesOnLocalBranch = false;
 			}
@@ -397,7 +421,7 @@ namespace Slug.CI
 			List<Output> gitOutput;
 			string gitArgs = "for-each-ref refs/tags/Ver*-" + branch + ".* --count=1 --sort=-version:refname";
 			ExecuteGitTryCatch("GetMostRecentVersionTagOfBranch", gitArgs, out gitOutput);
-			if (gitOutput.Count == 0) {
+			if ( gitOutput.Count == 0 ) {
 				return new SemVersion(0, 0, 0);
 				PrintGitHistory();
 				ControlFlow.Assert(gitOutput.Count != 0, "GetMostRecentVersionTagOfBranch failed to return any results...");
@@ -408,7 +432,7 @@ namespace Slug.CI
 			string [] columns = outputRec.Split(separators);
 			ControlFlow.Assert((columns.Length == 3), "Command output produced unexpected output. [" + outputRec + "]");
 			string value = columns [2].Substring(10);
-			ControlFlow.Assert(value.StartsWith("Ver"),"Did not find the Version tag marker:  Ver in the output record: [" + outputRec + "]");
+			ControlFlow.Assert(value.StartsWith("Ver"), "Did not find the Version tag marker:  Ver in the output record: [" + outputRec + "]");
 			return ConvertVersionToSemVersion(value);
 		}
 
@@ -444,11 +468,11 @@ namespace Slug.CI
 		/// <summary>
 		/// Used to push the app into a Development commit, which means it is tagged with a SemVer tag, such as 2.5.6-alpha1001
 		/// </summary>
-		public void CommitSemVersionChanges (string tagVersion,string tagDescription) {
+		public void CommitSemVersionChanges (string tagVersion, string tagDescription) {
 			try {
 				//if ( WasVersionPreviouslyCommitted ) return;
 				string commitErrStart = "CommitSemVersionChanges:::  Git Command Failed:  git ";
-				
+
 				string gitArgs = "";
 
 				gitArgs = string.Format("tag -a {0} -m \"{1}\"", tagVersion, tagDescription);
@@ -465,7 +489,7 @@ namespace Slug.CI
 				throw e;
 			}
 		}
-		
+
 
 
 		/// <summary>
@@ -554,7 +578,7 @@ namespace Slug.CI
 			output.Text = GIT_COMMAND_MARKER + command + " " + cmdArguments;
 			GitCommandOutputHistory.Add(output);
 
-			IProcess process = ProcessTasks.StartProcess(command, cmdArguments, CISesion.RootDirectory, logOutput: false);
+			IProcess process = ProcessTasks.StartProcess(command, cmdArguments, CISesion.RootDirectory,logInvocation: logInvocationLogging, logOutput: logOutputLogging); 
 			process.AssertWaitForExit();
 
 			// Copy output to history.
@@ -582,7 +606,8 @@ namespace Slug.CI
 			GitCommandOutputHistory.Add(outputCmd);
 
 			//ProcessTasks.DefaultLogOutput = false;
-			IProcess process = ProcessTasks.StartProcess(command, cmdArguments, CISesion.RootDirectory,logOutput:false);
+			IProcess process = ProcessTasks.StartProcess(command, cmdArguments, CISesion.RootDirectory,logInvocation: logInvocationLogging, logOutput: logOutputLogging);
+
 			//,customLogger:GitProcessorLoggerNormal
 			process.AssertWaitForExit();
 			output = process.Output.ToList();
@@ -612,6 +637,7 @@ namespace Slug.CI
 				throw e;
 			}
 		}
+
 
 		public void GetNextVersion (bool isMainBranchBuild) {
 			Version = GitVersion.MajorMinorPatch;
@@ -734,7 +760,7 @@ namespace Slug.CI
 		/// Returns the GitVersion object
 		/// </summary>
 		public GitVersion GitVersion { get; private set; }
-		
+
 
 		/// <summary>
 		/// Executes the Git Cat-File command against a given command.
@@ -743,6 +769,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		public List<Output> ShowCommit (string commitHash) {
 			List<Output> gitOutput;
+
 			// git show --format=format:"M:slugci%ncommit: %h%nparents: %P%ncommitter: %cn%ncdate: %ct%nrefs: %d%nmsg: %s" 65a8e5
 			string gitArgs = "show --format=format:\"" +
 			                 GIT_SHOW_SLUGCI +
@@ -764,9 +791,9 @@ namespace Slug.CI
 			                 "%n" +
 			                 GIT_SHOW_MESSAGE +
 			                 " %s" +
-							 "\" " +
+			                 "\" " +
 			                 commitHash;
-			                 
+
 			ExecuteGitTryCatch("GitCatFile_OnCommit", gitArgs, out gitOutput);
 			return gitOutput;
 		}
@@ -790,10 +817,10 @@ namespace Slug.CI
 				if ( output.Text.StartsWith("*") ) continue;
 
 				string branchFound = output.Text.Trim();
-				if ((branchFound != branchName))
-					merged.Add(branchFound);
-			//	RecordBranchMerged record = new RecordBranchMerged(isChecked,branchName);
-			//	merged.Add(record);
+				if ( (branchFound != branchName) ) merged.Add(branchFound);
+
+				//	RecordBranchMerged record = new RecordBranchMerged(isChecked,branchName);
+				//	merged.Add(record);
 			}
 
 			return merged;
@@ -813,17 +840,18 @@ namespace Slug.CI
 			else
 				gitArgs = "branch -D " + branchName;
 
-				bool success = ExecuteGit(gitArgs, out gitOutput);
-				if ( !success ) {
-					// See if it is an acceptable error
-					foreach ( Output output in gitOutput ) {
-						if ( output.Text.Contains("remote ref does not exist") ) return false;
-					}
-
-					ControlFlow.Assert(true == false, "DeleteBranch Failed: " + gitOutput [0].Text);
+			bool success = ExecuteGit(gitArgs, out gitOutput);
+			if ( !success ) {
+				// See if it is an acceptable error
+				foreach ( Output output in gitOutput ) {
+					if ( output.Text.Contains("remote ref does not exist") ) return false;
 				}
-				else
-					return true;
+
+				ControlFlow.Assert(true == false, "DeleteBranch Failed: " + gitOutput [0].Text);
+			}
+			else
+				return true;
+
 			return true;
 		}
 
@@ -831,11 +859,25 @@ namespace Slug.CI
 		/// <summary>
 		/// Fetches remote and removes any local branches that were removed from the remote
 		/// </summary>
-		public void FetchPrune ()
-		{
+		public void FetchPrune () {
 			List<Output> gitOutput;
 			string gitArgs = "fetch -p";
 			ExecuteGitTryCatch("FetchPrune", gitArgs, out gitOutput);
+		}
+
+
+
+		/// <summary>
+		/// Custom logger for the GitProcessor
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="output"></param>
+		internal static void CustomLogger (OutputType type, string output) {
+			if ( type == OutputType.Err ) {
+				Logger.Error(output);
+				return;
+			}
+
 		}
 	}
 }

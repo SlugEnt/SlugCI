@@ -36,7 +36,7 @@ namespace Slug.CI.SlugBuildStages
 					foreach ( string mergedBranch in mergedBranches ) {
 						if ( mergedBranch != "main" && mergedBranch != "master" && mergedBranch != "alpha" && mergedBranch != "beta" ) {
 							try {
-								if ( !CISession.GitProcessor.DeleteBranch(mergedBranch, false) ) CISession.GitProcessor.DeleteBranch(mergedBranch, true);
+								if ( !CISession.GitProcessor.DeleteBranch(mergedBranch, true) ) CISession.GitProcessor.DeleteBranch(mergedBranch, false);
 
 							}
 							catch ( Exception e ) {

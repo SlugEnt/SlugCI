@@ -43,6 +43,8 @@ namespace Slug.CI.SlugBuildStages
 			else
 				CISession.GitProcessor.CommitSemVersionChanges(versionTag,gitTagDesc);
 
+			Logger.Success("Git Changes were committed!");
+
 			return StageCompletionStatusEnum.Success;
 		}
 

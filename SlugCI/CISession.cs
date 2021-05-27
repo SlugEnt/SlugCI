@@ -125,7 +125,7 @@ namespace Slug.CI.NukeClasses
 		/// <summary>
 		///  Level of verbosity for git Output
 		/// </summary>
-		public GitVersionVerbosity VerbosityGitVersion { get; set; }
+		public GitVersionVerbosity VerbosityGitVersion { get; set; } = GitVersionVerbosity.warn;
 
 
 		/// <summary>

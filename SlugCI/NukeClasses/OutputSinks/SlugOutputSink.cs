@@ -61,7 +61,6 @@ namespace Nuke.Common.OutputSinks
         /// <summary>
         /// Writes End of slugBuilder Summary info.
         /// </summary>
-        /// <param name="stageStats"></param>
         internal virtual void WriteSummary (ExecutionPlan plan, bool isInteractive) {
 	        Console.WriteLine();
 	        Misc.WriteFinalHeader(plan.PlanStatus);

@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Text;
-using System.Transactions;
-using Nuke.Common;
-using Nuke.Common.IO;
-using Nuke.Common.Tooling;
+﻿using Nuke.Common;
 using Semver;
 using Slug.CI.NukeClasses;
-using Slug.CI.NukeClasses;
-using Slug.CI.SlugBuildStages;
+using System;
+using System.Collections.Generic;
 
 
 namespace Slug.CI.SlugBuildStages
@@ -80,8 +71,6 @@ namespace Slug.CI.SlugBuildStages
 		/// </summary>
 		/// <returns></returns>
 		protected override StageCompletionStatusEnum ExecuteProcess () {
-			SemVersion semVersion;
-
 			GetBranchInfo();
 
 			GitBranchInfo comparisonBranch = null;
@@ -103,12 +92,14 @@ namespace Slug.CI.SlugBuildStages
 
 			// If the top commit on branch is already version tagged, then we are assuming they want to
 			// finish off later steps that might not have run successfully previously.
-			SemVersion mostCurrentSemVerOnBranch = currentBranch.LatestCommitOnBranch.GetGreatestVersionTag();
-			SemVersion zero = new SemVersion(0, 0, 0);
-			if ( mostCurrentSemVerOnBranch > zero ) {
-				CISession.WasPreviouslyCommitted = true;
-				newVersion = mostCurrentSemVerOnBranch;
-				return StageCompletionStatusEnum.Success;
+			if ( (CISession.PublishTarget == PublishTargetEnum.Production && currentBranch.Name == mainBranch.Name) || CISession.PublishTarget != PublishTargetEnum.Production ) {
+				SemVersion mostCurrentSemVerOnBranch = currentBranch.LatestCommitOnBranch.GetGreatestVersionTag();
+				SemVersion zero = new SemVersion(0, 0, 0);
+				if ( mostCurrentSemVerOnBranch > zero ) {
+					CISession.WasPreviouslyCommitted = true;
+					newVersion = mostCurrentSemVerOnBranch;
+					return StageCompletionStatusEnum.Success;
+				}
 			}
 
 
@@ -139,6 +130,8 @@ namespace Slug.CI.SlugBuildStages
 			// Store the version that should be set for the build.
 			CISession.SemVersion = newVersion;
 			
+			Logger.Success("New Version is:  " + newVersion);
+
 			return StageCompletionStatusEnum.Success;
 		}
 

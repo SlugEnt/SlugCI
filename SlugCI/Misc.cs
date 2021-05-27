@@ -66,8 +66,6 @@ namespace Slug.CI
 		/// <summary>
 		/// Writes The Final Status information
 		/// </summary>
-		/// <param name="text"></param>
-		/// <param name="parameterList"></param>
 		public static void WriteFinalHeader(StageCompletionStatusEnum status) {
 			Color color;
 			Color lineColor = Color.DarkViolet;

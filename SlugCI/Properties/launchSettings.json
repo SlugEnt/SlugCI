@@ -30,14 +30,14 @@
     },
     "DeployMain": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity gitversion:info|compile:info|calcversion:debug --skipnuget --deployto prod",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity compile:info|calcversion:debug --skipnuget --deployto prod",
       "environmentVariables": {
         "SLUGCI_DEPLOY_PROD": "C:\\temp\\deployProd"
       }
     },
     "Deploy Alpha": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity gitversion:info|compile:info|calcversion:debug --skipnuget --deployto alpha",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity compile:info|calcversion:debug --skipnuget --deployto alpha",
       "environmentVariables": {
         "SLUGCI_DEPLOY_ALPHA": "c:\\temp\\DeployAlpha"
       }
