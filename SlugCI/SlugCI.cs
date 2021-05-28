@@ -17,6 +17,7 @@ using static Nuke.Common.IO.FileSystemTasks;
 using System.Xml.XPath;
 using JetBrains.Annotations;
 using Nuke.Common.ProjectModel;
+using Nuke.Common.Utilities;
 using Semver;
 using Slug.CI;
 using Slug.CI.NukeClasses;
@@ -68,21 +69,22 @@ namespace Slug.CI
 				throw new ApplicationException("There are uncommited changes on the current branch: " + ciSession.GitProcessor.CurrentBranch +  "  Commit or discard existing changes and then try again.");
 
 			// TODO Remove this.  This is for testing only
+
 //			BuildStage_GitCleanup cleanup = new BuildStage_GitCleanup(ciSession);
 			//cleanup.Execute();
-
+/*
 			BuildStage_CalcVersion calc = new BuildStage_CalcVersion(CISession);
 			calc.Execute();
 
 			BuildStage_GitCommit gitCommit = new BuildStage_GitCommit(ciSession);
 			gitCommit.Execute();
-
+*/
 			// END TODO
 
 
 			CheckForEnvironmentVariables();
 
-			// Location Solution and set solution related variables
+			// Locate Solution and set solution related variables
 			LoadSolutionInfo();
 
 
@@ -103,6 +105,16 @@ namespace Slug.CI
 			MergeVSProjectIntoSlugCI();
 
 
+			// Store a shortcut to the projects right in CISession
+			CISession.Projects = CISession.SlugCIConfigObj.Projects;
+
+
+			// Setup Publish Results table 
+			foreach ( SlugCIProject project in ciSession.Projects ) {
+				PublishResultRecord resultRecord = new PublishResultRecord(project);
+				project.Results = resultRecord;
+				ciSession.PublishResults.Add(project.Name,resultRecord);
+			}
 
 			// Quick stats on number of Deploy targets by type
 			short deployNone = 0;
@@ -130,6 +142,9 @@ namespace Slug.CI
 		}
 
 
+		/// <summary>
+		/// Displays information about the solution, its projects, git repo, etc.
+		/// </summary>
 		public void DisplayInfo () {
 			Misc.WriteMainHeader("SlugCI / Repository Info");
 			Console.Write("    {0,-25}","Project Root:",Color.WhiteSmoke);
@@ -216,7 +231,6 @@ namespace Slug.CI
 		}
 
 
-
 		/// <summary>
 		/// Adds the Visual Studio project to the related SlugCIProject to make later looping thru projects easier...
 		/// </summary>
@@ -226,7 +240,12 @@ namespace Slug.CI
 				SlugCIProject slugCIProject = CISession.SlugCIConfigObj.GetProjectByName(x.Name);
 				if (slugCIProject == null) throw new ApplicationException("Trying to match SlugCIConfig Projects with Visual Studio Solution Projects failed.  This is unexpected... Visual Studio Project = [" + x.Name + "]");
 				slugCIProject.VSProject = x;
+
+				slugCIProject.AssemblyName = x.GetProperty("AssemblyName");
+				ControlFlow.Assert(!slugCIProject.AssemblyName.IsNullOrEmpty(),
+				                   "Unable to locate the Assembly name from the .csproj for project [" + slugCIProject.Name + "]");
 			}
+
 		}
 
 
@@ -238,7 +257,7 @@ namespace Slug.CI
 		public void Execute () {
 			SlugBuilder slugBuilder = new SlugBuilder(CISession);
 
-			slugBuilder.CopyCompiledProject(@"C:\temp\slugcitest", @"C:\temp\cideploy");
+			//slugBuilder.CopyCompiledProject(@"C:\temp\slugcitest", @"C:\temp\cideploy");
 			return;
 
 		}
@@ -257,8 +276,6 @@ namespace Slug.CI
 				ENV_SLUGCI_DEPLOY_DEV,
 				ENV_NUGET_REPO_URL,
 				ENV_NUGET_API_KEY
-				// TODO - May or may not be necessary in future
-				//"GITVERSION_EXE",		// GitVersion Tooling requires this
 			};
 
 			List<string> missingEnvironmentVariables = new List<string>();

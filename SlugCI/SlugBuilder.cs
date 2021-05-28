@@ -23,12 +23,6 @@ namespace Slug.CI
 		/// </summary>
 		private CISession CISession { get; set; }
 
-		/// <summary>
-		/// The Git Repository for the Solution
-		/// </summary>
-		public GitRepository GitRepository { get; set; }
-
-
 		private ExecutionPlan _executionPlan = new ExecutionPlan();
 
 		private GitProcessor _gitProcessor;
@@ -40,20 +34,6 @@ namespace Slug.CI
 			Misc.WriteMainHeader("SlugBuilder:: Startup");
 
 			CISession = ciSession;
-
-
-			// Temporary code
-
-				// TODO Fix this code
-
-			//	GitRepository = GitRepository.FromLocalDirectory(ciSession.RootDirectory);
-
-			// Set Path properties
-
-
-			// Load All Known Build Stages
-
-			// TODO - Uncomment
 			GitProcessorStartup();
 
 
@@ -61,6 +41,14 @@ namespace Slug.CI
 			// Pretend it was compile
 			Console.ForegroundColor = ConsoleColor.White;
 			LoadBuildStages();
+
+			// TODO Remove or comment this out, this is for speeding up testing.
+			foreach ( BuildStage stage in _executionPlan.KnownStages ) {
+			//	if ( stage.Name != BuildStageStatic.STAGE_CALCVERSION && stage.Name != BuildStageStatic.STAGE_PUBLISH ) stage.ShouldSkip = true;
+			}
+
+
+			// TODO Need to set this based upon Argument from Program.cs
 			_executionPlan.BuildExecutionPlan(BuildStageStatic.STAGE_PUBLISH);
 
 
@@ -76,45 +64,17 @@ namespace Slug.CI
 		/// Adds all the known Build stages to a list. 
 		/// </summary>
 		private void LoadBuildStages () {
-			_executionPlan.AddKnownStage(new BuildStage_GitCommit(CISession));
-
 			_executionPlan.AddKnownStage(new BuildStage_Clean(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_Restore(CISession));
+			_executionPlan.AddKnownStage(new BuildStage_CalcVersion(CISession)); 
 			_executionPlan.AddKnownStage(new BuildStage_Compile(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_Test(CISession));
-
+			_executionPlan.AddKnownStage(new BuildStage_GitCommit(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_Cover(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_Pack(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_Publish(CISession));
 		}
 
-
-		public bool Info () {
-			/*
-			Logger.Normal("Root =         " + RootDirectory.ToString());
-			Logger.Normal("Source =       " + SourceDirectory.ToString());
-			Logger.Normal("Tests:         " + TestsDirectory.ToString());
-			Logger.Normal("Output:        " + OutputDirectory);
-			Logger.Normal("Solution:      " + Solution.Path);
-
-			Logger.Normal("Build Assemnbly Dir:       " + BuildAssemblyDirectory);
-			Logger.Normal("Build Project Dir:         " + BuildProjectDirectory);
-			Logger.Normal("NugetPackageConfigFile:    " + ToolPathResolver.NuGetPackagesConfigFile);
-			//Logger.Normal("Executing Assembly Dir:    " + ToolPathResolver. .ExecutingAssemblyDirectory);
-			Logger.Normal("Nuget Assets Config File:  " + ToolPathResolver.NuGetAssetsConfigFile);
-			Logger.Normal();
-			*/
-			return true;
-		}
-
-
-
-		public bool CopyCompiledProject (string source, string destination) {
-			Misc.WriteMainHeader("SlugBuilder:: Deploy Via Copy");
-			FileSystemTasks.CopyDirectoryRecursively(source,destination);
-
-			return true;
-		}
 
 
 		/// <summary>
@@ -124,8 +84,6 @@ namespace Slug.CI
 		{
 			// Setup the GitProcessor
 			_gitProcessor = new GitProcessor(CISession);
-			// TODO - Removing GitVersion
-			//if (_gitProcessor.GitVersion == null) Logger.Error("GitProcessor:  Unable to load the GitVersion not Loaded");
 
 			// Get current branch and ensure there are no uncommitted updates.  These methods will throw if anything is out of sorts.
 			_gitProcessor.GetCurrentBranch();

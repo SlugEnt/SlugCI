@@ -16,8 +16,5 @@ namespace Slug.CI
 		public bool IsTestProject { get; set; }
 		public string Framework { get; set; }
 		public string DeployType { get; set; }
-
-
-		
 	}
 }

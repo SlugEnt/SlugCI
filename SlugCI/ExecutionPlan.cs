@@ -17,8 +17,7 @@ namespace Slug.CI
 
 		// The list of all available stages
 		private List<BuildStage> _buildStages = new List<BuildStage>();
-
-
+		
 		public StageCompletionStatusEnum PlanStatus { get; private set; }
 
 

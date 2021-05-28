@@ -18,12 +18,11 @@ namespace Slug.CI
 		/// <summary>
 		/// How deployed
 		/// </summary>
-		public string DeployMethod { get; set; }
+		public SlugCIDeployMethod DeployMethod { get; set; }
 
-		/// <summary>
-		/// Name of the Deploy
-		/// </summary>
-		public string DeployName { get; set; }
+		public bool CompileSuccess { get; set; }
+		public bool PackedSuccess { get; set; }
+		public bool PublishedSuccess { get; set; }
 
 		/// <summary>
 		/// Whether the publishing was successful
@@ -37,12 +36,10 @@ namespace Slug.CI
 		/// <param name="deployMethod">How it was deployed</param>
 		/// <param name="deployTarget">Name of the deploy target</param>
 		/// <param name="wasSuccessful">True if it completed successfully</param>
-		public PublishResultRecord(string nameOfProject, string deployMethod, string deployTarget, bool wasSuccessful = true)
+		public PublishResultRecord(SlugCIProject project)
 		{
-			NameOfProject = nameOfProject;
-			DeployMethod = deployMethod;
-			DeployName = deployTarget;
-			WasSuccessful = wasSuccessful;
+			NameOfProject = project.Name;
+			DeployMethod = project.Deploy;
 		}
 	}
 }

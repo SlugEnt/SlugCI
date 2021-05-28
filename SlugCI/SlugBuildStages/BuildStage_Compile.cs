@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Nuke.Common;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Slug.CI.NukeClasses;
@@ -17,7 +18,7 @@ namespace Slug.CI.SlugBuildStages
 		/// Constructor
 		/// </summary>
 		public BuildStage_Compile (CISession ciSession) : base(BuildStageStatic.STAGE_COMPILE, ciSession) {
-			PredecessorList.Add(BuildStageStatic.STAGE_RESTORE);
+			PredecessorList.Add(BuildStageStatic.STAGE_CALCVERSION);
 		}
 
 
@@ -30,15 +31,29 @@ namespace Slug.CI.SlugBuildStages
 			DotNetBuildSettings dotNetBuildSettings = new DotNetBuildSettings()
 			{
 				ProjectFile = CISession.Solution,
-				NoRestore = true
+				NoRestore = true,
+				PropertiesInternal = new Dictionary<string, object>(),
 			};
-			dotNetBuildSettings.SetProjectFile(CISession.Solution);
-			dotNetBuildSettings.SetFileVersion("9.4.5");
-			dotNetBuildSettings.SetVerbosity(DotNetVerbosity.Normal);
-			dotNetBuildSettings.EnableNoRestore();
 
-			IReadOnlyCollection<Output> out1 = DotNetTasks.DotNetBuild(dotNetBuildSettings);
+			dotNetBuildSettings = dotNetBuildSettings.SetProjectFile(CISession.Solution)
+			                                         .SetConfiguration(CISession.CompileConfig)
+			                                         .SetVerbosity(DotNetVerbosity.Minimal)
+			                                         .EnableNoRestore()
+			                                         .SetAssemblyVersion(CISession.SemVersion.ToString())
+			                                         .SetFileVersion(CISession.SemVersion.ToString());
 
+			IReadOnlyCollection<Output> compileOut = DotNetTasks.DotNetBuild(dotNetBuildSettings);
+			Console.WriteLine();
+			Console.WriteLine("Compilation Success:");
+			foreach ( SlugCIProject project in CISession.SlugCIConfigObj.Projects ) {
+				foreach ( Output output in compileOut ) {
+					if ( output.Text.StartsWith("  " + project.Name + " -> ") ) {
+						Logger.Success("Compile Success:  " + output.Text);
+						project.Results.CompileSuccess = true;
+						break;
+					}
+				}
+			}
 			return StageCompletionStatusEnum.Success;
 		}
 	}

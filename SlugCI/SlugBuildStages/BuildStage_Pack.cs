@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
@@ -21,7 +22,7 @@ namespace Slug.CI.SlugBuildStages
 		/// <param name="ciSession"></param>
 		public BuildStage_Pack(CISession ciSession) : base(BuildStageStatic.STAGE_PACK, ciSession)
 		{
-			PredecessorList.Add(BuildStageStatic.STAGE_TEST);
+			PredecessorList.Add(BuildStageStatic.STAGE_GITCOMMIT);
 		}
 
 
@@ -33,49 +34,40 @@ namespace Slug.CI.SlugBuildStages
 		{
 			CISession.OutputDirectory.GlobFiles("*.nupkg", "*symbols.nupkg").ForEach(DeleteFile);
 
-			DotNetPackSettings settings = new DotNetPackSettings();
-			foreach ( SlugCIProject slugCiProject in CISession.SlugCIConfigObj.Projects ) {
-				if ( slugCiProject.Deploy != SlugCIDeployMethod.Nuget ) continue;
+			DotNetPackSettings settings;// = new DotNetPackSettings()
 
-				settings.Project = slugCiProject.VSProject.Path;
-				settings.OutputDirectory = CISession.OutputDirectory;
-				settings.IncludeSymbols = true;
-				settings.NoRestore = true;
-				settings.Verbosity = DotNetVerbosity.Normal;
+			foreach ( SlugCIProject project in CISession.Projects ) {
+				if ( project.Deploy != SlugCIDeployMethod.Nuget ) continue;
+				settings = new DotNetPackSettings()
+				{
+					Project = project.VSProject.Path,
+					OutputDirectory = CISession.OutputDirectory,
+					IncludeSymbols = true,
+					NoRestore = true,
+					Verbosity = DotNetVerbosity.Minimal,
+					PropertiesInternal = new Dictionary<string, object>(),
+				};
 
-				// TODO - FIX version
-				settings.SetFileVersion("4.5.6");
+				string version = CISession.SemVersion.ToString();
+				settings = settings.SetFileVersion(version)
+				                   .SetAssemblyVersion(version)
+				                   .SetConfiguration(CISession.CompileConfig)
+				                   .SetInformationalVersion(version)
+				                   .SetVersion(version);
+
 				IReadOnlyCollection<Output> output = DotNetTasks.DotNetPack(settings);
+
+				// See if successful.
+				string searchName = project.AssemblyName + "." + CISession.SemVersion.ToString() + ".nupkg";
+				var matchingvalues =
+					output.Where(outputVal => (outputVal.Text.Contains("Successfully created package") && (outputVal.Text.Contains(searchName))));
+				if ( matchingvalues.Count() == 1 ) {
+					project.Results.PackedSuccess = true;
+				}
 			}
 
 			return StageCompletionStatusEnum.Success;
 
-
-			/* Original SlugNuke Code
-			 		                     // Build the necessary packages 
-		                     foreach ( NukeConf.Project project in CustomNukeSolutionConfig.Projects ) {
-			                     if ( project.Deploy == CustomNukeDeployMethod.Nuget ) {
-				                     string fullName = SourceDirectory / project.Name / project.Name + ".csproj";
-				                     IReadOnlyCollection<Output> output = DotNetPack(_ => _.SetProject(Solution.GetProject(fullName))
-				                                                                           .SetOutputDirectory(OutputDirectory)
-				                                                                           .SetConfiguration(Configuration)
-				                                                                           .SetIncludeSymbols(true)
-				                                                                           .SetAssemblyVersion(_gitProcessor.GitVersion.AssemblySemVer)
-				                                                                           .SetFileVersion(_gitProcessor.GitVersion.AssemblySemFileVer)
-				                                                                           .SetInformationalVersion(_gitProcessor.InformationalVersion)
-				                                                                           .SetVersion(_gitProcessor.SemVersionNugetCompatible));
-				                     foreach ( Output item in output ) {
-					                     if ( item.Text.Contains("Successfully created package") ) {
-						                     string file = item.Text.Substring(item.Text.IndexOf("'") + 1);
-						                     PublishResults.Add(new PublishResult(project.Name, project.Deploy.ToString(), file));
-					                     }
-				                     }
-			                     }
-
-		                     }
-	                     });
-
-			 */
 		}
 	}
 }

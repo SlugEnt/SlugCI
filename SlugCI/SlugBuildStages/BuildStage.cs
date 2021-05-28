@@ -36,7 +36,15 @@ namespace Slug.CI
 		public StageCompletionStatusEnum CompletionStatus { get; set; }
 
 
+		/// <summary>
+		/// Determines if the stage should be skipped or not...
+		/// </summary>
+		public bool ShouldSkip { get; set; }
 
+
+		/// <summary>
+		/// Keeps track of total runtime of this stage.
+		/// </summary>
 		private Stopwatch _stopwatch;
 
 
@@ -55,7 +63,6 @@ namespace Slug.CI
 			CompletionStatus = StageCompletionStatusEnum.NotStarted;
 			Name = name;
 			CISession = ciSession;
-			
 		}
 
 
@@ -73,6 +80,7 @@ namespace Slug.CI
 		/// </summary>
 		/// <returns></returns>
 		public long RunTimeDuration () {
+			if ( _stopwatch == null ) return 0;
 			return _stopwatch.ElapsedMilliseconds;
 		}
 
@@ -105,12 +113,21 @@ namespace Slug.CI
 
 				Misc.WriteMainHeader("SlugBuilder::  " + Name);
 
-				System.Console.WriteLine("", Color.DarkGray);
+				//System.Console.WriteLine("", Color.DarkGray);
 
 				// Set log level to std.  Let the process override if necessary.
 				Logger.LogLevel = LogLevel.Normal;
 
-				Finished(ExecuteProcess());
+
+				if ( ShouldSkip ) {
+					Console.WriteLine("Stage skipped due to skip stage setting being set.", Color.Yellow);
+					CompletionStatus = StageCompletionStatusEnum.Skipped;
+					_stopwatch.Stop();
+					return true;
+				}
+				else
+					Finished(ExecuteProcess());
+
 
 				if ( CompletionStatus >= StageCompletionStatusEnum.Warning ) return true;
 			}

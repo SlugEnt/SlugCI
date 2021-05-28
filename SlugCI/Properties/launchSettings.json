@@ -30,7 +30,7 @@
     },
     "DeployMain": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity compile:info|calcversion:debug --skipnuget --deployto prod",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity compile:info|calcversion:debug --deployto prod",
       "environmentVariables": {
         "SLUGCI_DEPLOY_PROD": "C:\\temp\\deployProd"
       }

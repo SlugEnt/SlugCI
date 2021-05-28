@@ -108,6 +108,12 @@ namespace Slug.CI.NukeClasses
 		/// </summary>
 		public SlugCIConfig SlugCIConfigObj { get; set; }
 
+
+		/// <summary>
+		/// This is just a shortcut to the Projects list contained in SlugCIConfigObj
+		/// </summary>
+		public List<SlugCIProject> Projects { get; set; }
+
 		/// <summary>
 		/// If true the SlugCIConfig file is not validated or updated with the latest changes to both SlugCI Config changes as well as solution changes to projects, such as add or deletes..
 		/// <para>Generally only used for testing purposes to provide a slight speed increase when starting</para>
@@ -180,9 +186,9 @@ namespace Slug.CI.NukeClasses
 
 
 		/// <summary>
-		/// Contains the results of the Publish Stage for each project
+		/// Contains the key results for each project.
 		/// </summary>
-		public List<PublishResultRecord> PublishResults = new List<PublishResultRecord>();
+		public Dictionary<string,PublishResultRecord> PublishResults = new Dictionary<string, PublishResultRecord>();
 
 
 		/// <summary>

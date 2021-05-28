@@ -134,14 +134,6 @@ namespace Slug.CI
 		/// <returns></returns>
 		public bool Converter()
 		{
-			// Find the Solution - Assume we are in the root folder right now.
-
-			// TODO Cleanup
-		/*	List<string> solutionFiles = SearchForSolutionFile(CISession.RootDirectory.ToString(), ".sln");
-			ControlFlow.Assert(solutionFiles.Count != 0, "Unable to find the solution file");
-			ControlFlow.Assert(solutionFiles.Count == 1, "Found more than 1 solution file under the root directory -  - We can only work with 1 solution file." + CISession.RootDirectory.ToString());
-			string solutionFile = solutionFiles[0];
-		*/
 			Logger.Normal("Solution File found:  {0}", CISession.SolutionFileName);
 
 			// A.  Proper Directory Structure
@@ -179,22 +171,6 @@ namespace Slug.CI
 			// C.  Ensure Config file is valid and up-to-date with current Class Structure
 			ProcessSlugCIConfigFile();
 
-			// D.  Copy the GitVersion.Yml file
-			// TODO Remove this code - not necessary?
-			/*
-			Assembly assembly = Assembly.GetExecutingAssembly();
-			string assemblyFile = assembly.Location;
-			string assemblyFolder = Path.GetDirectoryName(assemblyFile);
-			Logger.Info("Assembly Folder: " + assemblyFolder);
-			string src = Path.Combine(assemblyFolder, "GitVersion.yml");
-			AbsolutePath dest = CISession.RootDirectory / "GitVersion.yml";
-
-			if (!FileExists(dest))
-				File.Copy(src, dest, false);
-
-
-			// E.  Ensure GitVersion.exe environment variable exists
-			*/
 			return true;
 		}
 

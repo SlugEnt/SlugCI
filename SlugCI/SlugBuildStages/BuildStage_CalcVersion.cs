@@ -3,7 +3,8 @@ using Semver;
 using Slug.CI.NukeClasses;
 using System;
 using System.Collections.Generic;
-
+using System.Drawing;
+using Console = Colorful.Console;
 
 namespace Slug.CI.SlugBuildStages
 {
@@ -26,10 +27,13 @@ namespace Slug.CI.SlugBuildStages
 		private SemVersion newVersion = null;
 		private SemVersion mostRecentBranchTypeVersion;
 
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public BuildStage_CalcVersion (CISession ciSession) : base(BuildStageStatic.STAGE_CALCVERSION, ciSession) { ; }
+		public BuildStage_CalcVersion (CISession ciSession) : base(BuildStageStatic.STAGE_CALCVERSION, ciSession) {
+			PredecessorList.Add(BuildStageStatic.STAGE_RESTORE);
+		}
 
 
 		/// <summary>
@@ -98,6 +102,9 @@ namespace Slug.CI.SlugBuildStages
 				if ( mostCurrentSemVerOnBranch > zero ) {
 					CISession.WasPreviouslyCommitted = true;
 					newVersion = mostCurrentSemVerOnBranch;
+					CISession.SemVersion = newVersion;
+					Console.WriteLine("No changes require a version change.  Assuming this is a continuation of a prior post compile failure.",Color.Yellow);
+					Logger.Success("Existing Version is:  " + newVersion);
 					return StageCompletionStatusEnum.Success;
 				}
 			}

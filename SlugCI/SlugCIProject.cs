@@ -18,6 +18,19 @@ namespace Slug.CI
 		public string Name { get; set; }
 
 		/// <summary>
+		/// The name of the assembly from the visual studio project file
+		/// </summary>
+		[JsonIgnore]
+		public string AssemblyName { get; set; }
+
+
+		/// <summary>
+		/// The results of the build process for this project.
+		/// </summary>
+		[JsonIgnore]
+		public PublishResultRecord Results { get; set; }
+
+		/// <summary>
 		/// What method to use to deploy the project.  Can be Copy, Nuget, None
 		/// </summary>
 		public SlugCIDeployMethod Deploy { get; set; }
@@ -52,6 +65,7 @@ namespace Slug.CI
 		public SlugCIProject Copy()
 		{
 			SlugCIProject b = new SlugCIProject();
+			b.AssemblyName = AssemblyName;
 			b.Name = Name;
 			b.Deploy = Deploy;
 			b.Framework = Framework;

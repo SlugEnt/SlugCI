@@ -39,7 +39,7 @@ namespace Slug.CI.SlugBuildStages
 				ProjectFile = CISession.Solution,
 				NoRestore = true,
 				NoBuild = true,
-				Verbosity = DotNetVerbosity.Normal,
+				Verbosity = DotNetVerbosity.Minimal,
 				ProcessLogOutput = true,
 				ResultsDirectory = CISession.TestOutputPath,
 				ProcessArgumentConfigurator = arguments => arguments.Add("/p:CollectCoverage={0}", true)

@@ -7,6 +7,7 @@ using Nuke.Common.IO;
 using Slug.CI.NukeClasses;
 using Slug.CI.NukeClasses;
 using Slug.CI.SlugBuildStages;
+using Console = Colorful.Console;
 
 
 namespace Slug.CI.SlugBuildStages
@@ -20,7 +21,9 @@ namespace Slug.CI.SlugBuildStages
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public BuildStage_GitCommit(CISession ciSession) : base(BuildStageStatic.STAGE_GITCOMMIT, ciSession) { }
+		public BuildStage_GitCommit (CISession ciSession) : base(BuildStageStatic.STAGE_GITCOMMIT, ciSession) {
+			PredecessorList.Add(BuildStageStatic.STAGE_TEST);
+		}
 
 
 		/// <summary>
@@ -30,7 +33,7 @@ namespace Slug.CI.SlugBuildStages
 		protected override StageCompletionStatusEnum ExecuteProcess()
 		{
 			if ( CISession.WasPreviouslyCommitted ) {
-				Logger.Warn("Skipping " + Name + " stage.  Branch was previously committed and versioned.");
+				Console.WriteLine("Skipping " + Name + " stage.  Branch was previously committed and versioned.", Color.Yellow);
 				return StageCompletionStatusEnum.Skipped;
 			}
 
