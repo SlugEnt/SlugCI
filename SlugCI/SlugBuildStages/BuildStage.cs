@@ -102,6 +102,31 @@ namespace Slug.CI
 		protected abstract StageCompletionStatusEnum ExecuteProcess ();
 
 
+		protected void SetInprocessStageStatus (StageCompletionStatusEnum status) {
+			if ( CompletionStatus == StageCompletionStatusEnum.NotStarted ) {
+				CompletionStatus = status;
+				return;
+			}
+
+			if ( CompletionStatus == status ) return;
+
+			// If the current status is warning or error and the new status is good, leave at the current status
+			if ( CompletionStatus < StageCompletionStatusEnum.Skipped && status > StageCompletionStatusEnum.Skipped ) return;
+
+			if ( status == StageCompletionStatusEnum.Failure ) {
+				CompletionStatus = status;
+				return;
+			}
+
+			// Warning does not override errors.
+			if ( status == StageCompletionStatusEnum.Warning && CompletionStatus <= status ) return;
+
+			// Catchall
+			CompletionStatus = status;
+
+		} 
+
+
 		/// <summary>
 		/// Runs the given Build Stage
 		/// </summary>

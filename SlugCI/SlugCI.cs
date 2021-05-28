@@ -45,6 +45,10 @@ namespace Slug.CI
 		public CISession CISession { get; private set; }
 
 
+		/// <summary>
+		/// List of Environment Variables that are missing
+		/// </summary>
+		private List<string> MissingEnvironmentVariables { get; set; }
 
 
 		/// <summary>
@@ -182,10 +186,17 @@ namespace Slug.CI
 			Console.Write("    {0,-25}", "Git CommandLine Version:", Color.WhiteSmoke);
 			Console.WriteLine(CISession.GitProcessor.GitCommandVersion, Color.Cyan);
 
-
-			//Console.Write("    {0,-25}", "Current Branch Name:", Color.WhiteSmoke);
-			//Console.WriteLine(CISession.GitProcessor., Color.Cyan);
-
+			Console.WriteLine("-------------------------------------------------------------");
+			Console.WriteLine("                  Environment Variables");
+			Console.WriteLine("-------------------------------------------------------------");
+			Console.WriteLine("   Required: ", Color.Green);
+			foreach ( KeyValuePair<string, string> envVar in CISession.EnvironmentVariables) {
+				Console.WriteLine("   {0,-35}  |  {1,-60}", envVar.Key, envVar.Value);
+			}
+			Console.WriteLine("  Missing Required:", Color.Red);
+			foreach ( string envVar in MissingEnvironmentVariables ) {
+				Console.WriteLine("   {0,-35", envVar);
+			}
 		}
 
 
@@ -268,7 +279,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		private bool CheckForEnvironmentVariables()
 		{
-			List<string> requiredEnvironmentVariables = new List<string>()
+			List<string> requiredEnvironmentVariables  = new List<string>()
 			{
 				ENV_SLUGCI_DEPLOY_PROD,
 				ENV_SLUGCI_DEPLOY_BETA,
@@ -278,12 +289,12 @@ namespace Slug.CI
 				ENV_NUGET_API_KEY
 			};
 
-			List<string> missingEnvironmentVariables = new List<string>();
+			MissingEnvironmentVariables = new List<string>();
 
 			foreach (string name in requiredEnvironmentVariables)
 			{
 				string result = Environment.GetEnvironmentVariable(name);
-				if (result == null) missingEnvironmentVariables.Add(name);
+				if (result == null) MissingEnvironmentVariables.Add(name);
 				else {
 					CISession.EnvironmentVariables.Add(name,result);
 
@@ -297,14 +308,14 @@ namespace Slug.CI
 				}
 			}
 
-			if (missingEnvironmentVariables.Count == 0)
+			if (MissingEnvironmentVariables.Count == 0)
 			{
 				Console.WriteLine("All required environment variables found", Color.Green);
 				return true;
 			}
 
 			Console.WriteLine("Some environment variables are missing.  These may or may not be required.", Color.Yellow);
-			foreach (string item in missingEnvironmentVariables) Console.WriteLine("  -->  " + item);
+			foreach (string item in MissingEnvironmentVariables) Console.WriteLine("  -->  " + item);
 			return false;
 		}
 

@@ -50,13 +50,9 @@ namespace Slug.CI.SlugBuildStages
 			}
 			if (!CISession.SkipNuget)
 				Publish_Nuget();
-			
 
-			// TODO..
-				// Now process Copy Outputs.
-				//PublishCopiedFolders();
-				Publish_Copy();
-				Logger.Success("Version: " + CISession.SemVersion.ToString() + " fully committed and deployed to target location.");
+			Publish_Copy();
+			Logger.Success("Version: " + CISession.SemVersion.ToString() + " fully committed and deployed to target location.");
 			
 
 			return StageCompletionStatusEnum.Success;
@@ -99,6 +95,7 @@ namespace Slug.CI.SlugBuildStages
 			{
 				if (nugetPackage.ToString().EndsWith("symbols.nupkg")) continue;
 				bool pushedSuccessfully = false;
+				StageCompletionStatusEnum stepStatus = StageCompletionStatusEnum.NotStarted;
 
 				try
 				{
@@ -109,8 +106,8 @@ namespace Slug.CI.SlugBuildStages
 						// Look for skipped message.
 						foreach (Output outputLine in nugetOutput)
 						{
-							if (outputLine.Text.Contains("already exists at feed"))
-							{
+							if (outputLine.Text.Contains("already exists at feed")) {
+								stepStatus = StageCompletionStatusEnum.Warning;
 								string msg = @"A nuget package  <" +
 								             Path.GetFileName(nugetPackage) +
 								             ">  with this name and version already exists. " +
@@ -119,13 +116,17 @@ namespace Slug.CI.SlugBuildStages
 								             "Otherwise, if this should have been a new update, then you will need to make another commit and re-publish";
 								Logger.Warn(msg);
 							}
-							else if (outputLine.Text.Contains("package was pushed")) { pushedSuccessfully = true; }
+							else if ( outputLine.Text.Contains("package was pushed") ) {
+								pushedSuccessfully = true;
+								stepStatus = StageCompletionStatusEnum.Success;
+							}
 						}
 					}
 				}
 				catch (ProcessException pe)
 				{
-					if (!CISession.NugetRepoURL.Contains("nuget.org"))
+					stepStatus = StageCompletionStatusEnum.Failure;
+					if ( !CISession.NugetRepoURL.Contains("nuget.org") ) 
 						Logger.Warn(
 							"The nuget Push process threw an error.  Since you are using a service other than Nuget this may be a service outage with the site or it might mean the version of the library you are pushing already exists.  You will need to perform a manual check to determine which it is.");
 					else
@@ -144,9 +145,10 @@ namespace Slug.CI.SlugBuildStages
 							break;
 						}
 					}
-					//CISession.PublishResults.Add(new PublishResultRecord("", "Nuget", nugetPackage));
 				}
-					
+
+				// Set stage status based upon Step Status
+				SetInprocessStageStatus(stepStatus);
 			}
 		}
 	}

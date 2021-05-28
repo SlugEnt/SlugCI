@@ -25,16 +25,17 @@ namespace Slug.CI
 		/// </summary>
 		Aborted = 40,
 
-		/// <summary>
-		/// Stage was unable to successfully complete.
-		/// </summary>
-		Failure = 50,
-
 
 		/// <summary>
 		/// Stage completed, but it might not have done so successfully.
 		/// </summary>
-		Warning = 100,
+		Warning = 50,
+
+
+		/// <summary>
+		/// Stage was unable to successfully complete.
+		/// </summary>
+		Failure = 100,
 
 
 		/// <summary>
