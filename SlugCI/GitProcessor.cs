@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
 using Nuke.Common;
-using Nuke.Common.IO;
 using Nuke.Common.Tooling;
 using Semver;
 using Slug.CI.NukeClasses;
@@ -16,7 +11,8 @@ using Console = Colorful.Console;
 
 [assembly: InternalsVisibleTo("Test_SlugCI")]
 
-namespace Slug.CI {
+namespace Slug.CI
+{
 
 	/// <summary>
 	/// Identified Remotes

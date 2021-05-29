@@ -1,27 +1,13 @@
-﻿using System;
+﻿using Nuke.Common;
+using Nuke.Common.IO;
+using Nuke.Common.ProjectModel;
+using Nuke.Common.Utilities;
+using Slug.CI.NukeClasses;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Nuke.Common;
-using Nuke.Common.IO;
-using Nuke.Common.Tooling;
-using static Nuke.Common.Tools.DotNet.DotNetTasks;
-using static Nuke.Common.IO.FileSystemTasks;
-using System.Xml.XPath;
-using JetBrains.Annotations;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Utilities;
-using Semver;
-using Slug.CI;
-using Slug.CI.NukeClasses;
-using Slug.CI.SlugBuildStages;
 using Console = Colorful.Console;
 
 

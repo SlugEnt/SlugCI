@@ -1,23 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using Nuke.Common;
+﻿using Nuke.Common;
 using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
-
-//using Nuke.Common.Tools.DotNet;
-//using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.ReportGenerator;
 using Nuke.Common.Utilities;
-using Nuke.Common.Utilities.Collections;
 using Slug.CI.NukeClasses;
-using Slug.CI.SlugBuildStages;
-using static Nuke.Common.IO.FileSystemTasks;
+using System.Collections.Generic;
+using System.IO;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 namespace Slug.CI.SlugBuildStages

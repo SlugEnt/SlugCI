@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
-using JetBrains.Annotations;
 using Nuke.Common;
 using static Nuke.Common.IO.FileSystemTasks;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
-using Semver;
 
 namespace Slug.CI.NukeClasses
 {

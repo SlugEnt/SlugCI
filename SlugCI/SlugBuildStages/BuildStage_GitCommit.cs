@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
+﻿using System.Drawing;
 using Nuke.Common;
-using Nuke.Common.IO;
 using Slug.CI.NukeClasses;
-using Slug.CI.NukeClasses;
-using Slug.CI.SlugBuildStages;
 using Console = Colorful.Console;
 
 
