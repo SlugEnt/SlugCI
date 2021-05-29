@@ -56,17 +56,42 @@ namespace Slug.CI.SlugBuildStages
 
 				project.Results.PublishedSuccess = false;
 
-				// Convert the Assembly name into folders...
-				string assemblyName = project.AssemblyName;
-				string assemblyAsFolders = assemblyName.Replace('.', '\\');
-				AbsolutePath destFolder = CISession.DeployCopyPath / assemblyAsFolders / CISession.VersionInfo.SemVersionAsString;
+				AbsolutePath destFolder = BuildDestinationFolderLayout(project);
 
 				AbsolutePath srcFolder = project.VSProject.Directory / "bin" / CISession.CompileConfig / project.Framework;
 				FileSystemTasks.CopyDirectoryRecursively(srcFolder,destFolder,DirectoryExistsPolicy.Merge,FileExistsPolicy.OverwriteIfNewer);
-				Logger.Success("Copied:  " + assemblyName + " to Deployment folder: " + destFolder);
+				Logger.Success("Copied:  " + project.Name + " to Deployment folder: " + destFolder);
 				project.Results.PublishedSuccess = true;
 			}
 		}
+
+
+		/// <summary>
+		/// Builds the Destination folder path based upon the settings in the config file.
+		/// </summary>
+		/// <param name="project"></param>
+		/// <returns></returns>
+		private AbsolutePath BuildDestinationFolderLayout (SlugCIProject project) {
+			string versionFolder = "";
+			if ( CISession.SlugCIConfigObj.DeployToVersionedFolder ) {
+				if ( CISession.SlugCIConfigObj.DeployFolderUsesSemVer ) versionFolder = CISession.VersionInfo.SemVersionAsString;
+				else versionFolder = CISession.VersionInfo.SemVersion.Major.ToString() + "." +
+					CISession.VersionInfo.SemVersion.Minor.ToString() + "." + 
+					CISession.VersionInfo.SemVersion.Patch.ToString();
+			}
+			string projFolder = project.Name;
+
+			// Now calculate main project folder name
+			if ( CISession.SlugCIConfigObj.DeployToAssemblyFolders ) {
+				string assemblyName = project.AssemblyName;
+				projFolder = assemblyName.Replace('.', '\\');
+			}
+			
+			// Build Path
+			AbsolutePath destFolder = CISession.DeployCopyPath / projFolder / versionFolder;
+			return destFolder;
+		}
+
 
 
 		/// <summary>

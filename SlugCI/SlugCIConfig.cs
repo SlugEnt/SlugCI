@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Drawing;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.VisualBasic.CompilerServices;
-using Nuke.Common.ProjectModel;
+
 
 namespace Slug.CI {
 	/// <summary>

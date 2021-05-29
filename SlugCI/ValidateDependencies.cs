@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.CommandLine.Rendering;
-using System.Drawing;
-using System.Text;
-using Newtonsoft.Json;
-using Nuke.Common.Tooling;
+﻿using System.Collections.Generic;
 using Slug.CI.NukeClasses;
-using YamlDotNet.Serialization.Schemas;
-using Console = Colorful.Console;
 
 
 namespace Slug.CI

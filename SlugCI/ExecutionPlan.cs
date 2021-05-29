@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.CommandLine.Rendering;
-using System.Drawing;
-using System.Text;
 using Nuke.Common;
 
 namespace Slug.CI

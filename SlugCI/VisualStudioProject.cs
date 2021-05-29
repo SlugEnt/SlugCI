@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Nuke.Common.IO;
+﻿using Nuke.Common.IO;
 
 namespace Slug.CI
 {
