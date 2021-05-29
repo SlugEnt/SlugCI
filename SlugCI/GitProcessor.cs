@@ -507,7 +507,7 @@ namespace Slug.CI {
 					gitArgs = "checkout " + MainBranchName;
 					if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitMainVersionChanges:::  .Git Command failed:  git " + gitArgs);
 
-					gitArgs = string.Format("merge {0} --no-ff --no-edit -m \"Merging Branch: {0}   |  {1}\"", CurrentBranch, CISesion.SemVersion);
+					gitArgs = string.Format("merge {0} --no-ff --no-edit -m \"Merging Branch: {0}   |  {1}\"", CurrentBranch, CISesion.VersionInfo.SemVersion);
 					if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitMainVersionChanges:::  .Git Command failed:  git " + gitArgs);
 				}
 
@@ -650,9 +650,12 @@ namespace Slug.CI {
 			return 0;
 		}
 
-
+		/*
+		 * This is unused, but there is potential that we might need it one day, I have left the code
+		 * in on purpose...
+		 *
 		public List<Remotes> FetchRemotes () {
-			// TODO Implement this.  Need to determine what the remote origin is.
+			
 			throw new NotImplementedException();
 
 			List<Output> gitOutput;
@@ -671,7 +674,7 @@ namespace Slug.CI {
 			else
 				ControlFlow.Assert(true == false, "Retrieving Git --Version returned an invalid value of - " + gitOutput [0].Text);
 		}
-
+		*/
 
 		/// <summary>
 		/// Prints the history of the Git commands to the console.

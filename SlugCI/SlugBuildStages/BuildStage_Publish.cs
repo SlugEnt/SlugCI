@@ -52,7 +52,7 @@ namespace Slug.CI.SlugBuildStages
 				Publish_Nuget();
 
 			Publish_Copy();
-			Logger.Success("Version: " + CISession.SemVersion.ToString() + " fully committed and deployed to target location.");
+			Logger.Success("Version: " + CISession.VersionInfo.SemVersionAsString + " fully committed and deployed to target location.");
 			
 
 			return StageCompletionStatusEnum.Success;
@@ -66,10 +66,12 @@ namespace Slug.CI.SlugBuildStages
 			foreach (SlugCIProject project in CISession.Projects) {
 				if ( project.Deploy != SlugCIDeployMethod.Copy ) continue;
 
+				project.Results.PublishedSuccess = false;
+
 				// Convert the Assembly name into folders...
 				string assemblyName = project.AssemblyName;
 				string assemblyAsFolders = assemblyName.Replace('.', '\\');
-				AbsolutePath destFolder = CISession.DeployCopyPath / assemblyAsFolders / CISession.SemVersion.ToString();
+				AbsolutePath destFolder = CISession.DeployCopyPath / assemblyAsFolders / CISession.VersionInfo.SemVersionAsString;
 
 				AbsolutePath srcFolder = project.VSProject.Directory / "bin" / CISession.CompileConfig / project.Framework;
 				FileSystemTasks.CopyDirectoryRecursively(srcFolder,destFolder,DirectoryExistsPolicy.Merge,FileExistsPolicy.OverwriteIfNewer);
@@ -137,7 +139,7 @@ namespace Slug.CI.SlugBuildStages
 					string fileName = Path.GetFileName(nugetPackage);
 					fileName = fileName.TrimEnd(".symbols.nupkg");
 					fileName = fileName.TrimEnd(".nupkg");
-					fileName = fileName.TrimEnd("." + CISession.SemVersion.ToString());
+					fileName = fileName.TrimEnd("." + CISession.VersionInfo.SemVersionAsString);
 					// Loop thru projects looking for that assembly name
 					foreach ( SlugCIProject project in CISession.Projects ) {
 						if ( project.AssemblyName == fileName ) {

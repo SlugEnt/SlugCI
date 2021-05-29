@@ -39,8 +39,8 @@ namespace Slug.CI.SlugBuildStages
 			                                         .SetConfiguration(CISession.CompileConfig)
 			                                         .SetVerbosity(DotNetVerbosity.Minimal)
 			                                         .EnableNoRestore()
-			                                         .SetAssemblyVersion(CISession.SemVersion.ToString())
-			                                         .SetFileVersion(CISession.SemVersion.ToString());
+			                                         .SetAssemblyVersion(CISession.VersionInfo.AssemblyVersion)
+			                                         .SetFileVersion(CISession.VersionInfo.FileVersion);
 
 			IReadOnlyCollection<Output> compileOut = DotNetTasks.DotNetBuild(dotNetBuildSettings);
 			Console.WriteLine();

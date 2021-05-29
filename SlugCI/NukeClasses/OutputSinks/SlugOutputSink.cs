@@ -17,6 +17,7 @@ using Nuke.Common.Tools.GitHub;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
 using Slug.CI;
+using Slug.CI.NukeClasses;
 using Console = Colorful.Console;
 
 // MODIFIED:  Significant Modifications to this code.
@@ -24,8 +25,10 @@ using Console = Colorful.Console;
 namespace Nuke.Common.OutputSinks
 {
     [PublicAPI]
-    public abstract class SlugOutputSink
-    {
+    public abstract class SlugOutputSink {
+	    private const string ERR_LINE = "********************************** ERROR ****************************************";
+
+
         public static SlugOutputSink Default
         {
             get
@@ -61,9 +64,9 @@ namespace Nuke.Common.OutputSinks
         /// <summary>
         /// Writes End of slugBuilder Summary info.
         /// </summary>
-        internal virtual void WriteSummary (ExecutionPlan plan, bool isInteractive) {
+        internal virtual void WriteSummary (ExecutionPlan plan, bool isInteractive, CISession ciSession) {
 	        Console.WriteLine();
-	        Misc.WriteFinalHeader(plan.PlanStatus);
+	        Misc.WriteFinalHeader(plan.PlanStatus,ciSession);
 
 	        if ( !isInteractive ) {
 		        if ( SevereMessages.Count > 0 ) {
@@ -109,6 +112,17 @@ namespace Nuke.Common.OutputSinks
         }
 
 
+
+        // FX Builds the duration from the Runtime
+        static string GetDuration (long duration) {
+	        long seconds = duration / 1000;
+	        if ( seconds < 1 )
+		        return "< 1 second";
+	        else
+		        return seconds.ToString();
+        }
+
+
         /// <summary>
         /// Writes the Summary of the Slug Build Process
         /// </summary>
@@ -136,14 +150,15 @@ namespace Nuke.Common.OutputSinks
                 => target.CompletionStatus == StageCompletionStatusEnum.Success ||
                     target.CompletionStatus == StageCompletionStatusEnum.Failure ||
 					target.CompletionStatus == StageCompletionStatusEnum.Warning ||
-                    target.CompletionStatus == StageCompletionStatusEnum.Warning
+                    target.CompletionStatus == StageCompletionStatusEnum.InProcess ||
+                    target.CompletionStatus == StageCompletionStatusEnum.Aborted
 	                ? GetDuration(target.RunTimeDuration())
                     : string.Empty;
 
 
             // FX Builds the duration from the Runtime
-            static string GetDuration(long duration)
-                => $"{(long) (duration / 1000)}".Replace("0", "< 1sec");
+        //    static string GetDuration(long duration)
+         //       => $"{(long) (duration / 1000)}".Replace("0", "< 1sec");
 
 
             /// Begin writing table
@@ -170,8 +185,13 @@ namespace Nuke.Common.OutputSinks
                     case StageCompletionStatusEnum.Failure:
                         WriteError(line);
                         break;
+                    case StageCompletionStatusEnum.Warning: WriteWarning(line);
+                        break;
+                    case StageCompletionStatusEnum.NotStarted:
+                        WriteWarning(line);
+                        break;
                     default:
-                        throw new NotSupportedException(stageStat.CompletionStatus.ToString());
+	                    throw new NotSupportedException(stageStat.CompletionStatus.ToString());
                 }
             }
 
@@ -216,7 +236,8 @@ namespace Nuke.Common.OutputSinks
             ReportError(text, details);
             if ( EnableWriteErrors ) {
 	            Console.WriteLine();
-	            WriteError("-->(ERROR):  " + text, details);
+	            string errMsg = ERR_LINE + Environment.NewLine + "-->(Error):  " + text + Environment.NewLine + ERR_LINE + Environment.NewLine;
+	            WriteError(errMsg, details);
             }
         }
 

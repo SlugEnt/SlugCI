@@ -102,7 +102,8 @@ namespace Slug.CI.SlugBuildStages
 				if ( mostCurrentSemVerOnBranch > zero ) {
 					CISession.WasPreviouslyCommitted = true;
 					newVersion = mostCurrentSemVerOnBranch;
-					CISession.SemVersion = newVersion;
+					CISession.VersionInfo = new VersionInfo(newVersion, currentBranch.LatestCommitOnBranch.CommitHash);
+					//CISession.SemVersion = newVersion;
 					Console.WriteLine("No changes require a version change.  Assuming this is a continuation of a prior post compile failure.",Color.Yellow);
 					Logger.Success("Existing Version is:  " + newVersion);
 					return StageCompletionStatusEnum.Success;
@@ -135,7 +136,8 @@ namespace Slug.CI.SlugBuildStages
 				throw new ApplicationException("Publish Target of [" + CISession.PublishTarget.ToString() + "]  has no implemented functionality");
 
 			// Store the version that should be set for the build.
-			CISession.SemVersion = newVersion;
+			CISession.VersionInfo = new VersionInfo(newVersion, currentBranch.LatestCommitOnBranch.CommitHash);
+			//CISession.SemVersion = newVersion;
 			
 			Logger.Success("New Version is:  " + newVersion);
 

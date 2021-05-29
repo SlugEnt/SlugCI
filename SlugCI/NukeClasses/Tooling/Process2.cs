@@ -49,8 +49,6 @@ namespace Nuke.Common.Tooling
 
         public bool WaitForExit()
         {
-            // TODO: we are assuming that this method is called directly after process creation
-            // use _process.StartTime
             var hasExited = _process.WaitForExit(_timeout ?? -1);
             if (!hasExited)
                 _process.Kill();

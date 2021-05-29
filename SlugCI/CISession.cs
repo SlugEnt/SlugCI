@@ -211,11 +211,16 @@ namespace Slug.CI.NukeClasses
 		}
 
 			
+		// TODO CLeanup
 		/// <summary>
 		/// The semantic version that will be set during this run!
 		/// </summary>
-		public SemVersion SemVersion { get; set; }
+		//public SemVersion SemVersion { get; set; }
 
+		/// <summary>
+		/// All variants of the version of the given build.
+		/// </summary>
+		public VersionInfo VersionInfo { get; set; }
 
 		/// <summary>
 		/// Indicates the branch has had no changes to it, so process, but do not bump version

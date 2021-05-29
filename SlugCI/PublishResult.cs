@@ -20,9 +20,9 @@ namespace Slug.CI
 		/// </summary>
 		public SlugCIDeployMethod DeployMethod { get; set; }
 
-		public bool CompileSuccess { get; set; }
-		public bool PackedSuccess { get; set; }
-		public bool PublishedSuccess { get; set; }
+		public bool? CompileSuccess { get; set; } = null;
+		public bool? PackedSuccess { get; set; } = null;
+		public bool? PublishedSuccess { get; set; } = null;
 
 		/// <summary>
 		/// Whether the publishing was successful

@@ -12,7 +12,7 @@ using Nuke.Common.Utilities.Collections;
 /*
 namespace Nuke.Common.IO
 {
-    // TODO: document
+    
     [PublicAPI]
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public class FileGlobbingAttribute : FileSystemGlobbingAttributeBase
@@ -23,7 +23,7 @@ namespace Nuke.Common.IO
         }
     }
 
-    // TODO: document
+    
     [PublicAPI]
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
     public class DirectoryGlobbingAttribute : FileSystemGlobbingAttributeBase

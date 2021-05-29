@@ -1,18 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.CommandLine.Rendering;
-using System.Diagnostics;
-using System.Text;
-using Nuke.Common;
-using Nuke.Common.Git;
-using Nuke.Common.IO;
-using Nuke.Common.OutputSinks;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.ReportGenerator;
+﻿using Nuke.Common;
 using Slug.CI.NukeClasses;
 using Slug.CI.SlugBuildStages;
+using System;
 
 namespace Slug.CI
 {
@@ -55,7 +44,9 @@ namespace Slug.CI
 			// Anything less than skipped indicates an error situation.
 			StageCompletionStatusEnum planStatus = _executionPlan.Execute();
 
-			Logger.OutputSink.WriteSummary(_executionPlan, CISession.IsInteractiveRun);
+			Logger.OutputSink.WriteSummary(_executionPlan, CISession.IsInteractiveRun,ciSession);
+
+
 
 		}
 

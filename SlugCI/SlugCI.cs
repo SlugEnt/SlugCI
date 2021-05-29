@@ -195,7 +195,7 @@ namespace Slug.CI
 			}
 			Console.WriteLine("  Missing Required:", Color.Red);
 			foreach ( string envVar in MissingEnvironmentVariables ) {
-				Console.WriteLine("   {0,-35", envVar);
+				Console.WriteLine("   {0,-35}", envVar);
 			}
 		}
 
@@ -267,6 +267,8 @@ namespace Slug.CI
 		/// </summary>
 		public void Execute () {
 			SlugBuilder slugBuilder = new SlugBuilder(CISession);
+
+
 
 			//slugBuilder.CopyCompiledProject(@"C:\temp\slugcitest", @"C:\temp\cideploy");
 			return;

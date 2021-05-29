@@ -48,22 +48,26 @@ namespace Slug.CI.SlugBuildStages
 					PropertiesInternal = new Dictionary<string, object>(),
 				};
 
-				string version = CISession.SemVersion.ToString();
-				settings = settings.SetFileVersion(version)
-				                   .SetAssemblyVersion(version)
+				string version = CISession.VersionInfo.SemVersionAsString;
+				settings = settings.SetFileVersion(CISession.VersionInfo.FileVersion)
+				                   .SetAssemblyVersion(CISession.VersionInfo.AssemblyVersion)
 				                   .SetConfiguration(CISession.CompileConfig)
-				                   .SetInformationalVersion(version)
-				                   .SetVersion(version);
+				                   .SetInformationalVersion(CISession.VersionInfo.InformationalVersion)
+				                   .SetVersion(CISession.VersionInfo.SemVersionAsString);
 
 				IReadOnlyCollection<Output> output = DotNetTasks.DotNetPack(settings);
 
 				// See if successful.
-				string searchName = project.AssemblyName + "." + CISession.SemVersion.ToString() + ".nupkg";
+				string searchName = project.AssemblyName + "." + CISession.VersionInfo.SemVersionAsString + ".nupkg";
 				var matchingvalues =
 					output.Where(outputVal => (outputVal.Text.Contains("Successfully created package") && (outputVal.Text.Contains(searchName))));
 				if ( matchingvalues.Count() == 1 ) {
 					project.Results.PackedSuccess = true;
 				}
+				else
+					project.Results.PackedSuccess = false;
+				// We set published to false here, as we can't really do it in the publish step
+				project.Results.PublishedSuccess = false;
 			}
 
 			return StageCompletionStatusEnum.Success;

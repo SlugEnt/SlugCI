@@ -38,8 +38,8 @@ namespace Slug.CI.SlugBuildStages
 			}
 
 			// Set Commit tag and description
-			string versionTag = "Ver" + CISession.SemVersion;
-			string gitTagDesc = "Deployed Version:  " + PrettyPrintBranchName(CISession.GitProcessor.CurrentBranch) + "  |  " + CISession.SemVersion;
+			string versionTag = "Ver" + CISession.VersionInfo.SemVersion;
+			string gitTagDesc = "Deployed Version:  " + PrettyPrintBranchName(CISession.GitProcessor.CurrentBranch) + "  |  " + CISession.VersionInfo.SemVersion;
 
 			if (CISession.PublishTarget == PublishTargetEnum.Production)
 				CISession.GitProcessor.CommitMainVersionChanges(versionTag,gitTagDesc);

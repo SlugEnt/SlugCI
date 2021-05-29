@@ -37,7 +37,7 @@
     },
     "Deploy Alpha": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity compile:info|calcversion:debug --skipnuget --deployto alpha",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --faststart  false --verbosity compile:info|calcversion:debug --deployto alpha",
       "environmentVariables": {
         "SLUGCI_DEPLOY_ALPHA": "c:\\temp\\DeployAlpha"
       }

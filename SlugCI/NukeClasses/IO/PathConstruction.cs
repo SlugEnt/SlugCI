@@ -95,7 +95,6 @@ namespace Nuke.Common.IO
             return IsDescendantPath(basePath, destinationPath);
         }
 
-        // TODO: check usages
         [Pure]
         public static string GetRelativePath(string basePath, string destinationPath, bool normalize = true)
         {
