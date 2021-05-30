@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
-using Nuke.Common;
+﻿using System.Collections.Generic;
 using Nuke.Common.IO;
 using Slug.CI.NukeClasses;
-using Slug.CI.NukeClasses;
-using Slug.CI.SlugBuildStages;
 
 
 namespace Slug.CI.SlugBuildStages

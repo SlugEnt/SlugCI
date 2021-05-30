@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using Slug.CI.NukeClasses;
+using Console = Colorful.Console;
 
 namespace Slug.CI
 {
@@ -38,6 +40,10 @@ namespace Slug.CI
 		                       bool info = false) {
 			try {
 				Misc.WriteAppHeader();
+
+				// We process thru defaults, at the end if interactive is on, then we
+				// prompt user for changes / confirmation
+
 				CISession ciSession = new CISession();
 
 				// If no RootDir specified, then set to current directory.
@@ -45,7 +51,6 @@ namespace Slug.CI
 					ciSession.RootDirectory = (AbsolutePath) Directory.GetCurrentDirectory();
 				else
 					ciSession.RootDirectory = (AbsolutePath) rootdir;
-
 
 
 				// Determine Deployment Target
@@ -58,7 +63,6 @@ namespace Slug.CI
 					"prod" => PublishTargetEnum.Production,
 					_ => PublishTargetEnum.Development,
 				};
-
 
 
 				// Set Compile Configuration.  If not specified, then we base it upon PublishTarget.  This ensure production does not have Debug code, unless specifically requested.
@@ -87,13 +91,22 @@ namespace Slug.CI
 				// Skip Nuget
 				ciSession.SkipNuget = skipnuget;
 
+
 				// Perform Validation 
 				ValidateDependencies validation = new ValidateDependencies(ciSession);
 				if (!validation.Validate()) throw new ApplicationException("One or more required features is missing from this pc.");
 
 
+				// Interactive mode....
+				if (interactive)
+					UserPrompting(ciSession);
+
+
 				// Create the SlugCI which is main processing class.
 				SlugCI slugCI = new SlugCI(ciSession);
+
+				if(interactive)
+					Menu(ciSession, slugCI);
 
 
 				// If user wanted info then display it and exit.
@@ -116,6 +129,215 @@ namespace Slug.CI
 		}
 
 
+		/// <summary>
+		/// Prompt user for information and confirm...
+		/// </summary>
+		private static bool UserPrompting (CISession ciSession) {
+			Console.Clear();
+
+			bool keepLooping = true;
+			while ( keepLooping ) {
+				PromptForDeployTarget(ciSession);
+				PromptForConfiguration(ciSession);
+
+
+				return true;
+			}
+
+			return true;
+		}
+
+
+		private static bool Menu (CISession ciSession, SlugCI slugCi) {
+			bool keepLooping = true;
+			while (keepLooping) {
+				Console.WriteLine(Environment.NewLine);
+				Color lineColor = Color.WhiteSmoke;
+				ConsoleKey defaultChoice = ConsoleKey.Enter;
+
+				Misc.WriteMainHeader("SlugCI Interactive Menu");
+
+				Console.WriteLine(" (I)  Information about Project", Color.Yellow);
+				Console.WriteLine();
+				Console.WriteLine(" {0,-25}  |  {1,-30}", "Target Deploy", ciSession.PublishTarget.ToString());
+				Console.WriteLine(" {0,-25}  |  {1,-30}", "Compile Configuration", ciSession.CompileConfig);
+				Console.WriteLine();
+				Console.WriteLine("Press Enter to start the Build Process");
+
+				// Set Valid Keys
+				List<ConsoleKey> validKeys = new List<ConsoleKey>()
+				{
+					ConsoleKey.I,
+					ConsoleKey.Enter,
+				};
+
+				ConsoleKey answer = PromptAndGetResponse(ConsoleKey.Enter, validKeys);
+				if ( answer == ConsoleKey.I ) slugCi.DisplayInfo();
+				if ( answer == ConsoleKey.Enter ) return true;
+			}
+
+			return true;
+		}
+
+
+		/// <summary>
+		/// Allow user to choose where they are deploying too.
+		/// </summary>
+		/// <param name="ciSession"></param>
+		private static void PromptForConfiguration(CISession ciSession)
+		{
+			Console.WriteLine(Environment.NewLine);
+			Color lineColor = Color.WhiteSmoke;
+			ConsoleKey defaultChoice = ConsoleKey.Enter;
+
+			List<string> help = new List<string>() { "Usually Release or Debug" };
+			Misc.WriteMainHeader("Configuration to Compile", help);
+
+			// Release
+			lineColor = Color.WhiteSmoke;
+			if (ciSession.CompileConfig == "Release")
+			{
+				lineColor = Color.Green;
+				defaultChoice = ConsoleKey.R;
+			}
+			else
+				lineColor = Color.WhiteSmoke;
+			Console.WriteLine("(R)  Release", lineColor);
+
+
+			// Debug
+			lineColor = Color.WhiteSmoke;
+			if (ciSession.CompileConfig == "Debug")
+			{
+				lineColor = Color.Green;
+				defaultChoice = ConsoleKey.D;
+			}
+			else
+				lineColor = Color.WhiteSmoke;
+			Console.WriteLine("(D)  Debug", lineColor);
+
+
+			// Other
+			lineColor = Color.WhiteSmoke;
+			if (ciSession.CompileConfig != "Debug" && ciSession.CompileConfig != "Release")
+			{
+				lineColor = Color.Green;
+				defaultChoice = ConsoleKey.O;
+				Console.WriteLine("(O)  Other - " + ciSession.CompileConfig, lineColor);
+			}
+
+
+
+			// Set Valid Keys
+			List<ConsoleKey> validKeys = new List<ConsoleKey>()
+			{
+				ConsoleKey.R,
+				ConsoleKey.D,
+				ConsoleKey.O
+			};
+
+			ConsoleKey choice = PromptAndGetResponse(defaultChoice, validKeys);
+			if (choice == ConsoleKey.R) ciSession.CompileConfig = "Release";
+			else if (choice == ConsoleKey.D)
+				ciSession.CompileConfig = "Debug";
+			else
+				ciSession.CompileConfig = ciSession.CompileConfig;
+		}
+
+
+
+		/// <summary>
+		/// Allow user to choose where they are deploying too.
+		/// </summary>
+		/// <param name="ciSession"></param>
+		private static void PromptForDeployTarget (CISession ciSession) {
+			Console.WriteLine(Environment.NewLine);
+			Color lineColor = Color.WhiteSmoke;
+			ConsoleKey defaultChoice = ConsoleKey.Enter;
+
+			List<string> help = new List<string>() { "Where you are deploying the build" };
+			Misc.WriteMainHeader("Deploy Target",help);
+			
+			// Production
+			lineColor = Color.WhiteSmoke;
+			if ( ciSession.PublishTarget == PublishTargetEnum.Production ) {
+				lineColor = Color.Green;
+				defaultChoice = ConsoleKey.P;
+			}
+			else
+				lineColor = Color.WhiteSmoke;
+			Console.WriteLine("(P)  Production or main / master",lineColor);
+
+
+			// Alpha
+			lineColor = Color.WhiteSmoke;
+			if (ciSession.PublishTarget == PublishTargetEnum.Alpha)
+			{
+				lineColor = Color.Green;
+				defaultChoice = ConsoleKey.A;
+			}
+			else
+				lineColor = Color.WhiteSmoke;
+			Console.WriteLine("(A)  Alpha or Test",lineColor);
+
+
+
+			// Beta
+			lineColor = Color.WhiteSmoke;
+			if (ciSession.PublishTarget == PublishTargetEnum.Beta)
+			{
+				lineColor = Color.Green;
+				defaultChoice = ConsoleKey.B;
+			}
+			else
+				lineColor = Color.WhiteSmoke;
+			Console.WriteLine("(B)  Beta / Test", lineColor);
+
+			
+			// Set Valid Keys
+			List<ConsoleKey> validKeys = new List<ConsoleKey>()
+			{
+				ConsoleKey.A,
+				ConsoleKey.B,
+				ConsoleKey.P
+			};
+
+			ConsoleKey choice = PromptAndGetResponse(defaultChoice, validKeys);
+			if ( choice == ConsoleKey.A ) ciSession.PublishTarget = PublishTargetEnum.Alpha;
+			else if ( choice == ConsoleKey.B )
+				ciSession.PublishTarget = PublishTargetEnum.Beta;
+			else
+				ciSession.PublishTarget = PublishTargetEnum.Production;
+		}
+
+
+		/// <summary>
+		/// Displays the prompt and then accepts input from user.  Validates the input and returns the choice.
+		/// </summary>
+		/// <param name="defaultKey"></param>
+		/// <param name="validKeys"></param>
+		/// <returns></returns>
+		private static ConsoleKey PromptAndGetResponse (ConsoleKey defaultKey,List<ConsoleKey> validKeys) {
+			Console.WriteLine();
+			Console.WriteLine("Press the letter of your choice, or Enter to accept current value.");
+			bool keepLooping = true;
+			while ( keepLooping ) {
+				ConsoleKeyInfo choice = Console.ReadKey();
+				if ( validKeys.Contains(choice.Key) ) return choice.Key;
+				if ( choice.Key == ConsoleKey.Enter ) return defaultKey;
+			}
+
+			// This will never happen, but need to make compiler shut up!
+			return defaultKey;
+		}
+
+
+
+		/// <summary>
+		/// Sets verbosity of components based upon verbosity setting.
+		/// </summary>
+		/// <param name="verbosity"></param>
+		/// <param name="ciSession"></param>
 		private static void SetVerbosity (string verbosity, CISession ciSession) {
 			List<string> methods = verbosity.Split('|').ToList();
 			foreach ( string method in methods ) {

@@ -134,7 +134,6 @@ namespace Nuke.Common.OutputSinks
         /// <summary>
         /// Writes the Summary of the Slug Build Process
         /// </summary>
-        /// <param name="StageStats"></param>
         protected virtual void WriteSummaryTable(ExecutionPlan plan) {
 	        List<BuildStage> StageStats = plan.Plan.ToList();
 
@@ -164,12 +163,7 @@ namespace Nuke.Common.OutputSinks
                     : string.Empty;
 
 
-            // FX Builds the duration from the Runtime
-        //    static string GetDuration(long duration)
-         //       => $"{(long) (duration / 1000)}".Replace("0", "< 1sec");
-
-
-            /// Begin writing table
+            // Begin writing table
             WriteNormal(new string(c: '═', count: totalColWidth));
             WriteInformation(CreateLine("Target", "Status", "Duration"));
             WriteNormal(new string(c: '─', count: totalColWidth));

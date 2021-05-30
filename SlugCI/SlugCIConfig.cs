@@ -220,7 +220,7 @@ namespace Slug.CI {
 			if ( b.UseCodeCoverage != UseCodeCoverage ) return false;
 			if ( b.Projects.Count != Projects.Count ) return false;
 			if ( b.GitRemote != GitRemote ) return false;
-
+				
 
 			// Loop thru projects looking for complete matches
 			foreach ( SlugCIProject project in Projects ) {

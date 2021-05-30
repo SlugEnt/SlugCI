@@ -28,10 +28,6 @@
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		/// <param name="nameOfProject">Project Name</param>
-		/// <param name="deployMethod">How it was deployed</param>
-		/// <param name="deployTarget">Name of the deploy target</param>
-		/// <param name="wasSuccessful">True if it completed successfully</param>
 		public PublishResultRecord(SlugCIProject project)
 		{
 			NameOfProject = project.Name;

@@ -102,7 +102,6 @@ namespace Slug.CI
 				LinkedListNode<BuildStage> myself = _executionPlan.Find(buildStage);
 				if ( myself != null ) {
 					// Need to make sure the parent is not before us...  If so we need to move ourselves, to before the parent
-					bool parentExistsPrior = false;
 					bool continueSearching = true;
 					LinkedListNode<BuildStage> priorParentLinkedListNode = myself.Previous;
 					while ( continueSearching ) {
