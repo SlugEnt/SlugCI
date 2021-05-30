@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -84,6 +85,13 @@ namespace Nuke.Common.OutputSinks
                 WriteSuccessfulBuild();
             else
                 WriteFailedBuild();
+
+            Console.WriteLine();
+            Console.WriteLine("Version Built was: ", Color.Yellow);
+            Console.WriteLine("    Semantic Version:   " + ciSession.VersionInfo.SemVersionAsString,Color.Yellow);
+            Console.WriteLine("    Assembly Version:  " + ciSession.VersionInfo.AssemblyVersion,Color.Yellow);
+            Console.WriteLine("    File Version:  " + ciSession.VersionInfo.FileVersion,Color.Yellow);
+            Console.WriteLine("    Info Version: " + ciSession.VersionInfo.InformationalVersion,Color.Yellow);
 
             if ( isInteractive ) {
 	            bool continueLooping = true;

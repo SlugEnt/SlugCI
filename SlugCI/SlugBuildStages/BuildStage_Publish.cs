@@ -41,9 +41,9 @@ namespace Slug.CI.SlugBuildStages
 
 			Publish_Copy();
 			Logger.Success("Version: " + CISession.VersionInfo.SemVersionAsString + " fully committed and deployed to target location.");
-			
 
-			return StageCompletionStatusEnum.Success;
+
+			return CompletionStatus;
 		}
 		
 
@@ -62,6 +62,7 @@ namespace Slug.CI.SlugBuildStages
 				FileSystemTasks.CopyDirectoryRecursively(srcFolder,destFolder,DirectoryExistsPolicy.Merge,FileExistsPolicy.OverwriteIfNewer);
 				Logger.Success("Copied:  " + project.Name + " to Deployment folder: " + destFolder);
 				project.Results.PublishedSuccess = true;
+				SetInprocessStageStatus(StageCompletionStatusEnum.Success);
 			}
 		}
 
@@ -145,7 +146,7 @@ namespace Slug.CI.SlugBuildStages
 						Logger.Warn(
 							"The nuget Push process threw an error.  Since you are using a service other than Nuget this may be a service outage with the site or it might mean the version of the library you are pushing already exists.  You will need to perform a manual check to determine which it is.");
 					else
-						throw pe;
+						throw;
 				}
 
 				if ( pushedSuccessfully ) {

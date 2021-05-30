@@ -3,13 +3,32 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyVersion>1.0.0.183</AssemblyVersion>
+    <AssemblyVersion>0.8.0.183</AssemblyVersion>
     <RootNamespace>Slug.CI</RootNamespace>
+    <Authors>Scott Herrmann</Authors>
+    <Company>SlugEnt</Company>
+    <Description>Opinionated CI builder with heavy integration with GIT and automated versioning</Description>
+    <Copyright>Scott Herrmann 2021</Copyright>
+    <PackageProjectUrl>https://github.com/SlugEnt/SlugCISample</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/SlugEnt/SlugCISample</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
+    <Version>0.8.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <WarningsAsErrors>;NU1605</WarningsAsErrors>
     <NoWarn>1701;1702;1591;1573</NoWarn>
+  </PropertyGroup>
+
+
+  <!-- Dotnet Tool Specific settings -->
+  <PropertyGroup>
+    <PackAsTool>true</PackAsTool>
+    <PackageId>dotnet-SlugCI</PackageId>
+    <ToolCommandName>slugci</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>

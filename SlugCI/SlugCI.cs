@@ -40,7 +40,7 @@ namespace Slug.CI
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		/// <param name="rootDir"></param>
+		/// <param name="ciSession">The SlugCI Session object</param>
 		public SlugCI (CISession ciSession) {
 			CISession = ciSession;
 			CISession.SlugCIPath = CISession.RootDirectory / ".slugci";
@@ -118,7 +118,6 @@ namespace Slug.CI
 
 
 			// If we have Deploy "Copy" targets then make sure the variables are set and folders are valid
-			bool deployFolderSpecified = false;
 			if ( ciSession.CountOfDeployTargetsCopy > 0 ) {
 				ciSession.DeployCopyPath = GetDeployFolder();
 				if ( ciSession.DeployCopyPath == null ) {
@@ -189,7 +188,6 @@ namespace Slug.CI
 		/// <summary>
 		/// Returns the deployment folder for this run.  
 		/// </summary>
-		/// <param name="fromEnvVariable"></param>
 		/// <returns></returns>
 		private AbsolutePath GetDeployFolder () {
 			bool useEnv = (CISession.SlugCIConfigObj.IsRootFolderUsingEnvironmentVariable(CISession.PublishTarget));
@@ -337,12 +335,5 @@ namespace Slug.CI
 
 			return files;
 		}
-
-
-
-		/// <summary>
-		/// Pre-Processing that must occur for majority of the targets to work.
-		/// </summary>
-
 	}
 }

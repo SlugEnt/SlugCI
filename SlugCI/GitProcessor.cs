@@ -17,10 +17,6 @@ namespace Slug.CI
 	/// <summary>
 	/// Identified Remotes
 	/// </summary>
-	/// <param name="name">Name of the remote</param>
-	/// <param name="url">URL to access the remote</param>
-	/// <param name="operation">The operation this remote is for</param>
-	/// <returns></returns>
 	public record Remotes (string name, string url, string operation);
 
 
@@ -34,12 +30,6 @@ namespace Slug.CI
 	/// Information returned from the Git Describe --tags command.
 	/// </summary>
 	public record RecordGitDescribeTag (string tag, int commitsSince, string commitHash);
-
-
-	/// <summary>
-	/// Output of BranchMerged command.
-	/// </summary>
-//	public record RecordBranchMerged (bool isCheckedOutBranch, string branchName);
 
 
 	/// <summary>
@@ -128,7 +118,7 @@ namespace Slug.CI
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		/// <param name="rootPath"></param>
+		/// <param name="ciSession"></param>
 		public GitProcessor (CISession ciSession) {
 			CISesion = ciSession;
 
@@ -198,7 +188,7 @@ namespace Slug.CI
 				PrintGitHistory();
 				if ( e.Message.Contains("Sequence contains no elements") )
 					throw new InvalidOperationException("Do you have a branch checked out?  Original error: " + e.Message);
-				throw e;
+				throw new ApplicationException("Unexpected error",e);
 			}
 		}
 
@@ -407,7 +397,7 @@ namespace Slug.CI
 			}
 			catch ( Exception e ) {
 				PrintGitHistory();
-				throw e;
+				throw new ApplicationException("RefreshUncommittedChanges error.",e);
 			}
 		}
 
@@ -418,8 +408,6 @@ namespace Slug.CI
 			ExecuteGitTryCatch("GetMostRecentVersionTagOfBranch", gitArgs, out gitOutput);
 			if ( gitOutput.Count == 0 ) {
 				return new SemVersion(0, 0, 0);
-				PrintGitHistory();
-				ControlFlow.Assert(gitOutput.Count != 0, "GetMostRecentVersionTagOfBranch failed to return any results...");
 			}
 
 			string outputRec = gitOutput [0].Text;
@@ -454,7 +442,7 @@ namespace Slug.CI
 			}
 			catch ( Exception e ) {
 				PrintGitHistory();
-				throw e;
+				throw;
 			}
 
 		}
@@ -481,7 +469,7 @@ namespace Slug.CI
 			}
 			catch ( Exception e ) {
 				PrintGitHistory();
-				throw e;
+				throw;
 			}
 		}
 
@@ -555,7 +543,7 @@ namespace Slug.CI
 			}
 			catch ( Exception e ) {
 				PrintGitHistory();
-				throw e;
+				throw;
 			}
 		}
 
@@ -629,7 +617,7 @@ namespace Slug.CI
 			}
 			catch ( Exception e ) {
 				PrintGitHistory();
-				throw e;
+				throw;
 			}
 		}
 		
