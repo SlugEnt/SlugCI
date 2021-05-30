@@ -60,18 +60,6 @@ namespace Slug.CI
 
 			// TODO Remove this.  This is for testing only
 
-//			BuildStage_GitCleanup cleanup = new BuildStage_GitCleanup(ciSession);
-			//cleanup.Execute();
-/*
-			BuildStage_CalcVersion calc = new BuildStage_CalcVersion(CISession);
-			calc.Execute();
-
-			BuildStage_GitCommit gitCommit = new BuildStage_GitCommit(ciSession);
-			gitCommit.Execute();
-*/
-			// END TODO
-
-
 			CheckForEnvironmentVariables();
 
 			// Locate Solution and set solution related variables
@@ -157,6 +145,7 @@ namespace Slug.CI
 			Console.Write("    {0,-25}", "Nuget Repo URL:", Color.WhiteSmoke);
 			Console.WriteLine(CISession.NugetRepoURL, Color.Cyan);
 
+			Console.WriteLine();
 			Console.WriteLine("-------------------------------------------------------------");
 			Console.WriteLine("                  GIT  Information");
 			Console.WriteLine("-------------------------------------------------------------");
@@ -170,7 +159,9 @@ namespace Slug.CI
 
 			Console.Write("    {0,-25}", "Git CommandLine Version:", Color.WhiteSmoke);
 			Console.WriteLine(CISession.GitProcessor.GitCommandVersion, Color.Cyan);
-
+			
+			
+			Console.WriteLine();
 			Console.WriteLine("-------------------------------------------------------------");
 			Console.WriteLine("                  Environment Variables");
 			Console.WriteLine("-------------------------------------------------------------");
@@ -181,6 +172,24 @@ namespace Slug.CI
 			Console.WriteLine("  Missing Required:", Color.Red);
 			foreach ( string envVar in MissingEnvironmentVariables ) {
 				Console.WriteLine("   {0,-35}", envVar);
+			}
+
+
+			Console.WriteLine();
+			Console.WriteLine("-------------------------------------------------------------");
+			Console.WriteLine("                  Project Info");
+			Console.WriteLine("-------------------------------------------------------------");
+			Console.WriteLine(" {0,-30}  ","Project","How Deployed","Framework","Assembly Name");
+			foreach ( SlugCIProject project in CISession.Projects ) {
+				Console.WriteLine(" {0,-30}  {1,-10}  {2,-12}  {3,-30}", project.Name,project.Deploy.ToString(),project.Framework, project.AssemblyName);
+			}
+
+
+
+			if ( CISession.IsInteractiveRun ) {
+				while (Console.KeyAvailable) { Console.ReadKey(true); }
+				Console.WriteLine("{0}Press Any key to continue",Environment.NewLine);
+				Console.ReadKey();
 			}
 		}
 

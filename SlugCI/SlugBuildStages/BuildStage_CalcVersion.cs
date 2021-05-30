@@ -12,8 +12,6 @@ namespace Slug.CI.SlugBuildStages
 	/// The DotNet Cleaning stage
 	/// </summary>
 	class BuildStage_CalcVersion : BuildStage {
-		private GitProcessor _gitProcessor;
-
 		private List<RecordBranchLatestCommit> latestCommits;
 		private Dictionary<string, GitBranchInfo> branches = new Dictionary<string, GitBranchInfo>();
 		private string currentBranchName;
@@ -145,9 +143,11 @@ namespace Slug.CI.SlugBuildStages
 		}
 
 
+		/// <summary>
+		/// Calculate version of project when Target is Beta
+		/// </summary>
+		/// <param name="comparisonBranch"></param>
 		private void CalculateBetaVersion (GitBranchInfo comparisonBranch) {
-			SemVersion tempVersion;
-
 			// Find the parents max version number.
 
 			GitCommitInfo commitBeta = comparisonBranch.LatestCommitOnBranch;
@@ -198,7 +198,7 @@ namespace Slug.CI.SlugBuildStages
 		/// <summary>
 		/// Computes the version for the Alpha Branch.
 		/// </summary>
-		/// <param name="comparisonBranch"></para	m>
+		/// <param name="comparisonBranch"></param>
 		private void CalculateAlphaVersion (GitBranchInfo comparisonBranch) {
 			// See if main is newer and if it's tag is newer.  If so we need to set the comparison's
 			// tag to the main version and then add the alpha / beta to it...

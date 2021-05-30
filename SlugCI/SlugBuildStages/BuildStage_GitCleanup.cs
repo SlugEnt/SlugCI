@@ -40,7 +40,7 @@ namespace Slug.CI.SlugBuildStages
 
 							}
 							catch ( Exception e ) {
-								if ( !e.Message.Contains("remote ref does not exist") ) throw e;
+								if ( !e.Message.Contains("remote ref does not exist") ) throw;
 							}
 						}
 					}

@@ -30,7 +30,6 @@ namespace Slug.CI
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		/// <param name="branchName">Name of this branch</param>
 		public GitBranchInfo (RecordBranchLatestCommit branchRecord, GitProcessor gitProcessor) {
 			Name = branchRecord.branch;
 
