@@ -35,13 +35,6 @@ namespace Slug.CI {
 	/// Contains information about the solution and projects that SlugNuke needs in order to build and publish the projects.
 	/// </summary>
 	public class SlugCIConfig :IEquatable<SlugCIConfig> {
-
-		/// <summary>
-		/// Used to track if there were any changes to this config file.
-		/// </summary>
-		public bool HasChanged { get; set; }
-
-
 		/// <summary>
 		/// If true Code Coverage reports will be run.
 		/// </summary>
@@ -175,17 +168,6 @@ namespace Slug.CI {
 
 
 		/// <summary>
-		/// Sets the given deployment folder based upon configuration to use Environment Variables
-		/// </summary>
-		/// <param name="config"></param>
-		public void SetRootFolderToUseEnvironmentVariable (Configuration config) {
-			if ( config == "Release" )
-				DeployProdRoot = "_";
-			else
-				DeployAlphaRoot = "_";
-		}
-
-		/// <summary>
 		/// Creates a new Exact copy of the current SlugCIConfig object
 		/// </summary>
 		/// <returns></returns>
@@ -206,6 +188,14 @@ namespace Slug.CI {
 
 			return b;
 		}
+
+		/// <summary>
+		/// Equals method override
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public override bool Equals(object obj) => this.Equals(obj as SlugCI);
+
 
 		public bool Equals([AllowNull] SlugCIConfig b)
 		{
@@ -233,7 +223,6 @@ namespace Slug.CI {
 
 
 			// Loop thru projects looking for complete matches
-			bool projectsEqual = true;
 			foreach ( SlugCIProject project in Projects ) {
 				// Find project in other object
 				SlugCIProject c =  b.Projects.Find(p => p.Name == project.Name);

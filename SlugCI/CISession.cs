@@ -208,12 +208,6 @@ namespace Slug.CI.NukeClasses
 			get; set;
 		}
 
-			
-		// TODO CLeanup
-		/// <summary>
-		/// The semantic version that will be set during this run!
-		/// </summary>
-		//public SemVersion SemVersion { get; set; }
 
 		/// <summary>
 		/// All variants of the version of the given build.

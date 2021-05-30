@@ -10,7 +10,7 @@ using Slug.CI.NukeClasses;
 namespace Slug.CI
 {
 
-	class Program : NukeBuild
+	class Program
 	{
 		/// <summary>
 		/// Main Entry Point
@@ -107,8 +107,6 @@ namespace Slug.CI
 				slugCI.Execute();
 
 				return 0;
-
-				Console.WriteLine("Hello World!");
 			}
 			catch ( Exception e ) {
 				Logger.Error(e);
