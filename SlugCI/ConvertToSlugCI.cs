@@ -199,16 +199,12 @@ namespace Slug.CI
 		/// </summary>
 		/// <returns></returns>
 		private bool ProcessSlugCIConfigFile() {
-			bool isNewConfigFile = false;
-			//string startingJson;
-
 			SlugCIConfig slugCiConfig = GetSlugCIConfig();
 			if (slugCiConfig == null)
 			{
 				EnsureExistingDirectory(CISession.SlugCIPath);
 				slugCiConfig = new SlugCIConfig();
 				slugCiConfig.DeployToVersionedFolder = true;
-				isNewConfigFile = true;
 			}
 
 			// Make a copy that we will compare against.
@@ -313,9 +309,7 @@ namespace Slug.CI
 		{
 			// Does the config have a root folder set?
 			if ( !slugCiConfig.IsRootFolderSpecified(config) ) {
-				//string name = "Production";
 				string name = config.ToString();
-				//if ( config == Configuration.Debug ) name = "Test";
 
 				Misc.WriteSubHeader(name + ": Set Deploy Folder");
 				Console.WriteLine("The [" + config + "] deployment folder is undefined in the SlugCI config file, You can enter a value OR press enter to force the system to look for and use environment variables.",
@@ -373,7 +367,7 @@ namespace Slug.CI
 			CurrentSolutionPath = (AbsolutePath)Path.GetDirectoryName(solutionFile);
 
 			DotNetPath = ToolPathResolver.GetPathExecutable("dotnet");
-			IProcess slnfind = ProcessTasks.StartProcess(DotNetPath, "sln " + CurrentSolutionPath + " list", logOutput: true);
+			IProcess slnfind = ProcessTasks.StartProcess(DotNetPath, "sln " + CurrentSolutionPath + " list", logOutput: false);
 			slnfind.AssertWaitForExit();
 			IReadOnlyCollection<Output> output = slnfind.Output;
 

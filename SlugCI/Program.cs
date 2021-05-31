@@ -11,24 +11,25 @@ using Console = Colorful.Console;
 
 namespace Slug.CI
 {
-
 	class Program
 	{
 		/// <summary>
-		/// Main Entry Point
-		/// <param name="rootdir">(Optional) The entry point folder for the solution - usually where the .git folder for the solution is.  If not specified will use current directory.</param>
+		/// SlugCI - An extremely opinionated Git Versioning and CI tool.
+		/// </summary>
+		/// <param name="rootdir">(Optional) The folder that contains the GIT Repository for the solution.</param>
 		/// <param name="deployto">Where you are wanting to deploy this to.  Valid values are (dev, alpha, beta, prod)</param>
-		/// <param name="compileconfig">This is the visual Studio Configuration value.  Standard values are Debug and Release.  But you can define your own also.
+		/// <param name="compileconfig">The visual Studio Configuration value.  Standard values are Debug and Release.  But you can define your own also.
 		/// <para>   If not specified then it will be set to Debug if the deployto is not production and set to Release if deployto is Production.</para></param>
 		/// <param name="faststart">Skips checking the config file and updating it.  Generally should only be used when testing.</param>
+		/// <param name="interactive">If True (Default) will prompt you for values.</param>
+		/// <param name="skipnuget">Does not publish to nuget.  Still builds the .nupkg however.</param>
+		/// <param name="info">Displays detailed information about the Solution and Environment</param>
 		/// <param name="verbosity">Sets the verbosity of command output.  You can set value for all commands or just certain commands.  Be careful with all, it can generate a LOT of output on debug level
 		/// <para>  The best is set to specific methods via:   method:value|method:value|method:value.</para>
 		/// <para>  Valid methods are:</para>
 		/// <para>    compile, pack, gitversion</para>
 		/// <para>  Valid values are:</para>
 		/// <para>    debug, warn, info</para></param>
-		/// <param name="info">Displays detailed information about the config and the repo and other vital stats</param>
-		/// </summary>
 		/// <returns></returns>
 		public static int Main(string rootdir = "", 
 		                       string deployto = "test", 
@@ -153,7 +154,7 @@ namespace Slug.CI
 			while (keepLooping) {
 				Console.WriteLine(Environment.NewLine);
 				Color lineColor = Color.WhiteSmoke;
-				ConsoleKey defaultChoice = ConsoleKey.Enter;
+				
 
 				Misc.WriteMainHeader("SlugCI Interactive Menu");
 

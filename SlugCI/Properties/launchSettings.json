@@ -48,6 +48,10 @@
       "environmentVariables": {
         "SLUGCI_DEPLOY_BETA": "c:\\temp\\DeployBeta"
       }
+    },
+    "Help": {
+      "commandName": "Project",
+      "commandLineArgs": "-h"
     }
   }
 }

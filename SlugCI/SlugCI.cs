@@ -56,9 +56,8 @@ namespace Slug.CI
 
 			ciSession.GitProcessor = new GitProcessor(ciSession);
 			if (ciSession.GitProcessor.AreUncommitedChangesOnLocalBranch) 
-				throw new ApplicationException("There are uncommited changes on the current branch: " + ciSession.GitProcessor.CurrentBranch +  "  Commit or discard existing changes and then try again.");
+				throw new ApplicationException("There are uncommitted changes on the current branch: " + ciSession.GitProcessor.CurrentBranch +  "  Commit or discard existing changes and then try again.");
 
-			// TODO Remove this.  This is for testing only
 
 			CheckForEnvironmentVariables();
 
@@ -260,12 +259,7 @@ namespace Slug.CI
 		/// </summary>
 		public void Execute () {
 			SlugBuilder slugBuilder = new SlugBuilder(CISession);
-
-
-
-			//slugBuilder.CopyCompiledProject(@"C:\temp\slugcitest", @"C:\temp\cideploy");
 			return;
-
 		}
 
 		/// <summary>
