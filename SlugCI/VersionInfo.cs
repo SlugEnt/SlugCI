@@ -1,4 +1,5 @@
-﻿using Semver;
+﻿using Nuke.Common.Utilities;
+using Semver;
 
 namespace Slug.CI
 {
@@ -30,13 +31,19 @@ namespace Slug.CI
 			// Assembly is the semVersion with the 4th value always a zero.
 			AssemblyVersion = prefix + "0";
 
-			// File Num
-			PreRelease = new SemVersionPreRelease(semVersion.Prerelease);
-			int fileNum = 1;
-			if ( PreRelease.ReleaseType == "alpha" ) fileNum = 100000;
-			else if ( PreRelease.ReleaseType == "beta" ) fileNum = 200000;
-			fileNum += PreRelease.ReleaseNumber;
-			FileVersion = prefix + fileNum;
+			// File Version
+			if ( !semVersion.Prerelease.IsNullOrEmpty() ) {
+				PreRelease = new SemVersionPreRelease(semVersion.Prerelease);
+				int fileNum = 1;
+				if ( PreRelease.ReleaseType == "alpha" )
+					fileNum = 100000;
+				else if ( PreRelease.ReleaseType == "beta" ) fileNum = 200000;
+				fileNum += PreRelease.ReleaseNumber;
+				FileVersion = prefix + fileNum;
+			}
+			else
+				FileVersion = prefix + "1";
+
 
 			InformationalVersion = SemVersionAsString + ".g" + commitHash;
 		}

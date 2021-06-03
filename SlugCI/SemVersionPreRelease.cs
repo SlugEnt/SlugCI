@@ -79,7 +79,7 @@ namespace Slug.CI
 
 			bool isInt = int.TryParse(trailer, out int value);
 			
-			ControlFlow.Assert(isInt, "PreRelease tag of [" + preReleaseTag + "] does not contain an integer component after the .");
+			ControlFlow.Assert(isInt, "PreRelease tag of [" + preReleaseTag + "] does not contain an integer component after the -");
 			ReleaseNumber = value;
 			ReleaseType = preReleaseTag.Substring(0, --index);
 			IsValidReleaseType(ReleaseType);

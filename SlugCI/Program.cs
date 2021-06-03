@@ -69,10 +69,7 @@ namespace Slug.CI
 
 				// Set Compile Configuration.  If not specified, then we base it upon PublishTarget.  This ensure production does not have Debug code, unless specifically requested.
 				if ( compileconfig == string.Empty ) {
-					if ( ciSession.PublishTarget == PublishTargetEnum.Production )
-						ciSession.CompileConfig = "Release";
-					else
-						ciSession.CompileConfig = "Debug";
+					DetermineCompileConfiguration(ciSession);
 				}
 				else
 					ciSession.CompileConfig = compileconfig;
@@ -132,6 +129,18 @@ namespace Slug.CI
 
 
 		/// <summary>
+		/// Sets Compile Configuration if none specified on command line, based upon the publishing target.
+		/// </summary>
+		/// <param name="ciSession"></param>
+		private static void DetermineCompileConfiguration (CISession ciSession) {
+			if (ciSession.PublishTarget == PublishTargetEnum.Production)
+				ciSession.CompileConfig = "Release";
+			else
+				ciSession.CompileConfig = "Debug";
+		}
+
+
+		/// <summary>
 		/// Prompt user for information and confirm...
 		/// </summary>
 		private static bool UserPrompting (CISession ciSession) {
@@ -140,6 +149,9 @@ namespace Slug.CI
 			bool keepLooping = true;
 			while ( keepLooping ) {
 				PromptForDeployTarget(ciSession);
+
+				DetermineCompileConfiguration(ciSession);
+
 				PromptForConfiguration(ciSession);
 
 

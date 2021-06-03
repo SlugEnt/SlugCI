@@ -94,24 +94,39 @@ namespace Slug.CI
 			Console.WriteLine("|   " + "Project Step Status: ", lineColor);
 			Console.WriteLine(hdrSep, lineColor);
 			Console.WriteLine("");
-			Console.WriteLine("  {0,-30}  {1,-8}  {2,-8}  {3,-8}  {4,-8}","Project","Deploy","Compile","Pack","Publish");
+			Console.WriteLine("  {0,-30}  {1,-8}  {2,-8}  {3,-8}  {4,-8}", "Project", "Deploy", "Compile", "Pack", "Publish");
 			foreach ( SlugCIProject project in ciSession.Projects ) {
-				Console.WriteLine("  {0,-30}  {1,-8}  {2,-8}  {3,-8}  {4, -8}", 
-				                  project.Name,
-				                  project.Deploy.ToString(),
-				                  WriteProjectStageStatus(project.Results.CompileSuccess),
-				                  WriteProjectStageStatus(project.Results.PackedSuccess),
-				                  WriteProjectStageStatus(project.Results.PublishedSuccess));
+				Console.Write("  {0,-30}",project.Name,Color.WhiteSmoke);
+				Console.Write("  {0,-8}",project.Deploy.ToString(),Color.WhiteSmoke);
+
+				string text;
+				(text, lineColor) = WriteProjectStageStatus(project.Results.CompileSuccess);
+				Console.Write("  {0,-8}" ,text,lineColor);
+
+				(text, lineColor) = WriteProjectStageStatus(project.Results.PackedSuccess);
+				Console.Write("  {0,-8}", text, lineColor);
+
+				(text, lineColor) = WriteProjectStageStatus(project.Results.PublishedSuccess);
+				Console.Write("  {0,-8}", text, lineColor);
+				Console.ForegroundColor = Color.WhiteSmoke;
+				Console.WriteLine();
 			}
 			
 		}
 
 
-		public static string WriteProjectStageStatus (bool? value) {
-			if ( value == null ) return "N/A";
-			if ( value == true ) return "Success";
-			return "Failed";
 
+		/// <summary>
+		/// Calculates the result and color to display of a given Stage
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public static (string text, Color lineColor) WriteProjectStageStatus (bool? value) {
+			if ( value == null ) 
+				return (("N/A", Color.WhiteSmoke));
+			
+			if ( value == true ) return (("Success",Color.Green));
+			return (("Failed",Color.Red));
 		}
 
 		/// <summary>

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Console = Colorful.Console;
 
 
@@ -129,7 +130,9 @@ namespace Slug.CI
 		/// Displays information about the solution, its projects, git repo, etc.
 		/// </summary>
 		public void DisplayInfo () {
-			Misc.WriteMainHeader(CISession.Solution.Name + "::  SlugCI / Repository Info");
+			List<string> info = new List<string>() {"SlugCI Version:  " + GetType().Assembly.GetName().Version.ToString()};
+
+			Misc.WriteMainHeader(CISession.Solution.Name + "::  SlugCI / Repository Info",info);
 			Console.Write("    {0,-25}","Project Root:",Color.WhiteSmoke);
 			Console.WriteLine(CISession.RootDirectory,Color.Cyan);
 

@@ -80,18 +80,18 @@ namespace Nuke.Common.OutputSinks
 			WriteNormal();
             WriteSummaryTable(plan);
             WriteNormal();
-            
-            if (plan.WasSuccessful)
-                WriteSuccessfulBuild();
-            else
-                WriteFailedBuild();
 
-            Console.WriteLine();
-            Console.WriteLine("Version Built was: ", Color.Yellow);
-            Console.WriteLine("    Semantic Version:   " + ciSession.VersionInfo.SemVersionAsString,Color.Yellow);
-            Console.WriteLine("    Assembly Version:  " + ciSession.VersionInfo.AssemblyVersion,Color.Yellow);
-            Console.WriteLine("    File Version:  " + ciSession.VersionInfo.FileVersion,Color.Yellow);
-            Console.WriteLine("    Info Version: " + ciSession.VersionInfo.InformationalVersion,Color.Yellow);
+            if ( plan.WasSuccessful ) {
+	            WriteSuccessfulBuild();
+	            Console.WriteLine();
+	            Console.WriteLine("Version Built was: ", Color.Yellow);
+	            Console.WriteLine("    Semantic Version:   " + ciSession.VersionInfo.SemVersionAsString, Color.Yellow);
+	            Console.WriteLine("    Assembly Version:   " + ciSession.VersionInfo.AssemblyVersion, Color.Yellow);
+	            Console.WriteLine("    File Version:       " + ciSession.VersionInfo.FileVersion, Color.Yellow);
+	            Console.WriteLine("    Info Version:       " + ciSession.VersionInfo.InformationalVersion, Color.Yellow);
+            }
+            else 
+	            WriteFailedBuild();
 
             if ( isInteractive ) {
 	            bool continueLooping = true;
