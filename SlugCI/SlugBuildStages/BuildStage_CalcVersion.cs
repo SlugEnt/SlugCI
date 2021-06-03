@@ -235,7 +235,7 @@ namespace Slug.CI.SlugBuildStages
 				}
 				if (incrementPatch) patch++;
 
-				tempVersion = new SemVersion(major, minor, patch, comparisonBranchName + ".0000");
+				tempVersion = new SemVersion(major, minor, patch, comparisonBranchName + "-0000");
 			}
 			else
 				tempVersion = new SemVersion(comparisonVersion.Major, comparisonVersion.Minor, comparisonVersion.Patch, comparisonVersion.Prerelease);

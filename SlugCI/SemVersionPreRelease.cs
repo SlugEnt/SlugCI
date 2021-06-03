@@ -57,8 +57,13 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="preReleaseTag">An already existing pre-release tag in string format</param>
 		public SemVersionPreRelease (string preReleaseTag) {
-			int index = preReleaseTag.IndexOf('.');
-			if (index == -1) throw new ArgumentException("Unable to find the . in the prerelease portion of the semanticVersion [" + preReleaseTag + "]");
+			// The normal should be alpha-0002, but there may be some that have alpha.0002, we accept either.
+			int index = preReleaseTag.IndexOf('-');
+			if ( index == -1 ) {
+				index = preReleaseTag.IndexOf('.');
+				if (index == -1)
+					throw new ArgumentException("Unable to find the . in the prerelease portion of the semanticVersion [" + preReleaseTag + "]");
+			}
 
 			string trailer = preReleaseTag.Substring(++index);
 			
@@ -144,7 +149,7 @@ namespace Slug.CI
 
 
 		/// <summary>
-		/// Createsthe string value of the SemVersionPreRelease object
+		/// Creates the string value of the SemVersionPreRelease object
 		/// </summary>
 		/// <returns></returns>
 		public string Tag () {
@@ -153,7 +158,7 @@ namespace Slug.CI
 			else if ( IncrementType == IncrementTypeEnum.Minor ) strIncrementType = "b";
 			else if ( IncrementType == IncrementTypeEnum.Patch ) strIncrementType = "a";
 
-			string value = ReleaseType + "." + ReleaseNumber.ToString("D4") + strIncrementType;
+			string value = ReleaseType + "-" + ReleaseNumber.ToString("D4") + strIncrementType;
 			return value;
 		}
 
