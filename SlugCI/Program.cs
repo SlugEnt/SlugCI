@@ -41,6 +41,8 @@ namespace Slug.CI
 		                       bool skipnuget = false,
 		                       bool info = false) {
 			try {
+				Console.SetWindowSize(130,34);
+
 				Misc.WriteAppHeader();
 
 				// We process thru defaults, at the end if interactive is on, then we
@@ -177,24 +179,37 @@ namespace Slug.CI
 
 				Misc.WriteMainHeader("SlugCI Interactive Menu");
 
+				Console.WriteLine(" {0}    |  {1,-35}", "Target Deploy", ciSession.PublishTarget.ToString(), lineColor);
+				Console.WriteLine(" {0}    |  {1,-35}", "Compile Config:", ciSession.CompileConfig, lineColor);
+
+				// Line 1 of Menu
+				string ver = "";
+				if (ciSession.ManuallySetVersion != null) ver = ciSession.ManuallySetVersion.ToString();
 				Console.WriteLine(" (I)  Information about Project", Color.Yellow);
 
-				string ver = "";
-				if ( ciSession.ManuallySetVersion != null ) ver = ciSession.ManuallySetVersion.ToString();
+				// Line 2 of Menu
 				Console.WriteLine(" (V)  Manually Set the next version [ " + ver + " ]", Color.WhiteSmoke);
 
-				Console.WriteLine(" (X)  Exit", Color.Red);
-				Console.WriteLine();
-				Console.WriteLine(" {0,-25}  |  {1,-30}", "Target Deploy", ciSession.PublishTarget.ToString(),lineColor);
-				Console.WriteLine(" {0,-25}  |  {1,-30}", "Compile Configuration", ciSession.CompileConfig,lineColor);
-				Console.WriteLine();
-				Console.WriteLine();
+				// Line 3 of Menu
+				if ( ciSession.SkipNuget )
+					lineColor = Color.Yellow;
+				else
+					lineColor = Color.WhiteSmoke;
+				Console.WriteLine(" (S)  Skip Nuget Publish  [ " + ciSession.SkipNuget + " ]", lineColor);
 
+
+				// Last line of Menu
+				Console.Write(" (X)  Exit", Color.Red);
+
+				Console.WriteLine();
+				
 				// Set Valid Keys
 				List<ConsoleKey> validKeys = new List<ConsoleKey>()
 				{
 					ConsoleKey.I,
 					ConsoleKey.V,
+					ConsoleKey.S,
+					ConsoleKey.X,
 					ConsoleKey.Enter,
 				};
 
@@ -202,7 +217,10 @@ namespace Slug.CI
 				if ( answer == ConsoleKey.I ) slugCi.DisplayInfo();
 				else if ( answer == ConsoleKey.Enter ) return true;
 				else if (answer == ConsoleKey.V) ManualVersionPrompts(ciSession,slugCi);
+				else if ( answer == ConsoleKey.S ) ciSession.SkipNuget = !ciSession.SkipNuget;
+				else if ( answer == ConsoleKey.X ) return false;
 
+				Console.Clear();
 			}
 
 			return true;
