@@ -6,6 +6,7 @@ using System.Linq;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
+using Nuke.Common.Utilities;
 using Slug.CI.NukeClasses;
 using Console = Colorful.Console;
 
@@ -149,6 +150,12 @@ namespace Slug.CI
 		}
 
 
+		/// <summary>
+		/// Displays the Main Menu for SLUGCI
+		/// </summary>
+		/// <param name="ciSession"></param>
+		/// <param name="slugCi"></param>
+		/// <returns></returns>
 		private static bool Menu (CISession ciSession, SlugCI slugCi) {
 			bool keepLooping = true;
 			while (keepLooping) {
@@ -159,11 +166,12 @@ namespace Slug.CI
 				Misc.WriteMainHeader("SlugCI Interactive Menu");
 
 				Console.WriteLine(" (I)  Information about Project", Color.Yellow);
+				Console.WriteLine(" (X)  Exit", Color.Red);
 				Console.WriteLine();
-				Console.WriteLine(" {0,-25}  |  {1,-30}", "Target Deploy", ciSession.PublishTarget.ToString());
-				Console.WriteLine(" {0,-25}  |  {1,-30}", "Compile Configuration", ciSession.CompileConfig);
+				Console.WriteLine(" {0,-25}  |  {1,-30}", "Target Deploy", ciSession.PublishTarget.ToString(),lineColor);
+				Console.WriteLine(" {0,-25}  |  {1,-30}", "Compile Configuration", ciSession.CompileConfig,lineColor);
 				Console.WriteLine();
-				Console.WriteLine("Press Enter to start the Build Process");
+				Console.WriteLine();
 
 				// Set Valid Keys
 				List<ConsoleKey> validKeys = new List<ConsoleKey>()
@@ -172,7 +180,7 @@ namespace Slug.CI
 					ConsoleKey.Enter,
 				};
 
-				ConsoleKey answer = PromptAndGetResponse(ConsoleKey.Enter, validKeys);
+				ConsoleKey answer = PromptAndGetResponse(ConsoleKey.Enter, validKeys, "Press Enter to start the Build Process  OR  Select an Item");
 				if ( answer == ConsoleKey.I ) slugCi.DisplayInfo();
 				if ( answer == ConsoleKey.Enter ) return true;
 			}
@@ -187,6 +195,7 @@ namespace Slug.CI
 		/// <param name="ciSession"></param>
 		private static void PromptForConfiguration(CISession ciSession)
 		{
+			Console.Clear();
 			Console.WriteLine(Environment.NewLine);
 			Color lineColor = Color.WhiteSmoke;
 			ConsoleKey defaultChoice = ConsoleKey.Enter;
@@ -318,18 +327,32 @@ namespace Slug.CI
 		/// <param name="defaultKey"></param>
 		/// <param name="validKeys"></param>
 		/// <returns></returns>
-		private static ConsoleKey PromptAndGetResponse (ConsoleKey defaultKey,List<ConsoleKey> validKeys) {
+		private static ConsoleKey PromptAndGetResponse (ConsoleKey defaultKey,List<ConsoleKey> validKeys, string prompt = "") {
 			Console.WriteLine();
-			Console.WriteLine("Press the letter of your choice, or Enter to accept current value.");
+			if (prompt.IsNullOrEmpty())
+				Console.Write("Press the letter of your choice, or Enter to accept current value.",Color.Magenta);
+			else Console.Write(prompt,Color.Magenta);
+			Console.WriteLine("",Color.WhiteSmoke);
+			
+
 			bool keepLooping = true;
+
+			ConsoleKey userSelectedConsoleKey = defaultKey;
+
 			while ( keepLooping ) {
 				ConsoleKeyInfo choice = Console.ReadKey();
-				if ( validKeys.Contains(choice.Key) ) return choice.Key;
-				if ( choice.Key == ConsoleKey.Enter ) return defaultKey;
+				if ( validKeys.Contains(choice.Key) ) userSelectedConsoleKey = choice.Key;
+				else if ( choice.Key == ConsoleKey.Enter )
+					userSelectedConsoleKey = defaultKey;
+				else
+					continue;
+
+				// User selected a valid item, so exit.
+				keepLooping = false;
 			}
 
-			// This will never happen, but need to make compiler shut up!
-			return defaultKey;
+			Console.ResetColor();
+			return userSelectedConsoleKey;
 		}
 
 
@@ -340,6 +363,7 @@ namespace Slug.CI
 		/// <param name="verbosity"></param>
 		/// <param name="ciSession"></param>
 		private static void SetVerbosity (string verbosity, CISession ciSession) {
+			if ( verbosity.IsNullOrEmpty() ) return;
 			List<string> methods = verbosity.Split('|').ToList();
 			foreach ( string method in methods ) {
 				string [] splits = method.Split(':');

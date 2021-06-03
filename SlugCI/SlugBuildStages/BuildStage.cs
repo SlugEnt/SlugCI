@@ -132,6 +132,8 @@ namespace Slug.CI
 			try {
 				// Start stage timer
 				_stopwatch = Stopwatch.StartNew();
+				
+				Console.ForegroundColor = Color.WhiteSmoke;
 
 				Misc.WriteMainHeader("SlugBuilder::  " + Name);
 

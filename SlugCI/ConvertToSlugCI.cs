@@ -92,24 +92,26 @@ namespace Slug.CI
 		/// <returns></returns>
 		public bool PreCheck()
 		{
-			Misc.WriteMainHeader("PreCheck");
+			Misc.WriteMainHeader("SlugCI: PreCheck",new List<string>() {"SlugCIConfig File"});
 
 			// See if the Root directory exists
 			ControlFlow.Assert(FileSystemTasks.DirectoryExists(CISession.RootDirectory), "Root Directory does not exist.  Should be specified on command line or be run from the projects entry folder");
 
+			// Check for old SlugNuke solution
 			if ( DirectoryExists(CISession.RootDirectory / ".nuke") || FileExists(CISession.RootDirectory / ".nuke")) {
 				IsSlugNukeFormat = true;
 				Logger.Warn("Detected previous SlugNuke Solution.  Will convert to SlugCI!");
 			}
 
 		
+			// Check for new SlugCI
 			if (!FileSystemTasks.DirectoryExists(CISession.SlugCIPath))
 			{
 				Logger.Warn(".SlugCI directory does not exist.  Proceeding with converting solution to .SlugCI format specifications");
 				// Need to convert project to SlugCI layout.
 			}
 
-			
+			// Convert the project
 			ControlFlow.Assert(Converter(),"Failure during SlugCI Converter processing.");
 			IsInSlugCIFormat = true;
 			return true;
@@ -146,11 +148,14 @@ namespace Slug.CI
 						DeleteFile(oldNukeFile);
 					}
 
+					// There could be either a .nuke folder or file - delete both
 					DeleteFile(CISession.RootDirectory / ".nuke");
+					DeleteDirectory(CISession.RootDirectory / ".nuke");
 					DeleteFile(CISession.RootDirectory / "build.cmd");
 					DeleteFile(CISession.RootDirectory / "build.ps1");
 					DeleteFile(CISession.RootDirectory / "build.sh");
 					DeleteFile(CISession.RootDirectory / "global.json");
+					DeleteFile(CISession.RootDirectory / "gitversion.yml");
 					IsSlugNukeFormat = false;
 				}
 				catch ( Exception e ) {

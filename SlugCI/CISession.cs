@@ -134,17 +134,17 @@ namespace Slug.CI.NukeClasses
 		/// <summary>
 		/// Level of verbosity for the Compile Stage
 		/// </summary>
-		public DotNetVerbosity VerbosityCompile { get; set; }
+		public DotNetVerbosity VerbosityCompile { get; set; } = DotNetVerbosity.Normal;
 
 		/// <summary>
 		/// Level of verbosity for the Pack Stage
 		/// </summary>
-		public DotNetVerbosity VerbosityPack { get; set; }
+		public DotNetVerbosity VerbosityPack { get; set; } = DotNetVerbosity.Normal;
 
 		/// <summary>
 		/// Level of verbosity for the CalcVersion Stage
 		/// </summary>
-		public Verbosity VerbosityCalcVersion { get; set; }
+		public Verbosity VerbosityCalcVersion { get; set; } = Verbosity.Normal;
 
 
 		/// <summary>

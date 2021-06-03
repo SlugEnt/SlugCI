@@ -42,6 +42,13 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="ciSession">The SlugCI Session object</param>
 		public SlugCI (CISession ciSession) {
+			Console.WriteLine(Environment.NewLine);
+			Color lineColor = Color.WhiteSmoke;
+			Console.ForegroundColor = lineColor;
+
+			Misc.WriteMainHeader("SlugCI Initialization of Repository");
+
+
 			CISession = ciSession;
 			CISession.SlugCIPath = CISession.RootDirectory / ".slugci";
 			CISession.SourceDirectory = CISession.RootDirectory / "src";
@@ -122,7 +129,7 @@ namespace Slug.CI
 		/// Displays information about the solution, its projects, git repo, etc.
 		/// </summary>
 		public void DisplayInfo () {
-			Misc.WriteMainHeader("SlugCI / Repository Info");
+			Misc.WriteMainHeader(CISession.Solution.Name + "::  SlugCI / Repository Info");
 			Console.Write("    {0,-25}","Project Root:",Color.WhiteSmoke);
 			Console.WriteLine(CISession.RootDirectory,Color.Cyan);
 
@@ -145,9 +152,9 @@ namespace Slug.CI
 			Console.WriteLine(CISession.NugetRepoURL, Color.Cyan);
 
 			Console.WriteLine();
-			Console.WriteLine("-------------------------------------------------------------");
-			Console.WriteLine("                  GIT  Information");
-			Console.WriteLine("-------------------------------------------------------------");
+			Console.WriteLine("-------------------------------------------------------------",Color.DarkCyan);
+			Console.WriteLine("                  GIT  Information", Color.DarkCyan);
+			Console.WriteLine("-------------------------------------------------------------", Color.DarkCyan);
 
 			Console.Write("    {0,-25}", "Main Branch Name:", Color.WhiteSmoke);
 			Console.WriteLine(CISession.GitProcessor.MainBranchName, Color.Cyan);
@@ -161,33 +168,34 @@ namespace Slug.CI
 			
 			
 			Console.WriteLine();
-			Console.WriteLine("-------------------------------------------------------------");
-			Console.WriteLine("                  Environment Variables");
-			Console.WriteLine("-------------------------------------------------------------");
+			Console.WriteLine("-------------------------------------------------------------", Color.DarkCyan);
+			Console.WriteLine("                  Environment Variables", Color.DarkCyan);
+			Console.WriteLine("-------------------------------------------------------------", Color.DarkCyan);
 			Console.WriteLine("   Required: ", Color.Green);
 			foreach ( KeyValuePair<string, string> envVar in CISession.EnvironmentVariables) {
-				Console.WriteLine("   {0,-35}  |  {1,-60}", envVar.Key, envVar.Value);
+				Console.Write("  {0,-35}  |  ",envVar.Key,Color.WhiteSmoke);
+				Console.WriteLine("{0,-60}",  envVar.Value, Color.DarkCyan);
 			}
-			Console.WriteLine("  Missing Required:", Color.Red);
+
+			Console.WriteLine(Environment.NewLine + "  Missing Required:", Color.Red);
 			foreach ( string envVar in MissingEnvironmentVariables ) {
-				Console.WriteLine("   {0,-35}", envVar);
+				Console.Write("  {0,-35}", envVar, Color.WhiteSmoke);
 			}
 
 
 			Console.WriteLine();
-			Console.WriteLine("-------------------------------------------------------------");
-			Console.WriteLine("                  Project Info");
-			Console.WriteLine("-------------------------------------------------------------");
-			Console.WriteLine(" {0,-30}  ","Project","How Deployed","Framework","Assembly Name");
+			Console.WriteLine("-------------------------------------------------------------", Color.DarkCyan);
+			Console.WriteLine("                  Project Info", Color.DarkCyan);
+			Console.WriteLine("-------------------------------------------------------------", Color.DarkCyan);
+			Console.WriteLine(" {0,-29}{1,-10}   {2,-18}  {3,-30}","Project","How Deployed","Framework","Assembly Name",Color.Magenta);
 			foreach ( SlugCIProject project in CISession.Projects ) {
-				Console.WriteLine(" {0,-30}  {1,-10}  {2,-12}  {3,-30}", project.Name,project.Deploy.ToString(),project.Framework, project.AssemblyName);
+				Console.WriteLine(" {0,-30}  {1,-10}  {2,-18}  {3,-30}", project.Name,project.Deploy.ToString(),project.Framework, project.AssemblyName, Color.WhiteSmoke);
 			}
-
 
 
 			if ( CISession.IsInteractiveRun ) {
 				while (Console.KeyAvailable) { Console.ReadKey(true); }
-				Console.WriteLine("{0}Press Any key to continue",Environment.NewLine);
+				Console.WriteLine("{0}Press Any key to continue",Environment.NewLine, Color.WhiteSmoke);
 				Console.ReadKey();
 			}
 		}
@@ -303,8 +311,8 @@ namespace Slug.CI
 				return true;
 			}
 
-			Console.WriteLine("Some environment variables are missing.  These may or may not be required.", Color.Yellow);
-			foreach (string item in MissingEnvironmentVariables) Console.WriteLine("  -->  " + item);
+			Console.WriteLine(Environment.NewLine + "Some environment variables are missing.  These may or may not be required.", Color.Yellow);
+			foreach (string item in MissingEnvironmentVariables) Console.WriteLine("  -->  " + item,Color.Yellow);
 			return false;
 		}
 

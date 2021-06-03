@@ -52,6 +52,10 @@
     "Help": {
       "commandName": "Project",
       "commandLineArgs": "-h"
+    },
+    "GenericTest": {
+      "commandName": "Project",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\NukeTestControl --deployto alpha"
     }
   }
 }
