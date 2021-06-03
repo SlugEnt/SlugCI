@@ -168,7 +168,7 @@ namespace Slug.CI
 		/// <summary>
 		/// Constructor - From the output of a git show with full information
 		/// </summary>
-		/// <param name="outputLines">The output of the ShowCommit command</param>
+		/// <param name="outputLines">The output of the ShowCommitNoDiff command</param>
 		public GitCommitInfo (List<Output> outputLines) {
 			// First, confirm we have the right output/
 			ControlFlow.Assert(outputLines[0].Text.StartsWith(GitProcessor.GIT_SHOW_SLUGCI), "The output provided is not a SlugCI Commit Output structure!");

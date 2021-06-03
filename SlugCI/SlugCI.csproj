@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyVersion>0.8.4.215</AssemblyVersion>
+    <AssemblyVersion>0.8.4.223</AssemblyVersion>
     <RootNamespace>Slug.CI</RootNamespace>
     <Authors>Scott Herrmann</Authors>
     <Company>SlugEnt</Company>

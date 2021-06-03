@@ -256,6 +256,8 @@ namespace Slug.CI
 				slugCIProject.VSProject = x;
 
 				slugCIProject.AssemblyName = x.GetProperty("AssemblyName");
+				slugCIProject.PackageId = x.GetProperty("PackageId");
+
 				ControlFlow.Assert(!slugCIProject.AssemblyName.IsNullOrEmpty(),
 				                   "Unable to locate the Assembly name from the .csproj for project [" + slugCIProject.Name + "]");
 			}
@@ -270,7 +272,6 @@ namespace Slug.CI
 		/// </summary>
 		public void Execute () {
 			SlugBuilder slugBuilder = new SlugBuilder(CISession);
-			return;
 		}
 
 		/// <summary>

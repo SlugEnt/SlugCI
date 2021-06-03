@@ -23,6 +23,13 @@ namespace Slug.CI
 
 
 		/// <summary>
+		/// The deployable Nuget Package name. 
+		/// </summary>
+		[JsonIgnore]
+		public string PackageId { get; set; }
+
+
+		/// <summary>
 		/// The results of the build process for this project.
 		/// </summary>
 		[JsonIgnore]

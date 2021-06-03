@@ -154,9 +154,11 @@ namespace Slug.CI.SlugBuildStages
 					fileName = fileName.TrimEnd(".symbols.nupkg");
 					fileName = fileName.TrimEnd(".nupkg");
 					fileName = fileName.TrimEnd("." + CISession.VersionInfo.SemVersionAsString);
+					fileName = fileName.ToLower();
+
 					// Loop thru projects looking for that assembly name
 					foreach ( SlugCIProject project in CISession.Projects ) {
-						if ( project.AssemblyName == fileName ) {
+						if ( project.AssemblyName.ToLower() == fileName || project.PackageId.ToLower() == fileName) {
 							project.Results.PublishedSuccess = true;
 							break;
 						}
@@ -166,6 +168,8 @@ namespace Slug.CI.SlugBuildStages
 				// Set stage status based upon Step Status
 				SetInprocessStageStatus(stepStatus);
 			}
+
+			
 		}
 	}
 }

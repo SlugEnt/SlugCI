@@ -96,13 +96,16 @@ namespace Nuke.Common.OutputSinks
             if ( isInteractive ) {
 	            bool continueLooping = true;
 	            while ( continueLooping ) {
-		            Console.WriteLine("Press (x) to exit, (d) to view detailed error information");
+		            Console.WriteLine("Press (x) to exit, (g) to display git history  (d) to view detailed error information");
 		            ConsoleKeyInfo keyInfo = Console.ReadKey();
 		            if ( keyInfo.Key == ConsoleKey.X ) return;
 		            if ( keyInfo.Key == ConsoleKey.D ) {
                         WriteNormal();
                         WriteSevereMessages();
-                        return;
+		            }
+
+		            if ( keyInfo.Key == ConsoleKey.G ) {
+                        ciSession.GitProcessor.PrintGitHistory();
 		            }
 	            }
             }

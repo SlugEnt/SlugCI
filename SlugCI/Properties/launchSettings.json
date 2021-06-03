@@ -55,7 +55,7 @@
     },
     "GenericTest": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\NukeTestControl --deployto alpha"
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\TimeGuid --deployto alpha"
     }
   }
 }

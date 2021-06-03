@@ -200,7 +200,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		public GitCommitInfo GetCommitInfo (string commitHash) {
 			List<Output> gitOutput;
-			gitOutput = ShowCommit(commitHash);
+			gitOutput = ShowCommitNoDiff(commitHash);
 			return new GitCommitInfo(gitOutput);
 			/*
 			string gitArgs = "show --format=\"%h|%cn|%ct|%s|%d \" --no-patch " + commitHash;
@@ -263,8 +263,10 @@ namespace Slug.CI
 		private RecordGitDescribeTag FindLatestGitVersionTagOnBranch (string branchName) {
 			List<Output> gitOutput;
 			string gitArgs = "describe --tags " + branchName + " --long --match \"Ver*\"";
-			ExecuteGitTryCatch("FindLatestGitVersionTagOnBranch", gitArgs, out gitOutput);
+			ExecuteGit( gitArgs, out gitOutput);
 			if ( gitOutput.Count == 0 ) return new RecordGitDescribeTag("", 0, "");
+			if ( gitOutput [0].Text.Contains("fatal: No names found") ) return new RecordGitDescribeTag("", 0, "");
+			if (gitOutput[0].Text.Contains("fatal: No tags can describe")) return new RecordGitDescribeTag("",0,"");
 			return GetGitDescribeTag(gitOutput [0].Text);
 		}
 
@@ -663,7 +665,7 @@ namespace Slug.CI
 		/// <summary>
 		/// Prints the history of the Git commands to the console.
 		/// </summary>
-		private void PrintGitHistory () {
+		public void PrintGitHistory () {
 
 			Console.WriteLine("");
 			Console.WriteLine("Git Command Execution History is below for debugging purposes", Color.DeepSkyBlue);
@@ -680,15 +682,15 @@ namespace Slug.CI
 
 
 		/// <summary>
-		/// Executes the Git Cat-File command against a given command.
+		/// Retrieves information about a given commit, except for the differences information which can be very lengthy.
 		/// </summary>
 		/// <param name="commitHash"></param>
 		/// <returns></returns>
-		public List<Output> ShowCommit (string commitHash) {
+		public List<Output> ShowCommitNoDiff (string commitHash) {
 			List<Output> gitOutput;
 
 			// git show --format=format:"M:slugci%ncommit: %h%nparents: %P%ncommitter: %cn%ncdate: %ct%nrefs: %d%nmsg: %s" 65a8e5
-			string gitArgs = "show --format=format:\"" +
+			string gitArgs = "show --no-patch --format=format:\"" +
 			                 GIT_SHOW_SLUGCI +
 			                 "%n" +
 			                 GIT_SHOW_COMMIT +

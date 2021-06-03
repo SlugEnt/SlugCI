@@ -114,6 +114,12 @@ namespace Slug.CI.SlugBuildStages
 			incrementMinor = (currentBranchName.StartsWith("feature") || currentBranchName.StartsWith("feat"));
 			incrementMajor = (currentBranchName.StartsWith("major"));
 
+			// Set IncrementPatch if it is not a key branch name and none of the above is set.
+			if ( !incrementMajor && !incrementMinor && !incrementPatch ) {
+				if ( currentBranchName != "alpha" && currentBranchName != "beta" && currentBranchName != CISession.GitProcessor.MainBranchName )
+					incrementPatch = true;
+			}
+
 			string versionPreReleaseName = "alpha";
 			if ( CISession.PublishTarget == PublishTargetEnum.Beta ) versionPreReleaseName = "beta";
 			
@@ -204,7 +210,15 @@ namespace Slug.CI.SlugBuildStages
 			// tag to the main version and then add the alpha / beta to it...
 			SemVersion tempVersion = CompareToMainVersion(mostRecentBranchTypeVersion, comparisonBranch.Name);
 
-			SemVersionPreRelease semPre = new SemVersionPreRelease(tempVersion.Prerelease);
+
+			// If this is the first Version tag on an alpha branch then create new.
+			SemVersionPreRelease semPre;
+			if ( tempVersion.Prerelease != string.Empty ) 
+				semPre = new SemVersionPreRelease(tempVersion.Prerelease);
+			else 
+				semPre = new SemVersionPreRelease("alpha",0,IncrementTypeEnum.None);
+			
+
 			if (incrementMinor) semPre.BumpMinor();
 			else if (incrementPatch) semPre.BumpPatch();
 			else if (incrementMajor) semPre.BumpMajor();
