@@ -4,6 +4,7 @@ using static Nuke.Common.IO.FileSystemTasks;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
+using Semver;
 
 namespace Slug.CI.NukeClasses
 {
@@ -219,6 +220,12 @@ namespace Slug.CI.NukeClasses
 		/// or commit any changes...
 		/// </summary>
 		public bool WasPreviouslyCommitted { get; set; }
+
+
+		/// <summary>
+		/// If the user wishes to override the calculated version, this is how they do it...
+		/// </summary>
+		public SemVersion ManuallySetVersion { get; set; } = null;
 
 
 		/// <summary>

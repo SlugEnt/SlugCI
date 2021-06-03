@@ -9,6 +9,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Semver;
 using Console = Colorful.Console;
 
 
@@ -349,6 +350,21 @@ namespace Slug.CI
 			}
 
 			return files;
+		}
+
+
+
+		/// <summary>
+		/// Sets the next version manually.
+		/// </summary>
+		/// <param name="userVersionInput"></param>
+		/// <returns></returns>
+		public bool SetVersionManually (string userVersionInput) {
+			// Try to conver to a SemVer
+			if ( !SemVersion.TryParse(userVersionInput, out SemVersion semVersion, true) ) return false;
+
+			CISession.ManuallySetVersion = semVersion;
+			return true;
 		}
 	}
 }

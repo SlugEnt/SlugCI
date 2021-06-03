@@ -178,6 +178,11 @@ namespace Slug.CI
 				Misc.WriteMainHeader("SlugCI Interactive Menu");
 
 				Console.WriteLine(" (I)  Information about Project", Color.Yellow);
+
+				string ver = "";
+				if ( ciSession.ManuallySetVersion != null ) ver = ciSession.ManuallySetVersion.ToString();
+				Console.WriteLine(" (V)  Manually Set the next version [ " + ver + " ]", Color.WhiteSmoke);
+
 				Console.WriteLine(" (X)  Exit", Color.Red);
 				Console.WriteLine();
 				Console.WriteLine(" {0,-25}  |  {1,-30}", "Target Deploy", ciSession.PublishTarget.ToString(),lineColor);
@@ -189,16 +194,41 @@ namespace Slug.CI
 				List<ConsoleKey> validKeys = new List<ConsoleKey>()
 				{
 					ConsoleKey.I,
+					ConsoleKey.V,
 					ConsoleKey.Enter,
 				};
 
 				ConsoleKey answer = PromptAndGetResponse(ConsoleKey.Enter, validKeys, "Press Enter to start the Build Process  OR  Select an Item");
 				if ( answer == ConsoleKey.I ) slugCi.DisplayInfo();
-				if ( answer == ConsoleKey.Enter ) return true;
+				else if ( answer == ConsoleKey.Enter ) return true;
+				else if (answer == ConsoleKey.V) ManualVersionPrompts(ciSession,slugCi);
+
 			}
 
 			return true;
 		}
+
+
+		private static void ManualVersionPrompts (CISession ciSession, SlugCI slugCi)
+		{
+			Misc.WriteMainHeader("Manually Set Version");
+
+			Console.WriteLine();
+			Console.WriteLine("This allows you to manually set the primary version numbers of the application for the branch being deployed to.");
+			Console.WriteLine("Version number should be in format:   #.#.#");
+			Console.WriteLine("Enter x to exit, not setting the version number");
+			Console.WriteLine();
+
+			bool continueLooping = true;
+			while ( continueLooping ) {
+				Console.WriteLine("Enter Ver # in format #.#.#");
+				string response = Console.ReadLine();
+				if ( response.ToLower() == "x" ) return;
+
+				if (slugCi.SetVersionManually(response)) continueLooping = false;
+			}
+		}
+
 
 
 		/// <summary>

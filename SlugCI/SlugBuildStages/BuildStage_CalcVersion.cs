@@ -92,6 +92,27 @@ namespace Slug.CI.SlugBuildStages
 			mainBranch = branches [CISession.GitProcessor.MainBranchName];
 			GitBranchInfo currentBranch = branches [CISession.GitProcessor.CurrentBranch];
 
+
+			// If version has been set by user manually, then we validate it and set it.
+			if ( CISession.ManuallySetVersion != null ) {
+				ControlFlow.Assert(CISession.ManuallySetVersion > currentBranch.LatestSemVersionOnBranch,
+				                   "Manually set version must be greater than the most current version on the branch deploying to");
+				string releaseType = "";
+				string semVersionPreRelease = "";
+				if ( CISession.PublishTarget == PublishTargetEnum.Alpha ) releaseType = "alpha";
+				else if (CISession.PublishTarget == PublishTargetEnum.Beta) releaseType = "beta";
+				else if ( CISession.PublishTarget == PublishTargetEnum.Production ) {
+					newVersion = CISession.ManuallySetVersion;
+					CISession.VersionInfo = new VersionInfo(newVersion, currentBranch.LatestCommitOnBranch.CommitHash);
+					return StageCompletionStatusEnum.Success;
+				}
+				SemVersionPreRelease semPre = new SemVersionPreRelease(releaseType, 0, IncrementTypeEnum.None);
+				newVersion = new SemVersion(CISession.ManuallySetVersion.Major, CISession.ManuallySetVersion.Minor, CISession.ManuallySetVersion.Patch, semPre.Tag());
+				CISession.VersionInfo = new VersionInfo(newVersion, currentBranch.LatestCommitOnBranch.CommitHash);
+				return StageCompletionStatusEnum.Success;
+			}
+
+
 			// If the top commit on branch is already version tagged, then we are assuming they want to
 			// finish off later steps that might not have run successfully previously.
 			if ( (CISession.PublishTarget == PublishTargetEnum.Production && currentBranch.Name == mainBranch.Name) || CISession.PublishTarget != PublishTargetEnum.Production ) {
@@ -101,7 +122,6 @@ namespace Slug.CI.SlugBuildStages
 					CISession.WasPreviouslyCommitted = true;
 					newVersion = mostCurrentSemVerOnBranch;
 					CISession.VersionInfo = new VersionInfo(newVersion, currentBranch.LatestCommitOnBranch.CommitHash);
-					//CISession.SemVersion = newVersion;
 					Console.WriteLine("No changes require a version change.  Assuming this is a continuation of a prior post compile failure.",Color.Yellow);
 					Logger.Success("Existing Version is:  " + newVersion);
 					return StageCompletionStatusEnum.Success;
@@ -141,7 +161,7 @@ namespace Slug.CI.SlugBuildStages
 
 			// Store the version that should be set for the build.
 			CISession.VersionInfo = new VersionInfo(newVersion, currentBranch.LatestCommitOnBranch.CommitHash);
-			//CISession.SemVersion = newVersion;
+			
 			
 			Logger.Success("New Version is:  " + newVersion);
 
