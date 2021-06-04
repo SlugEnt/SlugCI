@@ -40,6 +40,14 @@ namespace Slug.CI
 
 
 		/// <summary>
+		/// Once Startup has been run this is true.
+		/// </summary>
+		private bool IsReady { get; set; }
+
+
+		
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="ciSession">The SlugCI Session object</param>
@@ -64,9 +72,14 @@ namespace Slug.CI
 
 
 			ciSession.GitProcessor = new GitProcessor(ciSession);
-			if (ciSession.GitProcessor.AreUncommitedChangesOnLocalBranch) 
-				throw new ApplicationException("There are uncommitted changes on the current branch: " + ciSession.GitProcessor.CurrentBranch +  "  Commit or discard existing changes and then try again.");
+		}
 
+
+		/// <summary>
+		/// Performs initial steps:  Load slugciconfig, load projects, etc.
+		/// </summary>
+		public void Startup () {
+			CISession.GitProcessor.Startup();
 
 			CheckForEnvironmentVariables();
 
@@ -76,13 +89,15 @@ namespace Slug.CI
 
 			// Ensure Solution is in SlugCI format. If not migrate it.
 			ConvertToSlugCI converter = new ConvertToSlugCI(CISession);
-			if ( !converter.IsInSlugCIFormat ) {
-				ControlFlow.Assert(converter.IsInSlugCIFormat,"The solution is not in the proper SlugCI format.  This should be something that is automatically done.  Obviously something went wrong.");
+			if (!converter.IsInSlugCIFormat)
+			{
+				ControlFlow.Assert(converter.IsInSlugCIFormat, "The solution is not in the proper SlugCI format.  This should be something that is automatically done.  Obviously something went wrong.");
+				CISession.GitProcessor.RefreshUncommittedChanges();
 			}
 
 
 			// Reload solution info if it was moved.
-			if (converter.SolutionWasMoved) 
+			if (converter.SolutionWasMoved)
 				LoadSolutionInfo();
 
 
@@ -96,34 +111,40 @@ namespace Slug.CI
 
 
 			// Setup Publish Results table 
-			foreach ( SlugCIProject project in ciSession.Projects ) {
+			foreach (SlugCIProject project in CISession.Projects)
+			{
 				PublishResultRecord resultRecord = new PublishResultRecord(project);
 				project.Results = resultRecord;
-				ciSession.PublishResults.Add(project.Name,resultRecord);
+				CISession.PublishResults.Add(project.Name, resultRecord);
 			}
 
 			// Quick stats on number of Deploy targets by type
 			short deployNone = 0;
-			foreach ( SlugCIProject slugCiProject in ciSession.SlugCIConfigObj.Projects ) {
-				if ( slugCiProject.Deploy == SlugCIDeployMethod.Copy ) ciSession.CountOfDeployTargetsCopy++;
-				else if ( slugCiProject.Deploy == SlugCIDeployMethod.Nuget )
-					ciSession.CountOfDeployTargetsNuget++;
+			foreach (SlugCIProject slugCiProject in CISession.SlugCIConfigObj.Projects)
+			{
+				if (slugCiProject.Deploy == SlugCIDeployMethod.Copy) CISession.CountOfDeployTargetsCopy++;
+				else if (slugCiProject.Deploy == SlugCIDeployMethod.Nuget)
+					CISession.CountOfDeployTargetsNuget++;
 				else
 					deployNone++;
 			}
 
 
 			// If we have Deploy "Copy" targets then make sure the variables are set and folders are valid
-			if ( ciSession.CountOfDeployTargetsCopy > 0 ) {
-				ciSession.DeployCopyPath = GetDeployFolder();
-				if ( ciSession.DeployCopyPath == null ) {
-					if ( ciSession.SlugCIConfigObj.IsRootFolderUsingEnvironmentVariable(ciSession.PublishTarget) )
-						ControlFlow.Assert(ciSession.DeployCopyPath != null,
-						                   "The deploy folder for Copy Targets is null.  The slugci config file says to use environment variables to determine this setting.....");
+			if (CISession.CountOfDeployTargetsCopy > 0)
+			{
+				CISession.DeployCopyPath = GetDeployFolder();
+				if (CISession.DeployCopyPath == null)
+				{
+					if (CISession.SlugCIConfigObj.IsRootFolderUsingEnvironmentVariable(CISession.PublishTarget))
+						ControlFlow.Assert(CISession.DeployCopyPath != null,
+										   "The deploy folder for Copy Targets is null.  The slugci config file says to use environment variables to determine this setting.....");
 					else
-						ControlFlow.Assert(ciSession.DeployCopyPath != null, "The deploy folder specified in slugci config file is empty..");
+						ControlFlow.Assert(CISession.DeployCopyPath != null, "The deploy folder specified in slugci config file is empty..");
 				}
 			}
+
+			IsReady = true;
 		}
 
 
@@ -272,6 +293,9 @@ namespace Slug.CI
 		/// Runs the SlugCI Process
 		/// </summary>
 		public void Execute () {
+			if (CISession.GitProcessor.AreUncommitedChangesOnLocalBranch)
+				throw new ApplicationException("There are uncommitted changes on the current branch: " + CISession.GitProcessor.CurrentBranch + "  Commit or discard existing changes and then try again.");
+
 			SlugBuilder slugBuilder = new SlugBuilder(CISession);
 		}
 

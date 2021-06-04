@@ -40,6 +40,8 @@ namespace Slug.CI
 		                       bool interactive = true,
 		                       bool skipnuget = false,
 		                       bool info = false) {
+			CISession ciSession = new CISession();
+
 			try {
 				Console.SetWindowSize(130,34);
 
@@ -48,7 +50,7 @@ namespace Slug.CI
 				// We process thru defaults, at the end if interactive is on, then we
 				// prompt user for changes / confirmation
 
-				CISession ciSession = new CISession();
+				
 
 				// If no RootDir specified, then set to current directory.
 				if ( rootdir == string.Empty )
@@ -105,13 +107,14 @@ namespace Slug.CI
 
 				// Create the SlugCI which is main processing class.
 				SlugCI slugCI = new SlugCI(ciSession);
+				slugCI.Startup();
 
-				if(interactive)
+				if (interactive)
 					Menu(ciSession, slugCI);
 
 
 				// If user wanted info then display it and exit.
-				if ( info ) {
+				if ( info && !interactive) {
 					slugCI.DisplayInfo();
 					return 0;
 				}
@@ -123,6 +126,9 @@ namespace Slug.CI
 				return 0;
 			}
 			catch ( Exception e ) {
+				if (ciSession.GitProcessor != null) 
+					if (ciSession.GitProcessor.HasErrored)
+						ciSession.GitProcessor.PrintGitHistory();
 				Logger.Error(e);
 			}
 
@@ -176,11 +182,11 @@ namespace Slug.CI
 				Console.WriteLine(Environment.NewLine);
 				Color lineColor = Color.WhiteSmoke;
 				
+				
+				Misc.WriteMainHeader("SlugCI Interactive Menu", new List<string>() {ciSession.Solution.Name});
 
-				Misc.WriteMainHeader("SlugCI Interactive Menu");
-
-				Console.WriteLine(" {0}    |  {1,-35}", "Target Deploy", ciSession.PublishTarget.ToString(), lineColor);
-				Console.WriteLine(" {0}    |  {1,-35}", "Compile Config:", ciSession.CompileConfig, lineColor);
+				Console.WriteLine(" {0,-30}    |  {1,-35}", "Target Deploy:", ciSession.PublishTarget.ToString(), lineColor);
+				Console.WriteLine(" {0,-30}    |  {1,-35}", "Compile Config:", ciSession.CompileConfig, lineColor);
 
 				// Line 1 of Menu
 				string ver = "";
@@ -197,6 +203,12 @@ namespace Slug.CI
 					lineColor = Color.WhiteSmoke;
 				Console.WriteLine(" (S)  Skip Nuget Publish  [ " + ciSession.SkipNuget + " ]", lineColor);
 
+				// Line 4 of Menu
+				if ( ciSession.GitProcessor.AreUncommitedChangesOnLocalBranch ) {
+					lineColor = Color.Red;
+					Console.WriteLine(" (R)  Refresh Git (You have uncommitted changes on branch.  Commit and then issue this command", lineColor);
+				}
+				
 
 				// Last line of Menu
 				Console.Write(" (X)  Exit", Color.Red);
@@ -208,6 +220,7 @@ namespace Slug.CI
 				{
 					ConsoleKey.I,
 					ConsoleKey.V,
+					ConsoleKey.R,
 					ConsoleKey.S,
 					ConsoleKey.X,
 					ConsoleKey.Enter,
@@ -215,10 +228,11 @@ namespace Slug.CI
 
 				ConsoleKey answer = PromptAndGetResponse(ConsoleKey.Enter, validKeys, "Press Enter to start the Build Process  OR  Select an Item");
 				if ( answer == ConsoleKey.I ) slugCi.DisplayInfo();
-				else if ( answer == ConsoleKey.Enter ) return true;
+				else if ( answer == ConsoleKey.Enter && !ciSession.GitProcessor.AreUncommitedChangesOnLocalBranch) return true;
 				else if (answer == ConsoleKey.V) ManualVersionPrompts(ciSession,slugCi);
 				else if ( answer == ConsoleKey.S ) ciSession.SkipNuget = !ciSession.SkipNuget;
 				else if ( answer == ConsoleKey.X ) return false;
+				else if ( answer == ConsoleKey.R ) ciSession.GitProcessor.RefreshUncommittedChanges();
 
 				Console.Clear();
 			}
@@ -230,7 +244,8 @@ namespace Slug.CI
 		private static void ManualVersionPrompts (CISession ciSession, SlugCI slugCi)
 		{
 			Misc.WriteMainHeader("Manually Set Version");
-
+			Console.ForegroundColor = Color.WhiteSmoke;
+			
 			Console.WriteLine();
 			Console.WriteLine("This allows you to manually set the primary version numbers of the application for the branch being deployed to.");
 			Console.WriteLine("Version number should be in format:   #.#.#");

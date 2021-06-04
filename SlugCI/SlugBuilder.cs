@@ -74,13 +74,14 @@ namespace Slug.CI
 		private void GitProcessorStartup()
 		{
 			// Setup the GitProcessor
-			_gitProcessor = new GitProcessor(CISession);
+			_gitProcessor = CISession.GitProcessor;
 
 			// Get current branch and ensure there are no uncommitted updates.  These methods will throw if anything is out of sorts.
-			_gitProcessor.GetCurrentBranch();
+			// TODO Remove these - they are part of GitProcesor
+/*			_gitProcessor.GetCurrentBranch();
 			_gitProcessor.RefreshUncommittedChanges();
 			_gitProcessor.RefreshLocalBranchStatus();
-
+*/
 			if (_gitProcessor.IsCurrentBranchMainBranch() && CISession.PublishTarget != PublishTargetEnum.Production)
 			{
 				string msg =

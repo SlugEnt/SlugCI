@@ -116,6 +116,12 @@ namespace Slug.CI
 
 
 		/// <summary>
+		/// True if an internal GIT command errored.
+		/// </summary>
+		public bool HasErrored { get; private set; }
+
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="ciSession"></param>
@@ -134,7 +140,13 @@ namespace Slug.CI
 				logInvocationLogging = true;
 				logOutputLogging = true;
 			}
+		}
 
+
+		/// <summary>
+		/// Perform Git Processing startup processes
+		/// </summary>
+		public void Startup () {
 			GetGitCommandVersion();
 			Colorful.Console.WriteLine("Git Command Version:  " + GitCommandVersion, Color.Yellow);
 
@@ -146,13 +158,14 @@ namespace Slug.CI
 		/// <summary>
 		/// Gets basic info about the repository
 		/// </summary>
-		private void GetRepositoryInfo () {
+		public void GetRepositoryInfo () {
 			RefreshLocalBranchStatus();
 			GetMainBranchName();
 
-			//IdentifyMainBranch();
 			GetCurrentBranch();
 			RefreshUncommittedChanges();
+
+			FetchOriginToLocal(MainBranchName);
 		}
 
 
@@ -406,7 +419,7 @@ namespace Slug.CI
 
 		public SemVersion GetMostRecentVersionTagOfBranch (string branch) {
 			List<Output> gitOutput;
-			string gitArgs = "for-each-ref refs/tags/Ver*-" + branch + ".* --count=1 --sort=-version:refname";
+			string gitArgs = "for-each-ref refs/tags/Ver*-" + branch + "* --count=1 --sort=-version:refname";
 			ExecuteGitTryCatch("GetMostRecentVersionTagOfBranch", gitArgs, out gitOutput);
 			if ( gitOutput.Count == 0 ) {
 				return new SemVersion(0, 0, 0);
@@ -557,6 +570,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		private bool ExecuteGit_NoOutput (string cmdArguments) {
 			string command = GIT_COMMAND;
+			HasErrored = false;
 
 			// Log it
 			Output output = new Output();
@@ -569,7 +583,13 @@ namespace Slug.CI
 			// Copy output to history.
 			GitCommandOutputHistory.AddRange(process.Output);
 
-			if ( process.ExitCode != 0 ) return false;
+
+			if (process.ExitCode != 0)
+			{
+				HasErrored = true;
+				return false;
+			}
+
 			return true;
 		}
 
@@ -582,7 +602,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		private bool ExecuteGit (string cmdArguments, out List<Output> output) {
 			string command = GIT_COMMAND;
-
+			HasErrored = false;
 
 			// Log it
 			Output outputCmd = new Output();
@@ -600,7 +620,10 @@ namespace Slug.CI
 			// Copy output to history.
 			GitCommandOutputHistory.AddRange(process.Output);
 
-			if ( process.ExitCode != 0 ) return false;
+			if ( process.ExitCode != 0 ) {
+				HasErrored = true;
+				return false;
+			}
 			return true;
 		}
 
@@ -618,6 +641,7 @@ namespace Slug.CI
 				ControlFlow.Assert(ExecuteGit(gitArgs, out output) == true, cmdName + ":::  .Git Command Failed:  git " + gitArgs);
 			}
 			catch ( Exception e ) {
+				HasErrored = true;
 				PrintGitHistory();
 				throw;
 			}
@@ -747,11 +771,35 @@ namespace Slug.CI
 
 
 		/// <summary>
-		/// Deletes a Branch
-		/// <param name="local">If true, the local branch is deleted.  If false, the remote</param>
+		/// Performs a Git Fetch of the given branch from the remote to the local repository WITHOUT doing a checkout!
 		/// </summary>
-		/// <param name="branchName"></param>
-		public bool DeleteBranch (string branchName, bool local = true) {
+		/// <param name="branchName">Name of branch to pull</param>
+		/// <returns></returns>
+		public bool FetchOriginToLocal (string branchName, bool rejectionIsValid = true) {
+			if ( CurrentBranch == branchName ) return true;
+			List<Output> gitOutput;
+			string gitArgs = "fetch origin " + branchName + ":" + branchName;
+
+			if ( !ExecuteGit(gitArgs, out gitOutput) ) 
+				// We may get a rejection, if this is acceptable we return true.
+				if ( rejectionIsValid ) {
+					if ( gitOutput.Count > 0 )
+						if ( gitOutput [gitOutput.Count - 1].Text.Contains("! [rejected]") )
+							return true;
+					}
+				else
+					return false;
+
+			return true;
+		}
+
+
+		/// <summary>
+			/// Deletes a Branch
+			/// <param name="local">If true, the local branch is deleted.  If false, the remote</param>
+			/// </summary>
+			/// <param name="branchName"></param>
+			public bool DeleteBranch (string branchName, bool local = true) {
 			List<Output> gitOutput;
 			string gitArgs = "";
 			if ( local == false )
