@@ -36,6 +36,17 @@ namespace Slug.CI {
 	/// </summary>
 	public class SlugCIConfig :IEquatable<SlugCIConfig> {
 		/// <summary>
+		/// This value should be updated every time this config layout changes
+		/// </summary>
+		public const string CONFIG_STRUCTURE_VERSION = "0.10.0";
+
+		/// <summary>
+		/// The version format of the config file.
+		/// </summary>
+		public string ConfigStructureVersion { get; set; }
+
+
+		/// <summary>
 		/// If true Code Coverage reports will be run.
 		/// </summary>
 		public bool UseCodeCoverage { get; set; } = true;
@@ -182,12 +193,24 @@ namespace Slug.CI {
 			b.DeployToVersionedFolder = DeployToVersionedFolder;
 			b.UseCodeCoverage = UseCodeCoverage;
 			b.GitRemote = GitRemote;
+			b.ConfigStructureVersion = ConfigStructureVersion;
+
 			foreach ( SlugCIProject project in Projects ) {
 				b.Projects.Add(project.Copy());
 			}
 
 			return b;
 		}
+
+
+		/// <summary>
+		/// Updates the version # of the Config file to be the current layout version #.
+		/// We do this so we know when we have new structural versions of the file to write out.
+		/// </summary>
+		public void UpdateFileVersion () {
+			ConfigStructureVersion = CONFIG_STRUCTURE_VERSION;
+		}
+
 
 		/// <summary>
 		/// Equals method override
@@ -220,7 +243,7 @@ namespace Slug.CI {
 			if ( b.UseCodeCoverage != UseCodeCoverage ) return false;
 			if ( b.Projects.Count != Projects.Count ) return false;
 			if ( b.GitRemote != GitRemote ) return false;
-				
+			if ( b.ConfigStructureVersion != ConfigStructureVersion ) return false;
 
 			// Loop thru projects looking for complete matches
 			foreach ( SlugCIProject project in Projects ) {

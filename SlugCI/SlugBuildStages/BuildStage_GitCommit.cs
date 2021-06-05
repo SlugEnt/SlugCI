@@ -17,6 +17,7 @@ namespace Slug.CI.SlugBuildStages
 		/// </summary>
 		public BuildStage_GitCommit (CISession ciSession) : base(BuildStageStatic.STAGE_GITCOMMIT, ciSession) {
 			PredecessorList.Add(BuildStageStatic.STAGE_TEST);
+			PredecessorList.Add(BuildStageStatic.STAGE_TYPEWRITER_VER);
 		}
 
 

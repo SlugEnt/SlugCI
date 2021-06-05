@@ -62,7 +62,7 @@ namespace Slug.CI
 			if ( index == -1 ) {
 				index = preReleaseTag.IndexOf('.');
 				if (index == -1)
-					throw new ArgumentException("Unable to find the . in the prerelease portion of the semanticVersion [" + preReleaseTag + "]");
+					throw new ArgumentException("Unable to find the . or - in the prerelease portion of the semanticVersion [" + preReleaseTag + "]");
 			}
 
 			string trailer = preReleaseTag.Substring(++index);

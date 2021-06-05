@@ -110,7 +110,8 @@ namespace Slug.CI
 				slugCI.Startup();
 
 				if (interactive)
-					Menu(ciSession, slugCI);
+					if ( !Menu(ciSession, slugCI) )
+						return 1;
 
 
 				// If user wanted info then display it and exit.
@@ -181,8 +182,22 @@ namespace Slug.CI
 			while (keepLooping) {
 				Console.WriteLine(Environment.NewLine);
 				Color lineColor = Color.WhiteSmoke;
+
+				// Display Git Info / Versions of project
+				string versionPreReleaseName = "alpha";
+
+				// Get most recent Version Tag for the desired branch type
 				
+
+				Misc.WriteSubHeader("Git Project Information");
+				Console.WriteLine(" {0,-25}  |  {1,-34}","Current Branch",ciSession.GitProcessor.CurrentBranch);
+				Console.WriteLine(" {0,-25}  |  {1,-20}","Main Branch Name", ciSession.GitProcessor.MainBranchName);
+				Console.WriteLine(" {0,-25}  |  {1,-20}","Main Branch Version #", ciSession.GitBranches[ciSession.GitProcessor.MainBranchName].LatestSemVersionOnBranch.ToString());
 				
+				Console.WriteLine(" {0,-25}  |  {1,-20}", "Alpha Branch Version #", ciSession.GitProcessor.GetMostRecentVersionTagOfBranch("alpha"));
+				Console.WriteLine(" {0,-25}  |  {1,-20}", "Beta Branch Version #", ciSession.GitProcessor.GetMostRecentVersionTagOfBranch("beta"));
+
+
 				Misc.WriteMainHeader("SlugCI Interactive Menu", new List<string>() {ciSession.Solution.Name});
 
 				Console.WriteLine(" {0,-30}    |  {1,-35}", "Target Deploy:", ciSession.PublishTarget.ToString(), lineColor);

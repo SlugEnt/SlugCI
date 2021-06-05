@@ -52,6 +52,12 @@ namespace Slug.CI
 
 
 		/// <summary>
+		/// All recorded output from the stage.  Note: How much is output is determined by the Verbosity setting for the stage.
+		/// </summary>
+		public List<Output> StageOutput { get; private set; } = new List<Output>();
+
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="name">The name of this stage</param>
@@ -92,6 +98,14 @@ namespace Slug.CI
 		}
 
 
+		protected void AddOutputText (string text, OutputType outputType) {
+			Output output = new Output();
+			output.Type = outputType;
+			output.Text = text;
+			StageOutput.Add(output);
+		}
+
+
 		/// <summary>
 		/// Method that must be overridden in child classes.  This is where the main logic for the child process lives.
 		/// </summary>
@@ -99,6 +113,11 @@ namespace Slug.CI
 		protected abstract StageCompletionStatusEnum ExecuteProcess ();
 
 
+		/// <summary>
+		/// For stages that have to process each project of a solution, this allows the overall status to be set according to the
+		/// lowest status of any given project.  So, if 1 project out of 4 failed, the stage status is failed.
+		/// </summary>
+		/// <param name="status"></param>
 		protected void SetInprocessStageStatus (StageCompletionStatusEnum status) {
 			if ( CompletionStatus == StageCompletionStatusEnum.NotStarted ) {
 				CompletionStatus = status;
@@ -137,7 +156,6 @@ namespace Slug.CI
 
 				Misc.WriteMainHeader("SlugBuilder::  " + Name);
 
-				//System.Console.WriteLine("", Color.DarkGray);
 
 				// Set log level to std.  Let the process override if necessary.
 				Logger.LogLevel = LogLevel.Normal;
@@ -153,6 +171,21 @@ namespace Slug.CI
 					Finished(ExecuteProcess());
 
 
+				// Write Finishing Stage Message
+				Color lineColor = Color.Red;
+
+				lineColor = CompletionStatus switch
+				{
+					StageCompletionStatusEnum.Success => Color.Green,
+					StageCompletionStatusEnum.Skipped => Color.Cyan,
+					StageCompletionStatusEnum.Warning => Color.Yellow,
+				};
+
+				
+				Console.WriteLine("Stage Result:  {0}", CompletionStatus.ToString(), lineColor);
+
+
+				// Return success / Failure result
 				if ( CompletionStatus >= StageCompletionStatusEnum.Warning ) return true;
 			}
 			catch ( ProcessException p ) {

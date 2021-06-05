@@ -12,8 +12,8 @@ namespace Slug.CI.SlugBuildStages
 	/// The DotNet Cleaning stage
 	/// </summary>
 	class BuildStage_CalcVersion : BuildStage {
-		private List<RecordBranchLatestCommit> latestCommits;
-		private Dictionary<string, GitBranchInfo> branches = new Dictionary<string, GitBranchInfo>();
+		
+		//private Dictionary<string, GitBranchInfo> branches = new Dictionary<string, GitBranchInfo>();
 		private string currentBranchName;
 		private GitBranchInfo mainBranch;
 
@@ -34,38 +34,6 @@ namespace Slug.CI.SlugBuildStages
 		}
 
 
-		/// <summary>
-		/// Retrieves information about all the branches (local and remote).  It removes
-		/// remote branches that are the exact same as local branches.  At this point in the
-		/// process this should result in all remote branches that have local counterparts
-		/// being removed from our processing lists.
-		/// </summary>
-		private void GetBranchInfo () {
-			currentBranchName = CISession.GitProcessor.CurrentBranch.ToLower();
-			latestCommits = CISession.GitProcessor.GetAllBranchesWithLatestCommit();
-			foreach (RecordBranchLatestCommit recordBranchLatestCommit in latestCommits)
-			{
-				GitBranchInfo branch = new GitBranchInfo(recordBranchLatestCommit, CISession.GitProcessor);
-				branches.Add(branch.Name, branch);
-			}
-
-			// Process the Dictionary and remove the remotes that are exact same as locals
-			List<string> branchesToRemove = new List<string>();
-			foreach (KeyValuePair<string, GitBranchInfo> branch in branches)
-			{
-				if (branch.Value.Name.StartsWith("remotes/origin"))
-				{
-					string searchName = branch.Value.Name.Substring(15);
-					if (branches.ContainsKey(searchName))
-					{
-						GitBranchInfo b = branches[searchName];
-						if (branch.Value.IsSameAs(b, CISession.VerbosityCalcVersion)) branchesToRemove.Add(branch.Value.Name);
-					}
-				}
-			}
-
-			foreach (string s in branchesToRemove) { branches.Remove(s); }
-		}
 
 
 		/// <summary>
@@ -73,7 +41,9 @@ namespace Slug.CI.SlugBuildStages
 		/// </summary>
 		/// <returns></returns>
 		protected override StageCompletionStatusEnum ExecuteProcess () {
-			GetBranchInfo();
+			//GetBranchInfo();
+			
+			currentBranchName = CISession.GitProcessor.CurrentBranch.ToLower();
 
 			GitBranchInfo comparisonBranch = null;
 
@@ -85,12 +55,12 @@ namespace Slug.CI.SlugBuildStages
 			if ( CISession.PublishTarget == PublishTargetEnum.Production ) branchToFind = CISession.GitProcessor.MainBranchName;
 
 			// Make sure branch exists.
-			if ( !branches.TryGetValue(branchToFind, out comparisonBranch) )
+			if ( !CISession.GitBranches.TryGetValue(branchToFind, out comparisonBranch) )
 				ControlFlow.Assert(true == false, "The destination branch [" + branchToFind + "] does not exist.  You must manually create this branch.");
 
 			// Get Main Branch info
-			mainBranch = branches [CISession.GitProcessor.MainBranchName];
-			GitBranchInfo currentBranch = branches [CISession.GitProcessor.CurrentBranch];
+			mainBranch = CISession.GitBranches [CISession.GitProcessor.MainBranchName];
+			GitBranchInfo currentBranch = CISession.GitBranches [CISession.GitProcessor.CurrentBranch];
 
 
 			// If version has been set by user manually, then we validate it and set it.
@@ -276,6 +246,7 @@ namespace Slug.CI.SlugBuildStages
 
 			return tempVersion;
 		}
+
 
 		/// <summary>
 		/// Calculations to compute the new version when it's a production push.

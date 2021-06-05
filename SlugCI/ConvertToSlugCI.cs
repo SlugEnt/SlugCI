@@ -212,9 +212,13 @@ namespace Slug.CI
 				slugCiConfig.DeployToVersionedFolder = true;
 			}
 
+
 			// Make a copy that we will compare against.
 			SlugCIConfig origSlugCiConfig = slugCiConfig.Copy();
 
+			// Ensure the version of the config file layout is set to most current.  We do this after the copy, so we can 
+			// detect changes in the file layout, fields, etc.
+			slugCiConfig.UpdateFileVersion();
 
 			bool updateProjectAdd = false;
 			bool hasCopyDeployMethod = false;
@@ -269,6 +273,8 @@ namespace Slug.CI
 			if ( origSlugCiConfig != slugCiConfig ) {
 				string json = JsonSerializer.Serialize<SlugCIConfig>(slugCiConfig, SlugCIConfig.SerializerOptions());
 				File.WriteAllText(CISession.SlugCIFileName, json);
+				Console.WriteLine("SlugCIConfig file updated to latest version / values");
+
 				SlugCIConfig = GetSlugCIConfig(true);
 				if ( updateProjectAdd ) {
 					Logger.Warn("The file: {0} was updated.  One ore more projects were added.  Ensure they have the correct Deploy setting.", CISession.SlugCIFileName);

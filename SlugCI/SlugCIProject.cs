@@ -41,9 +41,15 @@ namespace Slug.CI
 		public SlugCIDeployMethod Deploy { get; set; }
 
 		/// <summary>
+		/// If this has NPM Typewriter conversions that are needed, then this is true.
+		/// </summary>
+		public bool HasTypeWriterScripts { get; set; } 
+
+		/// <summary>
 		/// What Framework the project is...
 		/// </summary>
 		public string Framework { get; set; }
+
 
 		/// <summary>
 		/// If this is a unit test project or not
@@ -56,7 +62,7 @@ namespace Slug.CI
 		[JsonIgnore]
 		public Project VSProject { get; set; }
 
-		/// <summary>
+
 		/// Print method
 		/// </summary>
 		/// <returns></returns>
@@ -75,6 +81,7 @@ namespace Slug.CI
 			b.Deploy = Deploy;
 			b.Framework = Framework;
 			b.IsTestProject = IsTestProject;
+			b.HasTypeWriterScripts = HasTypeWriterScripts;
 			return b;
 		}
 
@@ -96,6 +103,7 @@ namespace Slug.CI
 			if (b.Deploy != Deploy) return false;
 			if (b.Framework != Framework) return false;
 			if (b.IsTestProject != IsTestProject) return false;
+			if ( b.HasTypeWriterScripts != HasTypeWriterScripts ) return false;
 
 			return true;
 		}

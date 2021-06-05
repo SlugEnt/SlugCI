@@ -113,6 +113,13 @@ namespace Slug.CI.NukeClasses
 		/// </summary>
 		public List<SlugCIProject> Projects { get; set; }
 
+
+		/// <summary>
+		/// All branches in the Git Repository
+		/// </summary>
+		public Dictionary<string, GitBranchInfo> GitBranches = new Dictionary<string, GitBranchInfo>();
+
+
 		/// <summary>
 		/// If true the SlugCIConfig file is not validated or updated with the latest changes to both SlugCI Config changes as well as solution changes to projects, such as add or deletes..
 		/// <para>Generally only used for testing purposes to provide a slight speed increase when starting</para>

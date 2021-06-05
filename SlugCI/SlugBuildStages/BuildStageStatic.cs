@@ -19,5 +19,7 @@ namespace Slug.CI.SlugBuildStages
 		public const string STAGE_CLEAN = "Clean";
 		public const string STAGE_GITCOMMIT = "GitCommit";
 		public const string STAGE_GITCLEAN = "GitClean";
+		public const string STAGE_TYPEWRITER = "TypeWriter";
+		public const string STAGE_TYPEWRITER_VER = "TypeWriterVer";
 	}
 }

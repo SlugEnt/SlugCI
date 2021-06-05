@@ -459,6 +459,32 @@ namespace Slug.CI
 				PrintGitHistory();
 				throw;
 			}
+		}
+
+
+		/// <summary>
+		/// Commits all changes in current branch with the provided message.
+		/// </summary>
+		/// <param name="commitMsg"></param>
+		public void CommitChanges (string commitMsg) {
+			try
+			{
+				string commitErrStart = "CommitChanges:::  Git Command Failed:  git ";
+				List<Output> gitOutput;
+				string gitArgs = string.Format("commit --all --message=\"{0}\"",  commitMsg);
+				if ( !ExecuteGit(gitArgs, out gitOutput) ) {
+					if ( gitOutput.Count > 0 ) {
+						if ( gitOutput [gitOutput.Count - 1].Text.Contains("nothing to commit, working tree clean") ) return;
+					}
+					else 
+						throw new ApplicationException(commitErrStart + gitArgs);
+				}
+			}
+			catch (Exception e)
+			{
+				PrintGitHistory();
+				throw;
+			}
 
 		}
 

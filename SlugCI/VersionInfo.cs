@@ -8,12 +8,21 @@ namespace Slug.CI
 	/// </summary>
 	public class VersionInfo {
 		public SemVersion SemVersion { get; private set; }
+
 		public string SemVersionAsString { get; private set; }
 
 		public string AssemblyVersion { get; private set; }
+
 		public string FileVersion { get; private set; }
+
 		public string InformationalVersion { get; private set; }
+
 		public SemVersionPreRelease PreRelease { get; set; }
+
+		/// <summary>
+		/// NPM Version.  NPM only uses pure SemVer, no pre-release information
+		/// </summary>
+		public string NPMVersion { get; set; }
 
 
 		/// <summary>
@@ -46,6 +55,8 @@ namespace Slug.CI
 
 
 			InformationalVersion = SemVersionAsString + ".g" + commitHash;
+
+			NPMVersion = semVersion.Major + "." + semVersion.Minor + "." + semVersion.Patch;
 		}
 	}
 }

@@ -2,6 +2,7 @@
 using Slug.CI.NukeClasses;
 using Slug.CI.SlugBuildStages;
 using System;
+using Nuke.Common.Tooling;
 
 namespace Slug.CI
 {
@@ -33,11 +34,13 @@ namespace Slug.CI
 
 			// TODO Remove or comment this out, this is for speeding up testing.
 			foreach ( BuildStage stage in _executionPlan.KnownStages ) {
-			//	if ( stage.Name != BuildStageStatic.STAGE_CALCVERSION && stage.Name != BuildStageStatic.STAGE_PUBLISH ) stage.ShouldSkip = true;
+				if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER && stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER) stage.ShouldSkip = true;
 			}
+			_executionPlan.BuildExecutionPlan(BuildStageStatic.STAGE_TYPEWRITER);
 
 
 			// TODO Need to set this based upon Argument from Program.cs
+
 			_executionPlan.BuildExecutionPlan(BuildStageStatic.STAGE_PUBLISH);
 
 
@@ -47,7 +50,11 @@ namespace Slug.CI
 			Logger.OutputSink.WriteSummary(_executionPlan, CISession.IsInteractiveRun,ciSession);
 
 
-
+			// TODO Move this somewhere...
+			BuildStage_TypeWriterRun tw =  (BuildStage_TypeWriterRun )_executionPlan.GetBuildStage(BuildStageStatic.STAGE_TYPEWRITER);
+			foreach ( Output output in tw.StageOutput ) {
+				Console.WriteLine(output);
+			}
 		}
 
 
@@ -64,6 +71,8 @@ namespace Slug.CI
 			_executionPlan.AddKnownStage(new BuildStage_Cover(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_Pack(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_Publish(CISession));
+			_executionPlan.AddKnownStage(new BuildStage_TypeWriterRun(CISession));
+			_executionPlan.AddKnownStage(new BuildStage_TypeWriterVersioning(CISession));
 		}
 
 

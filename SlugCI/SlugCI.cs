@@ -144,8 +144,48 @@ namespace Slug.CI
 				}
 			}
 
+			GetBranchInfo();
+
 			IsReady = true;
 		}
+
+
+		/// <summary>
+		/// Retrieves information about all the branches (local and remote).  It removes
+		/// remote branches that are the exact same as local CISession.GitBranches.  At this point in the
+		/// process this should result in all remote branches that have local counterparts
+		/// being removed from our processing lists.
+		/// </summary>
+		private void GetBranchInfo()
+		{
+			List<RecordBranchLatestCommit> latestCommits;
+
+			
+			latestCommits = CISession.GitProcessor.GetAllBranchesWithLatestCommit();
+			foreach (RecordBranchLatestCommit recordBranchLatestCommit in latestCommits)
+			{
+				GitBranchInfo branch = new GitBranchInfo(recordBranchLatestCommit, CISession.GitProcessor);
+				CISession.GitBranches.Add(branch.Name, branch);
+			}
+
+			// Process the Dictionary and remove the remotes that are exact same as locals
+			List<string> branchesToRemove = new List<string>();
+			foreach (KeyValuePair<string, GitBranchInfo> branch in CISession.GitBranches)
+			{
+				if (branch.Value.Name.StartsWith("remotes/origin"))
+				{
+					string searchName = branch.Value.Name.Substring(15);
+					if (CISession.GitBranches.ContainsKey(searchName))
+					{
+						GitBranchInfo b = CISession.GitBranches[searchName];
+						if (branch.Value.IsSameAs(b, CISession.VerbosityCalcVersion)) branchesToRemove.Add(branch.Value.Name);
+					}
+				}
+			}
+
+			foreach (string s in branchesToRemove) { CISession.GitBranches.Remove(s); }
+		}
+
 
 
 		/// <summary>
