@@ -5,7 +5,7 @@ using Nuke.Common;
 namespace Slug.CI
 {
 	/// <summary>
-	///  The Sequence of stages that have been requested to run.
+	///  The Sequence of stages that have been requested to run and comprise the build steps for a solution
 	/// </summary>
 	public class ExecutionPlan
 	{

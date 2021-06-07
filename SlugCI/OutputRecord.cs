@@ -2,6 +2,10 @@
 
 namespace Slug.CI
 {
+
+	/// <summary>
+	/// Represents a printed information line for Severe messages during summary reporting.
+	/// </summary>
 	public class OutputRecord
 	{
 		public LogLevel LogLevel { get; private set; }

@@ -30,6 +30,10 @@ namespace Slug.CI
 	}
 
 
+
+	/// <summary>
+	/// Class that represents the Pre-Release tag portion of a semversion object.
+	/// </summary>
 	public class SemVersionPreRelease {
 		public const string SEMPRE_PATCH = "a";
 		public const string SEMPRE_MINOR = "b";

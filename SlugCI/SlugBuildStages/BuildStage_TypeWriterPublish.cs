@@ -8,7 +8,7 @@ using Slug.CI.NukeClasses;
 namespace Slug.CI.SlugBuildStages
 {
 	/// <summary>
-	/// The DotNet Cleaning stage
+	/// Publishing stage for typewriter / npm output
 	/// </summary>
 	class BuildStage_TypeWriterPublish : BuildStage
 	{
@@ -20,8 +20,9 @@ namespace Slug.CI.SlugBuildStages
 		}
 
 
+
 		/// <summary>
-		/// Run Clean process
+		/// Run the typewriter publishing steps
 		/// </summary>
 		/// <returns></returns>
 		protected override StageCompletionStatusEnum ExecuteProcess()

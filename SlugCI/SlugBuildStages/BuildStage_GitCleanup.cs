@@ -10,6 +10,9 @@ using Slug.CI.NukeClasses;
 
 namespace Slug.CI.SlugBuildStages
 {
+	/// <summary>
+	/// Performs a GitCleanup of the repository.  This is not performed during a normal build process, but rather run on demand as a single step.
+	/// </summary>
 	class BuildStage_GitCleanup : BuildStage
 	{
 		/// <summary>

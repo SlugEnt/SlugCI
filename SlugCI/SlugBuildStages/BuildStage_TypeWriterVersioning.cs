@@ -11,6 +11,9 @@ using static Nuke.Common.IO.FileSystemTasks;
 
 namespace Slug.CI.SlugBuildStages
 {
+	/// <summary>
+	/// Builds and versions the typewriter / npm scripts
+	/// </summary>
 	class BuildStage_TypeWriterVersioning : BuildStage {
 		private const string CMD_PACK = @"del /f /q /s dist && tsc && npm run copy";
 		private const string CMD_PUBLISH = @"cd dist && npm publish";
@@ -25,7 +28,7 @@ namespace Slug.CI.SlugBuildStages
 
 
 		/// <summary>
-		/// Run Clean process
+		/// Run the Typewriter build process
 		/// </summary>
 		/// <returns></returns>
 		protected override StageCompletionStatusEnum ExecuteProcess()

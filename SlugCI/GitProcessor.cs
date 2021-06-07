@@ -48,23 +48,18 @@ namespace Slug.CI
 		const string COMMIT_MARKER = "|^|";
 		const string GIT_COMMAND_MARKER = "|";
 
-		internal string DotNetPath { get; set; }
-
 
 		/// <summary>
 		/// Session settings and data
 		/// </summary>
-		private CISession CISesion { get; set; }
+		private CISession CISession { get; set; }
 
 		/// <summary>
 		/// The Branch that the repository is currently on
 		/// </summary>
 		public string CurrentBranch { get; private set; }
 
-		public string Version { get; private set; }
-		public string SemVersion { get; private set; }
-		public string SemVersionNugetCompatible { get; private set; }
-		public string InformationalVersion { get; private set; }
+
 		public bool IsLocalBranchUptoDate { get; private set; }
 		public bool AreUncommitedChangesOnLocalBranch { get; private set; }
 		public string GitCommandVersion { get; private set; }
@@ -126,9 +121,9 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="ciSession"></param>
 		public GitProcessor (CISession ciSession) {
-			CISesion = ciSession;
+			CISession = ciSession;
 
-			if ( CISesion.VerbosityGitVersion == ProcessVerbosity.Nothing) {
+			if ( CISession.VerbosityGitVersion == ProcessVerbosity.Nothing) {
 				logInvocationLogging = false;
 				logOutputLogging = false;
 			}
@@ -215,27 +210,15 @@ namespace Slug.CI
 			List<Output> gitOutput;
 			gitOutput = ShowCommitNoDiff(commitHash);
 			return new GitCommitInfo(gitOutput);
-			/*
-			string gitArgs = "show --format=\"%h|%cn|%ct|%s|%d \" --no-patch " + commitHash;
-			ExecuteGitTryCatch("GetCommitInfo", gitArgs, out gitOutput);
-			if ( gitOutput.Count == 0 ) return null;
-
-			GitCommitInfo gitCommit = new GitCommitInfo(gitOutput [0].Text);
-			return gitCommit;
-			//return ConvertCommitInfoToRecord(gitOutput [0].Text);
-			
-			string [] results = gitOutput [0].Text.Split('|');
-			if (! long.TryParse(results [2], out long value)) ControlFlow.Assert(true == false,"The Git Commit date was unable to be converted to a Unix long time [" + results[2] + "]");
-			
-			DateTimeOffset date1 = DateTimeOffset.FromUnixTimeSeconds(value);
-			DateTime date2 = date1.ToOffset(new TimeSpan(0, -4, 0, 0)).UtcDateTime;
-			
-			//return new RecordCommitInfo(commitHash, results [1], date1, results [3], results [4]);
-			*/
 		}
 
 
 
+		/// <summary>
+		/// Retrieves information about all branches and their latest commit.
+		/// </summary>
+		/// <param name="refresh"></param>
+		/// <returns></returns>
 		public List<RecordBranchLatestCommit> GetAllBranchesWithLatestCommit (bool refresh = false) {
 			if ( AllBranchInfo.Count != 0 && refresh == false ) return AllBranchInfo;
 
@@ -417,6 +400,12 @@ namespace Slug.CI
 		}
 
 
+		/// <summary>
+		/// Gets most recent tag for a given development "branch".  Note this is not an actual branch from repository, but rather one of (main, alpha, beta)
+		/// that might be tagged with alpha, beta or nothing..
+		/// </summary>
+		/// <param name="branch"></param>
+		/// <returns></returns>
 		public SemVersion GetMostRecentVersionTagOfBranch (string branch) {
 			List<Output> gitOutput;
 			string gitArgs = "for-each-ref refs/tags/Ver*-" + branch + "* --count=1 --sort=-version:refname";
@@ -532,7 +521,7 @@ namespace Slug.CI
 					gitArgs = "checkout " + MainBranchName;
 					if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitMainVersionChanges:::  .Git Command failed:  git " + gitArgs);
 
-					gitArgs = string.Format("merge {0} --no-ff --no-edit -m \"Merging Branch: {0}   |  {1}\"", CurrentBranch, CISesion.VersionInfo.SemVersion);
+					gitArgs = string.Format("merge {0} --no-ff --no-edit -m \"Merging Branch: {0}   |  {1}\"", CurrentBranch, CISession.VersionInfo.SemVersion);
 					if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("CommitMainVersionChanges:::  .Git Command failed:  git " + gitArgs);
 				}
 
@@ -603,7 +592,7 @@ namespace Slug.CI
 			output.Text = GIT_COMMAND_MARKER + command + " " + cmdArguments;
 			GitCommandOutputHistory.Add(output);
 
-			IProcess process = ProcessTasks.StartProcess(command, cmdArguments, CISesion.RootDirectory,logInvocation: logInvocationLogging, logOutput: logOutputLogging); 
+			IProcess process = ProcessTasks.StartProcess(command, cmdArguments, CISession.RootDirectory,logInvocation: logInvocationLogging, logOutput: logOutputLogging); 
 			process.AssertWaitForExit();
 
 			// Copy output to history.
@@ -637,7 +626,7 @@ namespace Slug.CI
 			GitCommandOutputHistory.Add(outputCmd);
 
 			//ProcessTasks.DefaultLogOutput = false;
-			IProcess process = ProcessTasks.StartProcess(command, cmdArguments, CISesion.RootDirectory,logInvocation: logInvocationLogging, logOutput: logOutputLogging);
+			IProcess process = ProcessTasks.StartProcess(command, cmdArguments, CISession.RootDirectory,logInvocation: logInvocationLogging, logOutput: logOutputLogging);
 
 			//,customLogger:GitProcessorLoggerNormal
 			process.AssertWaitForExit();
@@ -712,6 +701,7 @@ namespace Slug.CI
 		}
 		*/
 
+
 		/// <summary>
 		/// Prints the history of the Git commands to the console.
 		/// </summary>
@@ -724,9 +714,7 @@ namespace Slug.CI
 					Console.WriteLine("  " + line.Text.Substring(1), Color.Orange);
 				else
 					Console.WriteLine("     " + line.Text, Color.DarkKhaki);
-
 			}
-
 		}
 
 
@@ -821,11 +809,11 @@ namespace Slug.CI
 
 
 		/// <summary>
-			/// Deletes a Branch
-			/// <param name="local">If true, the local branch is deleted.  If false, the remote</param>
-			/// </summary>
-			/// <param name="branchName"></param>
-			public bool DeleteBranch (string branchName, bool local = true) {
+		/// Deletes a Branch
+		/// <param name="local">If true, the local branch is deleted.  If false, the remote</param>
+		/// </summary>
+		/// <param name="branchName"></param>
+		public bool DeleteBranch (string branchName, bool local = true) {
 			List<Output> gitOutput;
 			string gitArgs = "";
 			if ( local == false )

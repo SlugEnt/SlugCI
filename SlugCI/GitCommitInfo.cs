@@ -6,6 +6,9 @@ using Semver;
 
 namespace Slug.CI
 {
+	/// <summary>
+	/// Represents a Git commit and the important details.  Does not include the differential info about a git.
+	/// </summary>
 	public class GitCommitInfo {
 		/// <summary>
 		/// The Commit Hash

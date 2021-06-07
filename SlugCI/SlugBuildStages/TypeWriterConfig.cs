@@ -7,6 +7,10 @@
 	using Newtonsoft.Json;
 	using Newtonsoft.Json.Converters;
 
+
+	/// <summary>
+	/// The config file for the npm typewriter processing.
+	/// </summary>
 	public partial class TypeWriterConfig
 	{
 		[JsonProperty("name")]

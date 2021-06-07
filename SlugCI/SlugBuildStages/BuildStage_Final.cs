@@ -22,7 +22,7 @@ namespace Slug.CI.SlugBuildStages
 
 
 		/// <summary>
-		/// Run Clean process
+		/// Empty method.
 		/// </summary>
 		/// <returns></returns>
 		protected override StageCompletionStatusEnum ExecuteProcess()
