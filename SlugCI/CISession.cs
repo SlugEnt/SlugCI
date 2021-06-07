@@ -2,6 +2,7 @@
 using Nuke.Common;
 using static Nuke.Common.IO.FileSystemTasks;
 using Nuke.Common.IO;
+using Nuke.Common.OutputSinks;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tools.DotNet;
 using Semver;
@@ -233,6 +234,13 @@ namespace Slug.CI.NukeClasses
 		/// If the user wishes to override the calculated version, this is how they do it...
 		/// </summary>
 		public SemVersion ManuallySetVersion { get; set; } = null;
+
+
+		/// <summary>
+		/// Sink used to write output to.
+		/// </summary>
+		public static SlugOutputSink OutputSink = SlugOutputSink.Default;
+
 
 
 		/// <summary>

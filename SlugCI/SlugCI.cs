@@ -58,6 +58,7 @@ namespace Slug.CI
 
 			Misc.WriteMainHeader("SlugCI Initialization of Repository");
 
+			
 
 			CISession = ciSession;
 			CISession.SlugCIPath = CISession.RootDirectory / ".slugci";

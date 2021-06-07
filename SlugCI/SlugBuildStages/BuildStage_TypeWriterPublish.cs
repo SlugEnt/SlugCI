@@ -10,13 +10,12 @@ namespace Slug.CI.SlugBuildStages
 	/// <summary>
 	/// The DotNet Cleaning stage
 	/// </summary>
-	class BuildStage_TypeWriterRun : BuildStage
+	class BuildStage_TypeWriterPublish : BuildStage
 	{
-
 		/// <summary>
 		/// Constructor
 		/// </summary>
-		public BuildStage_TypeWriterRun (CISession ciSession) : base(BuildStageStatic.STAGE_TYPEWRITER, ciSession) {
+		public BuildStage_TypeWriterPublish (CISession ciSession) : base(BuildStageStatic.STAGE_TYPEWRITER_PUBLISH, ciSession) {
 			PredecessorList.Add(BuildStageStatic.STAGE_PUBLISH);
 		}
 
@@ -28,13 +27,14 @@ namespace Slug.CI.SlugBuildStages
 		protected override StageCompletionStatusEnum ExecuteProcess()
 		{
 			string command = "npm";
-			string npmArgs = "run pack_publish";
+			string npmArgs = "run publish";
 
 			CompletionStatus = StageCompletionStatusEnum.InProcess;
 
 			foreach ( SlugCIProject project in CISession.Projects ) {
-				StageOutput.Add(new Output { Text = "Project: " + project.Name, Type = OutputType.Std });
-				StageOutput.Add(new Output { Text = "  --> HasTypeWriterScripts:  " + project.HasTypeWriterScripts });
+				AddOutputText("Project: " + project.Name, OutputType.Std );
+				AddOutputText("  --> HasTypeWriterScripts:  " + project.HasTypeWriterScripts,OutputType.Std );
+				
 				if ( !project.HasTypeWriterScripts )
 					continue;
 				

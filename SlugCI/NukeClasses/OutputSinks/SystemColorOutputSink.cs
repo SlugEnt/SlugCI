@@ -35,14 +35,14 @@ namespace Nuke.Common.OutputSinks
             WriteWithColors(text, ConsoleColor.Cyan);
         }
 
-        protected override void WriteWarning(string text, string details = null)
+        public override void WriteWarning(string text, string details = null)
         {
             WriteWithColors(text, ConsoleColor.Yellow);
             if (details != null)
                 WriteWithColors(details, ConsoleColor.Yellow);
         }
 
-        protected override void WriteError(string text, string details = null)
+        public override void WriteError(string text, string details = null)
         {
             WriteWithColors(text, ConsoleColor.Red);
             if (details != null)

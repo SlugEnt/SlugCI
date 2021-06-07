@@ -71,14 +71,14 @@ namespace Nuke.Common.OutputSinks
             Console.WriteLine(FormatInformation(text));
         }
 
-        protected override void WriteWarning(string text, string details = null)
+        public override void WriteWarning(string text, string details = null)
         {
             Console.WriteLine(FormatWarning(text));
             if (details != null)
                 Console.WriteLine(FormatWarning(details));
         }
 
-        protected override void WriteError(string text, string details = null)
+        public override void WriteError(string text, string details = null)
         {
             Console.WriteLine(FormatError(text));
             if (details != null)

@@ -179,6 +179,7 @@ namespace Slug.CI
 					StageCompletionStatusEnum.Success => Color.Green,
 					StageCompletionStatusEnum.Skipped => Color.Cyan,
 					StageCompletionStatusEnum.Warning => Color.Yellow,
+					_ => Color.Red,
 				};
 
 				

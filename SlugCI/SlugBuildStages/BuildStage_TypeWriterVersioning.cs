@@ -31,7 +31,7 @@ namespace Slug.CI.SlugBuildStages
 		protected override StageCompletionStatusEnum ExecuteProcess()
 		{
 			// TODO REMOVE THIS - TEST ONLY
-			CISession.VersionInfo = new VersionInfo(new SemVersion(0,23,5,"alpha.1"),"g98g9k" );
+			//CISession.VersionInfo = new VersionInfo(new SemVersion(0,23,5,"alpha.1"),"g98g9k" );
 
 			// Read the package.json file if necessary...
 			foreach ( SlugCIProject project in CISession.Projects ) {
@@ -85,20 +85,22 @@ namespace Slug.CI.SlugBuildStages
 				}
 
 				if ( updated ) {
-					string json = JsonSerializer.Serialize<TypeWriterConfig>(typeWriterConfig, new JsonSerializerOptions {WriteIndented = true,PropertyNameCaseInsensitive = false});
+					string json = JsonSerializer.Serialize<TypeWriterConfig>(typeWriterConfig, new JsonSerializerOptions {WriteIndented = true,PropertyNamingPolicy = JsonNamingPolicy.CamelCase});
 					File.WriteAllText(scriptsFile, json);
-					CISession.GitProcessor.CommitChanges("TypeWriter Updates for project --> " + project.Name);
 				}
 
 				// Pack the files
 				string command = "npm";
-				string npmArgs = "run Pack";
+				string npmArgs = "run pack";
 				IProcess process = ProcessTasks.StartProcess(command, npmArgs, scriptsFolder);
 				process.AssertWaitForExit();
 				StageOutput.AddRange(process.Output);
 
 				if (process.ExitCode != 0) SetInprocessStageStatus(StageCompletionStatusEnum.Failure);
-				else SetInprocessStageStatus(StageCompletionStatusEnum.Success);
+				else {
+					CISession.GitProcessor.CommitChanges("TypeWriter Updates for project --> " + project.Name); 
+					SetInprocessStageStatus(StageCompletionStatusEnum.Success);
+				}
 
 
 				SetInprocessStageStatus(StageCompletionStatusEnum.Success);

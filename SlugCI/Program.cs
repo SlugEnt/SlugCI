@@ -42,6 +42,8 @@ namespace Slug.CI
 		                       bool info = false) {
 			CISession ciSession = new CISession();
 
+			Logger.SetOutputSink(CISession.OutputSink);
+
 			try {
 				Console.SetWindowSize(130,34);
 

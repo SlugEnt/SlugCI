@@ -14,12 +14,14 @@ namespace Slug.CI.SlugBuildStages
 		public const string STAGE_PUBLISH = "Publish";
 		public const string STAGE_PACK = "Pack";
 		public const string STAGE_TEST = "Unit Tests";
+		
 		public const string STAGE_COMPILE = "Compile";
 		public const string STAGE_RESTORE = "Restore";
 		public const string STAGE_CLEAN = "Clean";
 		public const string STAGE_GITCOMMIT = "GitCommit";
 		public const string STAGE_GITCLEAN = "GitClean";
-		public const string STAGE_TYPEWRITER = "TypeWriter";
 		public const string STAGE_TYPEWRITER_VER = "TypeWriterVer";
+		public const string STAGE_TYPEWRITER_PUBLISH = "TypeWriter";
+		public const string STAGE_FINAL = "Final";
 	}
 }

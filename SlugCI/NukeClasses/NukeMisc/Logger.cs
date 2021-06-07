@@ -47,7 +47,7 @@ namespace Nuke.Common
             }
         }
 
-        internal static SlugOutputSink OutputSink = SlugOutputSink.Default;
+        public static SlugOutputSink OutputSink = SlugOutputSink.Default;
 
         public static LogLevel LogLevel;
 
@@ -329,6 +329,15 @@ namespace Nuke.Common
                         GetTrimmedStackTrace(exception) + EnvironmentInfo.NewLine);
                     break;
             }
+        }
+
+
+        /// <summary>
+        /// Sets the output sink to be used by the Logger.
+        /// </summary>
+        /// <param name="sink"></param>
+        public static void SetOutputSink (SlugOutputSink sink) {
+	        OutputSink = sink;
         }
     }
 }
