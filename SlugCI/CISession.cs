@@ -242,6 +242,11 @@ namespace Slug.CI.NukeClasses
 		public static SlugOutputSink OutputSink = SlugOutputSink.Default;
 
 
+		/// <summary>
+		/// If true, unit tests that fail do not stop the build process from continuing.
+		/// </summary>
+		public bool FailedUnitTestsOkay { get; set; }
+
 
 		/// <summary>
 		/// Constructor

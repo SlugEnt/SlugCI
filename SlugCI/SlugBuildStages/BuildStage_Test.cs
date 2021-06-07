@@ -37,6 +37,7 @@ namespace Slug.CI.SlugBuildStages
 			DotNetTestSettings settings = new DotNetTestSettings()
 			{
 				ProjectFile = CISession.Solution,
+				Configuration = CISession.CompileConfig,
 				NoRestore = true,
 				NoBuild = true,
 				Verbosity = DotNetVerbosity.Minimal,
@@ -55,7 +56,8 @@ namespace Slug.CI.SlugBuildStages
 
 			};
 
-			DotNetTest(settings);
+			IReadOnlyCollection<Output> testOutput =  DotNetTest(settings);
+			StageOutput.AddRange(testOutput);
 
 			return StageCompletionStatusEnum.Success;
 		}

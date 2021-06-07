@@ -34,7 +34,8 @@ namespace Slug.CI
 			Name = branchRecord.branch;
 
 			// Retrieve info about the latest commit on the branch
-			LatestCommitOnBranch = gitProcessor.GetCommitInfo(branchRecord.commitHash);
+			if (branchRecord.commitHash != "->") 
+				LatestCommitOnBranch = gitProcessor.GetCommitInfo(branchRecord.commitHash);
 			LatestSemVersionOnBranch = gitProcessor.FindLatestSemVersionOnBranch(Name);
 		}
 

@@ -35,7 +35,10 @@ namespace Slug.CI.SlugBuildStages
 			DotNetPackSettings settings;// = new DotNetPackSettings()
 
 			foreach ( SlugCIProject project in CISession.Projects ) {
-				if ( project.Deploy != SlugCIDeployMethod.Nuget ) continue;
+				AddOutputText("Project: " + project.Name, OutputType.Std);
+				AddOutputText("  --> Is Nuget Packable:  " + (project.Deploy == SlugCIDeployMethod.Nuget).ToString(), OutputType.Std);
+
+				if ( project.Deploy != SlugCIDeployMethod.Nuget ) {continue;}
 				settings = new DotNetPackSettings()
 				{
 					Project = project.VSProject.Path,
@@ -54,6 +57,7 @@ namespace Slug.CI.SlugBuildStages
 				                   .SetVersion(CISession.VersionInfo.SemVersionAsString);
 
 				IReadOnlyCollection<Output> output = DotNetTasks.DotNetPack(settings);
+				StageOutput.AddRange(output);
 
 				// See if successful.
 				string searchName = project.AssemblyName + "." + CISession.VersionInfo.SemVersionAsString + ".nupkg";

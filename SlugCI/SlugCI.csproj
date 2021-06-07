@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyVersion>0.12.0.56</AssemblyVersion>
+    <AssemblyVersion>0.15.0.71</AssemblyVersion>
     <RootNamespace>Slug.CI</RootNamespace>
     <Authors>Scott Herrmann</Authors>
     <Company>SlugEnt</Company>
@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/SlugEnt/SlugCISample</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
-    <Version>0.12.0</Version>
+    <Version>0.15.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -29,6 +29,8 @@
     <ToolCommandName>slugci</ToolCommandName>
     <PackageOutputPath>../nupkg</PackageOutputPath>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageLicenseExpression></PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="CustomNuke\**" />
@@ -37,6 +39,10 @@
     <EmbeddedResource Remove="NukeClasses\Tools\GitVersion\**" />
     <None Remove="CustomNuke\**" />
     <None Remove="NukeClasses\Tools\GitVersion\**" />
+    <None Include="..\LICENSE.md">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

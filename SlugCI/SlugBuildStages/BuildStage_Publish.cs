@@ -117,6 +117,7 @@ namespace Slug.CI.SlugBuildStages
 				{
 					settings.TargetPath = nugetPackage;
 					IReadOnlyCollection<Output> nugetOutput = DotNetNuGetPush(settings);
+					StageOutput.AddRange(nugetOutput);
 					if (nugetOutput.Count > 0)
 					{
 						// Look for skipped message.

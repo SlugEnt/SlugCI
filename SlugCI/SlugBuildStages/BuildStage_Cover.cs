@@ -49,6 +49,7 @@ namespace Slug.CI.SlugBuildStages
 			AbsolutePath coverageFile = CISession.CoveragePath / "index.html";
 			Process.Start(@"cmd.exe ", @"/c " + coverageFile);
 
+			// TODO Await completion
 
 			return StageCompletionStatusEnum.Success;
 		}

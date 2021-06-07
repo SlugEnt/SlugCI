@@ -43,6 +43,8 @@ namespace Slug.CI.SlugBuildStages
 			                                         .SetFileVersion(CISession.VersionInfo.FileVersion);
 
 			IReadOnlyCollection<Output> compileOut = DotNetTasks.DotNetBuild(dotNetBuildSettings);
+			StageOutput.AddRange(compileOut);
+
 			Console.WriteLine();
 			Console.WriteLine("Compilation Success:");
 			foreach ( SlugCIProject project in CISession.SlugCIConfigObj.Projects ) {

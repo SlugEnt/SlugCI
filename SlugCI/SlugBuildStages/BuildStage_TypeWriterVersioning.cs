@@ -31,8 +31,9 @@ namespace Slug.CI.SlugBuildStages
 		/// Run the Typewriter build process
 		/// </summary>
 		/// <returns></returns>
-		protected override StageCompletionStatusEnum ExecuteProcess()
-		{
+		protected override StageCompletionStatusEnum ExecuteProcess() {
+			CompletionStatus = StageCompletionStatusEnum.InProcess;
+
 			// TODO REMOVE THIS - TEST ONLY
 			//CISession.VersionInfo = new VersionInfo(new SemVersion(0,23,5,"alpha.1"),"g98g9k" );
 
@@ -108,8 +109,8 @@ namespace Slug.CI.SlugBuildStages
 
 				SetInprocessStageStatus(StageCompletionStatusEnum.Success);
 			}
-			
-			if (CompletionStatus == StageCompletionStatusEnum.InProcess) CompletionStatus = StageCompletionStatusEnum.Success;
+
+			if ( CompletionStatus == StageCompletionStatusEnum.InProcess ) CompletionStatus = StageCompletionStatusEnum.Skipped;
 
 			return CompletionStatus;
 		}

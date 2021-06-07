@@ -41,11 +41,11 @@ namespace Slug.CI
 			LoadBuildStages();
 
 			// TODO Remove or comment this out, this is for speeding up testing.
-			foreach ( BuildStage stage in _executionPlan.KnownStages ) {
+/*			foreach ( BuildStage stage in _executionPlan.KnownStages ) {
 				//if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH && stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER) stage.ShouldSkip = true;
 				if ( stage.Name != BuildStageStatic.STAGE_FINAL ) stage.ShouldSkip = true;
 			}
-
+*/
 			_executionPlan.BuildExecutionPlan(BuildStageStatic.STAGE_FINAL);
 
 

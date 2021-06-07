@@ -30,7 +30,7 @@ namespace Slug.CI.SlugBuildStages
 			settings.ProjectFile = CISession.Solution;
 			settings.Verbosity = DotNetVerbosity.Minimal;
 			IReadOnlyCollection<Output> outputs = DotNetTasks.DotNetRestore(settings);
-
+			StageOutput.AddRange(outputs);
 			return StageCompletionStatusEnum.Success;
 		}
 	}

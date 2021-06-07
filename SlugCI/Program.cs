@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities;
 using Slug.CI.NukeClasses;
+using Slug.CI.SlugBuildStages;
 using Console = Colorful.Console;
 
 namespace Slug.CI
@@ -25,6 +28,7 @@ namespace Slug.CI
 		/// <param name="interactive">If True (Default) will prompt you for values.</param>
 		/// <param name="skipnuget">Does not publish to nuget.  Still builds the .nupkg however.</param>
 		/// <param name="info">Displays detailed information about the Solution and Environment</param>
+		/// <param name="failedtestsok">If true, unit tests that fail do not stop the build from continuing</param>
 		/// <param name="verbosity">Sets the verbosity of command output.  You can set value for all commands or just certain commands.  Be careful with all, it can generate a LOT of output on debug level
 		/// <para>  The best is set to specific methods via:   method:value|method:value|method:value.</para>
 		/// <para>  Valid methods are:</para>
@@ -39,6 +43,7 @@ namespace Slug.CI
 		                       string verbosity = "", 
 		                       bool interactive = true,
 		                       bool skipnuget = false,
+							   bool failedtestsok = false,
 		                       bool info = false) {
 			CISession ciSession = new CISession();
 
@@ -46,14 +51,13 @@ namespace Slug.CI
 
 			try {
 				Console.SetWindowSize(130,34);
+				string slugCIVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+				Misc.WriteAppHeader(new List<string>() {"SlugCI Version: " + slugCIVersion});
 
-				Misc.WriteAppHeader();
 
 				// We process thru defaults, at the end if interactive is on, then we
 				// prompt user for changes / confirmation
-
 				
-
 				// If no RootDir specified, then set to current directory.
 				if ( rootdir == string.Empty )
 					ciSession.RootDirectory = (AbsolutePath) Directory.GetCurrentDirectory();
@@ -95,6 +99,10 @@ namespace Slug.CI
 
 				// Skip Nuget
 				ciSession.SkipNuget = skipnuget;
+
+
+				// Failed Unit tests are ok?
+				ciSession.FailedUnitTestsOkay = failedtestsok;
 
 
 				// Perform Validation 
@@ -155,19 +163,12 @@ namespace Slug.CI
 		/// Prompt user for information and confirm...
 		/// </summary>
 		private static bool UserPrompting (CISession ciSession) {
-			Console.Clear();
+			PromptForDeployTarget(ciSession);
 
-			bool keepLooping = true;
-			while ( keepLooping ) {
-				PromptForDeployTarget(ciSession);
+			DetermineCompileConfiguration(ciSession);
 
-				DetermineCompileConfiguration(ciSession);
+			PromptForConfiguration(ciSession);
 
-				PromptForConfiguration(ciSession);
-
-
-				return true;
-			}
 
 			return true;
 		}
@@ -205,25 +206,36 @@ namespace Slug.CI
 				Console.WriteLine(" {0,-30}    |  {1,-35}", "Target Deploy:", ciSession.PublishTarget.ToString(), lineColor);
 				Console.WriteLine(" {0,-30}    |  {1,-35}", "Compile Config:", ciSession.CompileConfig, lineColor);
 
-				// Line 1 of Menu
+				// Menu Item
 				string ver = "";
 				if (ciSession.ManuallySetVersion != null) ver = ciSession.ManuallySetVersion.ToString();
 				Console.WriteLine(" (I)  Information about Project", Color.Yellow);
 
-				// Line 2 of Menu
+				// Menu Item
 				Console.WriteLine(" (V)  Manually Set the next version [ " + ver + " ]", Color.WhiteSmoke);
+				Console.WriteLine();
 
-				// Line 3 of Menu
+				// Menu Item
+				Console.WriteLine(" (C)  Cleanup Git Repo");
+				
+				// Menu Item
 				if ( ciSession.SkipNuget )
 					lineColor = Color.Yellow;
 				else
 					lineColor = Color.WhiteSmoke;
 				Console.WriteLine(" (S)  Skip Nuget Publish  [ " + ciSession.SkipNuget + " ]", lineColor);
 
-				// Line 4 of Menu
+				// Menu Item
+				if ( ciSession.FailedUnitTestsOkay )
+					lineColor = Color.Yellow;
+				else
+					lineColor = Color.WhiteSmoke;
+				Console.WriteLine(" (U)  Failed Unit Tests are okay - continue building:  {0}", ciSession.FailedUnitTestsOkay ,lineColor);
+
+				// Menu Item
 				if ( ciSession.GitProcessor.AreUncommitedChangesOnLocalBranch ) {
 					lineColor = Color.Red;
-					Console.WriteLine(" (R)  Refresh Git (You have uncommitted changes on branch.  Commit and then issue this command", lineColor);
+					Console.WriteLine(" (R)  Refresh Git (You have uncommitted changes on branch).  Commit and then issue this command", lineColor);
 				}
 				
 
@@ -236,6 +248,7 @@ namespace Slug.CI
 				List<ConsoleKey> validKeys = new List<ConsoleKey>()
 				{
 					ConsoleKey.I,
+					ConsoleKey.C,
 					ConsoleKey.V,
 					ConsoleKey.R,
 					ConsoleKey.S,
@@ -250,6 +263,13 @@ namespace Slug.CI
 				else if ( answer == ConsoleKey.S ) ciSession.SkipNuget = !ciSession.SkipNuget;
 				else if ( answer == ConsoleKey.X ) return false;
 				else if ( answer == ConsoleKey.R ) ciSession.GitProcessor.RefreshUncommittedChanges();
+				else if ( answer == ConsoleKey.C ) {
+					BuildStage_GitCleanup gitCleanup = new BuildStage_GitCleanup(ciSession);
+					if (!gitCleanup.Execute() ) Console.WriteLine("Git Cleanup Failed.");
+					else Console.WriteLine("Git Cleanup Success!");
+					Console.WriteLine("Press any key to continue");
+					Console.ReadKey();
+				}
 
 				Console.Clear();
 			}
