@@ -245,7 +245,7 @@ namespace Slug.CI
 
 			Console.WriteLine(Environment.NewLine + "  Missing Required:", Color.Red);
 			foreach ( string envVar in MissingEnvironmentVariables ) {
-				Console.Write("  {0,-35}", envVar, Color.WhiteSmoke);
+				Console.WriteLine("  {0,-35}", envVar, Color.WhiteSmoke);
 			}
 
 
@@ -253,9 +253,11 @@ namespace Slug.CI
 			Console.WriteLine("-------------------------------------------------------------", Color.DarkCyan);
 			Console.WriteLine("                  Project Info", Color.DarkCyan);
 			Console.WriteLine("-------------------------------------------------------------", Color.DarkCyan);
-			Console.WriteLine(" {0,-29}{1,-10}   {2,-18}  {3,-30}","Project","How Deployed","Framework","Assembly Name",Color.Magenta);
+			Console.WriteLine(" {0,-60}{1,-10}   {2,-18}  {3,-30}","Project","How Deployed","Framework","Assembly Name",Color.Magenta);
 			foreach ( SlugCIProject project in CISession.Projects ) {
-				Console.WriteLine(" {0,-30}  {1,-10}  {2,-18}  {3,-30}", project.Name,project.Deploy.ToString(),"", project.AssemblyName, Color.WhiteSmoke);
+				foreach ( string projectFramework in project.Frameworks ) {
+					Console.WriteLine(" {0,-60}  {1,-10}   {2,-18}  {3,-30}", project.Name, project.Deploy.ToString(), projectFramework, project.AssemblyName, Color.WhiteSmoke);
+				}
 			}
 
 

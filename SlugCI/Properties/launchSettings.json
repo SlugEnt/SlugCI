@@ -55,7 +55,7 @@
     },
     "GenericTest": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\Locker --deployto alpha --faststart"
+      "commandLineArgs": "--rootdir C:\\A_Dev\\practice\\template_service --deployto alpha --faststart false"
     }
   }
 }
