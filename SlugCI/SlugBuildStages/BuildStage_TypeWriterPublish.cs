@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Microsoft.VisualBasic;
+using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
 using Slug.CI.NukeClasses;
@@ -28,7 +30,7 @@ namespace Slug.CI.SlugBuildStages
 		protected override StageCompletionStatusEnum ExecuteProcess()
 		{
 			string command = "npm";
-			string npmArgs = "run publish";
+			string npmArgs = "run publishTW";
 
 			CompletionStatus = StageCompletionStatusEnum.InProcess;
 
@@ -41,7 +43,7 @@ namespace Slug.CI.SlugBuildStages
 				
 
 				AbsolutePath scriptsFolder = project.VSProject.Directory / "_scripts";
-				IProcess process = ProcessTasks.StartProcess(command, npmArgs, scriptsFolder);
+				IProcess process = ProcessTasks.StartProcess(command, npmArgs, scriptsFolder,customLogger: NPMLogger);
 				process.AssertWaitForExit();
 
 				StageOutput.AddRange(process.Output);
@@ -53,6 +55,23 @@ namespace Slug.CI.SlugBuildStages
 			if ( CompletionStatus == StageCompletionStatusEnum.InProcess ) CompletionStatus = StageCompletionStatusEnum.Success;
 
 			return CompletionStatus;
+		}
+
+
+
+		/// <summary>
+		/// NPM logs to informational messages to StdError.  Only know if NPM errored by checking return code.
+		/// </summary>
+		/// <param name="type"></param>
+		/// <param name="output"></param>
+		public static void NPMLogger(OutputType type, string output)
+		{
+			if (type == OutputType.Std)
+				Logger.Normal(output);
+			else if (output.StartsWith("npm notice"))
+				Logger.Normal(output);
+			else if (output.StartsWith("npm ERR:"))Logger.Error(output);
+			else Logger.Normal(output);
 		}
 	}
 }

@@ -255,7 +255,7 @@ namespace Slug.CI
 			Console.WriteLine("-------------------------------------------------------------", Color.DarkCyan);
 			Console.WriteLine(" {0,-29}{1,-10}   {2,-18}  {3,-30}","Project","How Deployed","Framework","Assembly Name",Color.Magenta);
 			foreach ( SlugCIProject project in CISession.Projects ) {
-				Console.WriteLine(" {0,-30}  {1,-10}  {2,-18}  {3,-30}", project.Name,project.Deploy.ToString(),project.Framework, project.AssemblyName, Color.WhiteSmoke);
+				Console.WriteLine(" {0,-30}  {1,-10}  {2,-18}  {3,-30}", project.Name,project.Deploy.ToString(),"", project.AssemblyName, Color.WhiteSmoke);
 			}
 
 
@@ -318,8 +318,19 @@ namespace Slug.CI
 				if (slugCIProject == null) throw new ApplicationException("Trying to match SlugCIConfig Projects with Visual Studio Solution Projects failed.  This is unexpected... Visual Studio Project = [" + x.Name + "]");
 				slugCIProject.VSProject = x;
 
+				// Get Framework(s)
+				string framework = x.GetProperty("TargetFramework");
+				if (framework != null)  slugCIProject.Frameworks.Add(framework);
+				else {
+					framework = x.GetProperty("TargetFrameworks");
+					if (framework != null) slugCIProject.Frameworks.AddRange(framework.Split(";"));
+				}
+				
+
+
 				slugCIProject.AssemblyName = x.GetProperty("AssemblyName");
 				slugCIProject.PackageId = x.GetProperty("PackageId");
+				//slugCIProject.
 
 				ControlFlow.Assert(!slugCIProject.AssemblyName.IsNullOrEmpty(),
 				                   "Unable to locate the Assembly name from the .csproj for project [" + slugCIProject.Name + "]");

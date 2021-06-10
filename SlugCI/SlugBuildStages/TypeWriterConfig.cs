@@ -70,8 +70,8 @@
 		[JsonProperty("pack")]
 		public string Pack { get; set; }
 
-		[JsonProperty("publish")]
-		public string Publish { get; set; }
+		[JsonProperty("publishtw")]
+		public string PublishTW { get; set; }
 
 	}
 }

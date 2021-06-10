@@ -41,11 +41,12 @@ namespace Slug.CI
 			LoadBuildStages();
 
 			// TODO Remove or comment this out, this is for speeding up testing.
-/*			foreach ( BuildStage stage in _executionPlan.KnownStages ) {
+#if DEBUG
+			foreach ( BuildStage stage in _executionPlan.KnownStages ) {
 				//if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH && stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER) stage.ShouldSkip = true;
-				if ( stage.Name != BuildStageStatic.STAGE_FINAL ) stage.ShouldSkip = true;
+				if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH  && stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER) stage.ShouldSkip = true;
 			}
-*/
+#endif
 			_executionPlan.BuildExecutionPlan(BuildStageStatic.STAGE_FINAL);
 
 
@@ -164,13 +165,18 @@ namespace Slug.CI
 				}
 
 				// Git history
-				if ( keyInfo.Key == ConsoleKey.D1 ) { ciSession.GitProcessor.PrintGitHistory(); }
+				if ( keyInfo.Key == ConsoleKey.D1 ) {
+					ciSession.GitProcessor.PrintGitHistory();
+					Console.WriteLine("Press [space] key to return to menu", Color.Yellow);
+					while (Console.ReadKey().Key != ConsoleKey.Spacebar) { }
+				}
 
 				// Check to see if letter is in StageInfo Dictionary.
 				char keyPress = keyInfo.KeyChar;
 				if ( keyPress > 96 ) keyPress = (char) (keyPress - 32);
 
 
+				// Display detailed info about a specific stage...
 				if ( stageInfo.ContainsKey(keyPress) ) {
 					// Display detailed info
 					BuildStage stage = stageInfo [keyPress];
@@ -187,8 +193,8 @@ namespace Slug.CI
 					}
 
 					Console.WriteLine();
-					Console.WriteLine("Press [x] key to return to menu", Color.Yellow);
-					while ( Console.ReadKey().Key != ConsoleKey.X ) { }
+					Console.WriteLine("Press [space] key to return to menu", Color.Yellow);
+					while ( Console.ReadKey().Key != ConsoleKey.Spacebar ) { }
 				}
 			}
 		}

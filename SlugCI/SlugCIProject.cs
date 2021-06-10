@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Nuke.Common.ProjectModel;
@@ -46,9 +47,10 @@ namespace Slug.CI
 		public bool HasTypeWriterScripts { get; set; } 
 
 		/// <summary>
-		/// What Framework the project is...
+		/// What Frameworks the project is compiled too.  This is loaded at runtime now.
 		/// </summary>
-		public string Framework { get; set; }
+		[JsonIgnore]
+		public List<string> Frameworks { get; set; } = new List<string>();
 
 
 		/// <summary>
@@ -79,7 +81,7 @@ namespace Slug.CI
 			b.AssemblyName = AssemblyName;
 			b.Name = Name;
 			b.Deploy = Deploy;
-			b.Framework = Framework;
+			b.Frameworks = Frameworks;
 			b.IsTestProject = IsTestProject;
 			b.HasTypeWriterScripts = HasTypeWriterScripts;
 			return b;
@@ -101,7 +103,7 @@ namespace Slug.CI
 
 			if (b.Name != Name) return false;
 			if (b.Deploy != Deploy) return false;
-			if (b.Framework != Framework) return false;
+			if (b.Frameworks != Frameworks) return false;
 			if (b.IsTestProject != IsTestProject) return false;
 			if ( b.HasTypeWriterScripts != HasTypeWriterScripts ) return false;
 

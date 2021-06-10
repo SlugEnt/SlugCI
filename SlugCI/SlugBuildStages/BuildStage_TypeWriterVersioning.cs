@@ -67,22 +67,22 @@ namespace Slug.CI.SlugBuildStages
 
 				// Make sure it has proper elements:
 				bool updated = false;
-				if ( typeWriterConfig.Scripts == null|| typeWriterConfig.Scripts.Pack != CMD_PACK ) {
+				if ( typeWriterConfig.Scripts.Pack == null || typeWriterConfig.Scripts.Pack != CMD_PACK ) {
 					updated = true;
 					typeWriterConfig.Scripts.Pack = CMD_PACK;
 				}
-				if (typeWriterConfig.Scripts.Publish != CMD_PUBLISH)
+				if ( typeWriterConfig.Scripts.PublishTW == null  || typeWriterConfig.Scripts.PublishTW != CMD_PUBLISH)
 				{
 					updated = true;
-					typeWriterConfig.Scripts.Publish = CMD_PUBLISH;
+					typeWriterConfig.Scripts.PublishTW = CMD_PUBLISH;
 				}
-				if (typeWriterConfig.Scripts.Copy != CMD_COPY)
+				if (typeWriterConfig.Scripts.Copy == null || typeWriterConfig.Scripts.Copy != CMD_COPY)
 				{
 					updated = true;
 					typeWriterConfig.Scripts.Copy = CMD_COPY;
 				}
 
-				if ( typeWriterConfig.Version != CISession.VersionInfo.NPMVersion ) {
+				if (typeWriterConfig.Version == null || typeWriterConfig.Version != CISession.VersionInfo.NPMVersion ) {
 					updated = true;
 					typeWriterConfig.Version = CISession.VersionInfo.NPMVersion;
 					typeWriterConfig.VersionFull = CISession.VersionInfo.SemVersionAsString;
