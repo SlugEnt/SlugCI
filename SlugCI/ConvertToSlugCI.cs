@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Drawing;
+using System.Linq;
 using System.Text.Json;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -226,12 +227,12 @@ namespace Slug.CI
 			// Now go thru the projects and update the config
 			foreach (VisualStudioProject project in Projects)
 			{
-				Slug.CI.SlugCIProject slugCIProject = slugCiConfig.GetProjectByName(project.Name);
+				SlugCIProject slugCIProject = slugCiConfig.GetProjectByName(project.Name);
 				if (slugCIProject == null)
 				{
 					updateProjectAdd = true;
 					slugCIProject = new SlugCIProject() { Name = project.Name };
-					slugCIProject.Framework = project.Framework;
+					// TODO fix this
 					slugCIProject.IsTestProject = project.IsTestProject;
 
 					if (project.IsTestProject)
@@ -248,9 +249,6 @@ namespace Slug.CI
 					slugCiConfig.Projects.Add(slugCIProject);
 				}
 				else {
-					// Check for updated values:
-					if ( slugCIProject.Framework != project.Framework ) { slugCIProject.Framework = project.Framework; }
-
 					if ( slugCIProject.IsTestProject )
 						// Also add the Required Nuget Coverage package
 						CoverletInstall(project);
@@ -501,13 +499,14 @@ namespace Slug.CI
 
 			// Determine Framework type.
 			DetermineFramework(visualStudioProject);
+			
 			return visualStudioProject;
 		}
 
 
 
 		/// <summary>
-		/// Determines the Project's targeted framework.
+		/// Determines the Project's targeted framework.  It checks both FrameWork and Frameworks and throws the results into a list.
 		/// </summary>
 		/// <param name="project"></param>
 		private void DetermineFramework(VisualStudioProject project)
@@ -517,10 +516,17 @@ namespace Slug.CI
 
 
 			XDocument doc = XDocument.Load(csprojPath);
-			string value = doc.XPathSelectElement("//PropertyGroup/TargetFramework").Value;
-			ControlFlow.Assert(value != string.Empty, "Unable to locate a FrameWork value from the csproj file.  This is a required property. Project: " + project.Namecsproj);
-			project.Framework = value;
+			string value = "";
+			if (doc.XPathSelectElement("//PropertyGroup/TargetFramework") != null)
+				value = doc.XPathSelectElement("//PropertyGroup/TargetFramework").Value;
+			else if (doc.XPathSelectElement("//PropertyGroup/TargetFrameworks") != null)
+				value = doc.XPathSelectElement("//PropertyGroup/TargetFrameworks").Value;
+			
+
+			//ControlFlow.Assert(value != string.Empty, "Unable to locate a FrameWork value from the csproj file.  This is a required property. Project: " + project.Namecsproj);
+			project.Frameworks = value.Split(";").ToList();
 		}
+
 
 
 		/// <summary>

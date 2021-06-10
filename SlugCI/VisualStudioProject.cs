@@ -1,4 +1,5 @@
-﻿using Nuke.Common.IO;
+﻿using System.Collections.Generic;
+using Nuke.Common.IO;
 
 namespace Slug.CI
 {
@@ -11,7 +12,6 @@ namespace Slug.CI
 		public AbsolutePath OriginalPath { get; set; }
 		public AbsolutePath NewPath { get; set; }
 		public bool IsTestProject { get; set; }
-		public string Framework { get; set; }
-		public string DeployType { get; set; }
+		public List<string> Frameworks { get; set; } = new List<string>();
 	}
 }

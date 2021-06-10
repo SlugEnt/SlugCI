@@ -54,15 +54,19 @@ namespace Slug.CI.SlugBuildStages
 			foreach (SlugCIProject project in CISession.Projects) {
 				if ( project.Deploy != SlugCIDeployMethod.Copy ) continue;
 
-				project.Results.PublishedSuccess = false;
+				// Each framework needs to be copied.
+				foreach ( string item in project.Frameworks ) {
+					project.Results.PublishedSuccess = false;
 
-				AbsolutePath destFolder = BuildDestinationFolderLayout(project);
+					AbsolutePath destFolder = BuildDestinationFolderLayout(project,item);
 
-				AbsolutePath srcFolder = project.VSProject.Directory / "bin" / CISession.CompileConfig / project.Framework;
-				FileSystemTasks.CopyDirectoryRecursively(srcFolder,destFolder,DirectoryExistsPolicy.Merge,FileExistsPolicy.OverwriteIfNewer);
-				Logger.Success("Copied:  " + project.Name + " to Deployment folder: " + destFolder);
-				project.Results.PublishedSuccess = true;
+					AbsolutePath srcFolder = project.VSProject.Directory / "bin" / CISession.CompileConfig / item;
+					FileSystemTasks.CopyDirectoryRecursively(srcFolder, destFolder, DirectoryExistsPolicy.Merge, FileExistsPolicy.OverwriteIfNewer);
+					Logger.Success("Copied:  " + project.Name + " to Deployment folder: " + destFolder);
+				}
+
 				SetInprocessStageStatus(StageCompletionStatusEnum.Success);
+				project.Results.PublishedSuccess = true;
 			}
 		}
 
@@ -72,7 +76,7 @@ namespace Slug.CI.SlugBuildStages
 		/// </summary>
 		/// <param name="project"></param>
 		/// <returns></returns>
-		private AbsolutePath BuildDestinationFolderLayout (SlugCIProject project) {
+		private AbsolutePath BuildDestinationFolderLayout (SlugCIProject project, string framework) {
 			string versionFolder = "";
 			if ( CISession.SlugCIConfigObj.DeployToVersionedFolder ) {
 				if ( CISession.SlugCIConfigObj.DeployFolderUsesSemVer ) versionFolder = CISession.VersionInfo.SemVersionAsString;
@@ -89,7 +93,7 @@ namespace Slug.CI.SlugBuildStages
 			}
 			
 			// Build Path
-			AbsolutePath destFolder = CISession.DeployCopyPath / projFolder / versionFolder;
+			AbsolutePath destFolder = CISession.DeployCopyPath / projFolder / framework / versionFolder;
 			return destFolder;
 		}
 
