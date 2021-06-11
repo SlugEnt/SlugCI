@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using System.Xml.XPath;
 using Nuke.Common;
 using Nuke.Common.IO;
+using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Slug.CI.NukeClasses;
 using static Nuke.Common.IO.FileSystemTasks;
@@ -373,13 +374,17 @@ namespace Slug.CI
 
 			// Query the solution for the projects that are in it.
 			// We allow all tests to run, instead of failing at first failure.
+
+			// TODO Solution Project Name Fix
+
+/*
 			CurrentSolutionPath = (AbsolutePath)Path.GetDirectoryName(solutionFile);
 
 			DotNetPath = ToolPathResolver.GetPathExecutable("dotnet");
 			IProcess slnfind = ProcessTasks.StartProcess(DotNetPath, "sln " + CurrentSolutionPath + " list", logOutput: false);
 			slnfind.AssertWaitForExit();
 			IReadOnlyCollection<Output> output = slnfind.Output;
-
+*/
 
 			// There are 2 things we need to check.
 			//  1.  Is solution in right folder?
@@ -391,8 +396,21 @@ namespace Slug.CI
 			//   4. Move solution file to proper location
 			//   5. Re-add all projects to solution
 			bool solutionNeedsToMove = false;
-			if (CurrentSolutionPath.ToString() != ExpectedSolutionPath.ToString()) solutionNeedsToMove = true;
+			if (CISession.Solution.Directory.ToString() != ExpectedSolutionPath.ToString()) solutionNeedsToMove = true;
 
+			List<VisualStudioProject> movedProjects = new List<VisualStudioProject>();
+			foreach ( Project project in CISession.Solution.AllProjects ) {
+
+				VisualStudioProject vsProject = GetInitProject(project);
+				Projects.Add(vsProject);
+				if ((vsProject.OriginalPath.ToString() != vsProject.NewPath.ToString()) || solutionNeedsToMove)
+				{
+					movedProjects.Add(vsProject);
+					MoveProjectStepA(vsProject);
+				}
+
+			}
+			/*
 			List<VisualStudioProject> movedProjects = new List<VisualStudioProject>();
 			// Step 3
 			foreach (Output outputRec in output)
@@ -410,7 +428,7 @@ namespace Slug.CI
 					}
 				}
 			}
-
+			*/
 			// Step 4:  Is Solution in proper directory.  If not move it.
 			if (solutionNeedsToMove)
 			{
@@ -475,14 +493,16 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="path">Path as returned from "dotnet sln" command</param>
 		/// <returns></returns>
-		public VisualStudioProject GetInitProject(string path)
+		public VisualStudioProject GetInitProject(Nuke.Common.ProjectModel.Project nukeProject)
 		{
-			VisualStudioProject visualStudioProject = new VisualStudioProject()
+			VisualStudioProject visualStudioProject = new VisualStudioProject(nukeProject);
+
+/*			VisualStudioProject visualStudioProject = new VisualStudioProject()
 			{
 				Namecsproj = Path.GetFileName(path),
 				Name = Path.GetFileName(Path.GetDirectoryName(path))
 			};
-
+*/
 
 			string lcprojName = visualStudioProject.Name.ToLower();
 
@@ -493,12 +513,12 @@ namespace Slug.CI
 				newRootPath = CISession.TestsDirectory;
 			}
 
-			visualStudioProject.OriginalPath = (AbsolutePath)Path.GetDirectoryName(Path.Combine(CurrentSolutionPath, path));
-			visualStudioProject.NewPath = newRootPath / visualStudioProject.Name;
+			visualStudioProject.OriginalPath = nukeProject.Directory;
+			visualStudioProject.NewPath = newRootPath / Path.GetFileName(nukeProject.Directory);
 
 
 			// Determine Framework type.
-			DetermineFramework(visualStudioProject);
+			//DetermineFramework(visualStudioProject);
 			
 			return visualStudioProject;
 		}

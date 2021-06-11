@@ -44,7 +44,9 @@ namespace Slug.CI
 #if DEBUG
 			foreach ( BuildStage stage in _executionPlan.KnownStages ) {
 				//if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH && stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER) stage.ShouldSkip = true;
-				if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH  && stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER) stage.ShouldSkip = true;
+				if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH  && 
+				     stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER &&
+				     stage.Name != BuildStageStatic.STAGE_PUBLISH) stage.ShouldSkip = true;
 			}
 #endif
 			_executionPlan.BuildExecutionPlan(BuildStageStatic.STAGE_FINAL);

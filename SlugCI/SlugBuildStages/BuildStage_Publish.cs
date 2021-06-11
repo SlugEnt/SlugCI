@@ -84,6 +84,9 @@ namespace Slug.CI.SlugBuildStages
 					CISession.VersionInfo.SemVersion.Minor.ToString() + "." + 
 					CISession.VersionInfo.SemVersion.Patch.ToString();
 			}
+
+			versionFolder = "Ver" + versionFolder;
+
 			string projFolder = project.Name;
 
 			// Now calculate main project folder name
