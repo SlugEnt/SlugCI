@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using Nuke.Common.Tooling;
+using Semver;
 using Console = Colorful.Console;
 
 namespace Slug.CI
@@ -40,15 +41,20 @@ namespace Slug.CI
 			Console.ForegroundColor = Color.WhiteSmoke;
 			LoadBuildStages();
 
+
 			// TODO Remove or comment this out, this is for speeding up testing.
 #if DEBUG
 			foreach ( BuildStage stage in _executionPlan.KnownStages ) {
 				//if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH && stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER) stage.ShouldSkip = true;
-				if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH  && 
+				if ( stage.Name != BuildStageStatic.STAGE_PUBLISH ) stage.ShouldSkip = true;
+/*				if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH  && 
 				     stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER &&
 				     stage.Name != BuildStageStatic.STAGE_PUBLISH) stage.ShouldSkip = true;
+*/
 			}
+			ciSession.VersionInfo = new VersionInfo(new SemVersion(3,56,43),"656gtg" );
 #endif
+
 			_executionPlan.BuildExecutionPlan(BuildStageStatic.STAGE_FINAL);
 
 
@@ -80,6 +86,7 @@ namespace Slug.CI
 			_executionPlan.AddKnownStage(new BuildStage_Publish(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_TypeWriterPublish(CISession));
 			_executionPlan.AddKnownStage(new BuildStage_Final(CISession));
+			_executionPlan.AddKnownStage(new BuildStage_Angular(CISession));
 
 		}
 

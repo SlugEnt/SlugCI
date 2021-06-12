@@ -120,6 +120,21 @@ namespace Slug.CI
 		}
 
 
+		/// <summary>
+		/// Converts a folder into SlugCI format
+		/// </summary>
+		/// <returns></returns>
+		public bool Converter () {
+			bool solutionConverted = false;
+			if ( CISession.SolutionFileName != null && CISession.SolutionFileName != string.Empty ) solutionConverted= Convert_VisualStudioSolution();
+
+			// Ensure Config file is valid and up-to-date with current Class Structure
+			ProcessSlugCIConfigFile();
+
+
+			return (solutionConverted);
+		}
+
 
 		/// <summary>
 		/// Performs initial logic to ensure that the Solution is ready for the SlugCI build process.
@@ -128,7 +143,7 @@ namespace Slug.CI
 		///   - Ensure a .SlugCI file exists.
 		/// </summary>
 		/// <returns></returns>
-		public bool Converter()
+		public bool Convert_VisualStudioSolution()
 		{
 			Logger.Normal("Solution File found:  {0}", CISession.SolutionFileName);
 
@@ -166,12 +181,10 @@ namespace Slug.CI
 				}
 			}
 			
-			
-			// C.  Ensure Config file is valid and up-to-date with current Class Structure
-			ProcessSlugCIConfigFile();
-
 			return true;
 		}
+
+
 
 
 
@@ -225,7 +238,8 @@ namespace Slug.CI
 			bool updateProjectAdd = false;
 			bool hasCopyDeployMethod = false;
 
-			// Now go thru the projects and update the config
+
+			// Now go thru the Visual Studio Projects and update the config
 			foreach (VisualStudioProject project in Projects)
 			{
 				SlugCIProject slugCIProject = slugCiConfig.GetProjectByName(project.Name);
@@ -256,7 +270,6 @@ namespace Slug.CI
 				}
 
 				if (slugCIProject.Deploy == SlugCIDeployMethod.Copy) hasCopyDeployMethod = true;
-
 			}
 
 
@@ -268,11 +281,15 @@ namespace Slug.CI
 			}
 
 
+			// Add Angular Projects
+			ProcessAngularProjects(slugCiConfig);
+
+
 			// Determine if we need to save new config.
 			if ( origSlugCiConfig != slugCiConfig ) {
 				string json = JsonSerializer.Serialize<SlugCIConfig>(slugCiConfig, SlugCIConfig.SerializerOptions());
 				File.WriteAllText(CISession.SlugCIFileName, json);
-				Console.WriteLine("SlugCIConfig file updated to latest version / values");
+				Console.WriteLine("SlugCIConfig file updated to latest version / values",Color.Green);
 
 				SlugCIConfig = GetSlugCIConfig(true);
 				if ( updateProjectAdd ) {
@@ -282,6 +299,42 @@ namespace Slug.CI
 
 			return true;
 		}
+
+
+
+		/// <summary>
+		/// Checks for Angular projects and ensures they exist in the SlugCIConfig.
+		/// </summary>
+		/// <param name="slugCiConfig"></param>
+		private void ProcessAngularProjects ( SlugCIConfig slugCiConfig) {
+			if ( !DirectoryExists(CISession.AngularDirectory) ) {
+				Logger.Warn("No Angular directory found off root folder");
+				return;
+			}
+
+			// Find all subdirectories - these are the angular projects.
+			List<string> webProjects = Directory.EnumerateDirectories(CISession.AngularDirectory, "*.web").ToList();
+
+			foreach ( string webProject in webProjects ) {
+				// See if already part of config, if so, nothing to do.
+				if ( slugCiConfig.AngularProjects.Exists(a => a.Name == webProject) ) continue;
+
+				// Make sure it contains a package.json file.  If so we will assume it is a web project.
+
+				AbsolutePath webFolder = (AbsolutePath) webProject;
+				string name = Path.GetFileName(webFolder);
+				AbsolutePath webFile = webFolder / "package.json";
+
+				if ( !FileExists(webFile) ) {
+					Logger.Warn("Angular Folder does not contain a package.json file.  NOT ADDING TO AnuglarProjects - " + webFolder);
+					continue;
+				}
+
+				slugCiConfig.AngularProjects.Add(new AngularProject(name));
+			}
+
+		}
+
 
 
 		/// <summary>

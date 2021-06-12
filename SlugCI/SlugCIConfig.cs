@@ -38,7 +38,7 @@ namespace Slug.CI {
 		/// <summary>
 		/// This value should be updated every time this config layout changes
 		/// </summary>
-		public const string CONFIG_STRUCTURE_VERSION = "0.10.0";
+		public const string CONFIG_STRUCTURE_VERSION = "0.22.0";
 
 		/// <summary>
 		/// The version format of the config file.
@@ -105,6 +105,13 @@ namespace Slug.CI {
 		/// </summary>
 		public string GitRemote { get; set; } = null;
 
+
+		/// <summary>
+		/// The root part of the folder name for an Angular Project deployment.  For example, name is [root].[appname]
+		/// </summary>
+		public string AngularDeployRootName { get; set; }
+
+
 		/// <summary>
 		/// Projects in the solution
 		/// </summary>
@@ -112,10 +119,17 @@ namespace Slug.CI {
 
 
 		/// <summary>
+		/// All Angular Web Projects
+		/// </summary>
+		public List<AngularProject> AngularProjects { get; set; }
+
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		public SlugCIConfig () {
 			Projects = new List<SlugCIProject>();
+			AngularProjects = new List<AngularProject>();
 		}
 
 
@@ -199,6 +213,10 @@ namespace Slug.CI {
 				b.Projects.Add(project.Copy());
 			}
 
+			foreach ( AngularProject angularProject in AngularProjects ) {
+				b.AngularProjects.Add(angularProject.Copy ());
+			}
+
 			return b;
 		}
 
@@ -251,6 +269,16 @@ namespace Slug.CI {
 				SlugCIProject c =  b.Projects.Find(p => p.Name == project.Name);
 				if ( c == null ) return false;
 				if ( c != project ) return false;
+			}
+
+
+			// Loop thru Angular Projects looking for complete matches
+			foreach (AngularProject project in AngularProjects)
+			{
+				// Find project in other object
+				AngularProject c = b.AngularProjects.Find(p => p.Name == project.Name);
+				if (c == null) return false;
+				if (c != project) return false;
 			}
 			return true;
 		}

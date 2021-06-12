@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Slug.CI.SlugBuildStages
@@ -22,6 +23,7 @@ namespace Slug.CI.SlugBuildStages
 		public const string STAGE_GITCLEAN = "GitClean";
 		public const string STAGE_TYPEWRITER_VER = "TypeWriterVer";
 		public const string STAGE_TYPEWRITER_PUBLISH = "TypeWriter";
+		public const string STAGE_ANGULAR = "Angular Publish";
 		public const string STAGE_FINAL = "Final";
 	}
 }

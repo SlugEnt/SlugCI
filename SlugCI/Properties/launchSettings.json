@@ -18,7 +18,7 @@
     },
     "SlugCISample": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --skipnuget --deployto alpha",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --skipnuget --deployto alpha --faststart",
       "environmentVariables": {
         "SLUGCI_DEPLOY_ALPHA": "c:\\temp\\DeployAlpha",
         "SLUGCI_DEPLOY_BETA": "c:\\temp\\DeployBeta"
@@ -55,7 +55,7 @@
     },
     "GenericTest": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\practice\\template_service --deployto alpha --faststart false"
+      "commandLineArgs": "--rootdir C:\\A_Dev\\practice\\temp --deployto alpha --faststart"
     }
   }
 }
