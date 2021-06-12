@@ -6,6 +6,7 @@ using Nuke.Common.Utilities;
 using Slug.CI.NukeClasses;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 namespace Slug.CI.SlugBuildStages
@@ -24,6 +25,8 @@ namespace Slug.CI.SlugBuildStages
 			// TODO Need to figure out what to do here... It could be PUBLISH OR PUBLISH TEST or do we do a post processing Execution plan...?
 			
 			PredecessorList.Add(BuildStageStatic.STAGE_PACK);
+
+			PredecessorList.Add(BuildStageStatic.STAGE_ANGULAR);
 				
 		}
 
@@ -39,7 +42,12 @@ namespace Slug.CI.SlugBuildStages
 			if (!CISession.SkipNuget)
 				Publish_Nuget();
 
-			Publish_Copy();
+			// Publish Visual Studio Projects
+			Publish_Copy_VS();
+
+			// Publish Angular Projects
+			Publish_Copy_Angular();
+
 			Logger.Success("Version: " + CISession.VersionInfo.SemVersionAsString + " fully committed and deployed to target location.");
 
 
@@ -48,9 +56,10 @@ namespace Slug.CI.SlugBuildStages
 		
 
 		/// <summary>
-		/// Copies from the compiled directory to the publish directory with the version as the last folder..
+		/// Copies from the compiled directory to the publish directory with the version as the last folder for Visual Studio projects..
 		/// </summary>
-		private void Publish_Copy () {
+		private void Publish_Copy_VS () {
+			Logger.Info("Publishing Visual Studio Projects");
 			foreach (SlugCIProject project in CISession.Projects) {
 				if ( project.Deploy != SlugCIDeployMethod.Copy ) continue;
 
@@ -58,7 +67,7 @@ namespace Slug.CI.SlugBuildStages
 				foreach ( string item in project.Frameworks ) {
 					project.Results.PublishedSuccess = false;
 
-					AbsolutePath destFolder = BuildDestinationFolderLayout(project,item);
+					AbsolutePath destFolder = BuildDestinationFolderLayout_VS(project,item);
 
 					AbsolutePath srcFolder = project.VSProject.Directory / "bin" / CISession.CompileConfig / item;
 					FileSystemTasks.CopyDirectoryRecursively(srcFolder, destFolder, DirectoryExistsPolicy.Merge, FileExistsPolicy.OverwriteIfNewer);
@@ -72,11 +81,89 @@ namespace Slug.CI.SlugBuildStages
 
 
 		/// <summary>
-		/// Builds the Destination folder path based upon the settings in the config file.
+		/// Publish Angular projects
+		/// </summary>
+		private void Publish_Copy_Angular() {
+			Logger.Info("Publishing Angular Projects");
+
+			// Angular projects:  We only support single app publishes per project.  Angular NX supports more, we just don't have any examples at the moment.
+
+			foreach (AngularProject project in CISession.SlugCIConfigObj.AngularProjects)
+			{
+				project.Results.PublishedSuccess = false;
+
+				// TODO - Replace "" with Angular Apps from dist folder 
+				AbsolutePath destFolder = BuildDestinationFolderName_Angular(project, "");
+
+				AbsolutePath angularDistPath = CISession.AngularDirectory / project.Name / "dist";
+				AbsolutePath angularAppsSubFolder = angularDistPath / "apps";
+				ControlFlow.Assert(Directory.Exists(angularDistPath),"Cannot find Angular dist folder.  Has Angular app been compiled?");
+
+				AbsolutePath srcFolder = (AbsolutePath) "c:";
+
+				// Determine where the source distribution files are.  This is either right in the dist folder OR there is a folder in dist called
+				// "apps" with subfolders and the "web" is in each subfolder.
+				if ( !Directory.Exists(angularAppsSubFolder) ) 
+					srcFolder = angularDistPath;
+				else {
+					List<string> dirNames = Directory.GetDirectories(angularAppsSubFolder).ToList();
+					ControlFlow.Assert(dirNames.Count > 0, "There are no compiled apps in the [" + angularAppsSubFolder + "].");
+					if ( dirNames.Count == 1 ) srcFolder = (AbsolutePath) dirNames [0];
+					else {
+						ControlFlow.Assert(dirNames.Count < 2,
+						                   "There is more than 1 app in the folder [" + angularAppsSubFolder + "].  We can only handle 1 at this time.");
+					}
+				}
+
+				FileSystemTasks.CopyDirectoryRecursively(srcFolder, destFolder, DirectoryExistsPolicy.Merge, FileExistsPolicy.OverwriteIfNewer);
+					Logger.Success("Copied:  " + project.Name + " to Deployment folder: " + destFolder);
+
+				SetInprocessStageStatus(StageCompletionStatusEnum.Success);
+				project.Results.PublishedSuccess = true;
+			}
+		}
+
+
+		/// <summary>
+		/// Computes the name of the Angular deployment folder for a given Angular Project app
 		/// </summary>
 		/// <param name="project"></param>
 		/// <returns></returns>
-		private AbsolutePath BuildDestinationFolderLayout (SlugCIProject project, string framework) {
+		private AbsolutePath BuildDestinationFolderName_Angular (AngularProject project,string appName) {
+			string rootName = project.Name;
+/*			if ( CISession.SlugCIConfigObj.AngularDeployRootName == null || CISession.SlugCIConfigObj.AngularDeployRootName == string.Empty ) {
+				// Name is the root directory name of project.
+				rootName = Path.GetFileName(CISession.RootDirectory);
+			}
+			else
+				rootName = CISession.SlugCIConfigObj.AngularDeployRootName;
+*/
+			if ( appName != string.Empty ) rootName = rootName + "." + appName;
+
+			string versionFolder = "";
+
+			if (CISession.SlugCIConfigObj.DeployToVersionedFolder)
+			{
+				if (CISession.SlugCIConfigObj.DeployFolderUsesSemVer) versionFolder = CISession.VersionInfo.SemVersionAsString;
+				else versionFolder = CISession.VersionInfo.SemVersion.Major.ToString() + "." +
+				                     CISession.VersionInfo.SemVersion.Minor.ToString() + "." +
+				                     CISession.VersionInfo.SemVersion.Patch.ToString();
+			}
+
+			versionFolder = "Ver" + versionFolder;
+
+			AbsolutePath destFolder = CISession.DeployCopyPath / rootName / versionFolder;
+			return destFolder;
+		}
+
+
+
+		/// <summary>
+		/// Builds the Destination folder path based upon the settings in the config file for Visual Studio Projects
+		/// </summary>
+		/// <param name="project"></param>
+		/// <returns></returns>
+		private AbsolutePath BuildDestinationFolderLayout_VS (SlugCIProject project, string framework) {
 			string versionFolder = "";
 			if ( CISession.SlugCIConfigObj.DeployToVersionedFolder ) {
 				if ( CISession.SlugCIConfigObj.DeployFolderUsesSemVer ) versionFolder = CISession.VersionInfo.SemVersionAsString;

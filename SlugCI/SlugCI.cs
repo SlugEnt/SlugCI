@@ -66,6 +66,7 @@ namespace Slug.CI
 			CISession.TestsDirectory = CISession.RootDirectory / "tests";
 			CISession.OutputDirectory = CISession.RootDirectory / "artifacts";
 			CISession.SlugCIFileName = CISession.SlugCIPath / SLUG_CI_CONFIG_FILE;
+			CISession.AngularDirectory = CISession.RootDirectory / "angular";
 
 
 			CISession.CoveragePath = CISession.OutputDirectory / "Coverage";
@@ -117,6 +118,14 @@ namespace Slug.CI
 				PublishResultRecord resultRecord = new PublishResultRecord(project);
 				project.Results = resultRecord;
 				CISession.PublishResults.Add(project.Name, resultRecord);
+			}
+
+			// Setup Publish Results for Angular Projects
+			foreach ( AngularProject angularProject in CISession.SlugCIConfigObj.AngularProjects ) {
+				PublishResultRecord resultRecord = new PublishResultRecord(angularProject);
+				angularProject.Results = resultRecord;
+				CISession.PublishResults.Add(angularProject.Name, resultRecord);
+
 			}
 
 			// Quick stats on number of Deploy targets by type

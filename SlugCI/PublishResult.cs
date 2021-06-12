@@ -33,5 +33,17 @@
 			NameOfProject = project.Name;
 			DeployMethod = project.Deploy;
 		}
+
+
+		/// <summary>
+		/// Angular Project Constructor
+		/// </summary>
+		/// <param name="project"></param>
+		public PublishResultRecord (AngularProject project) {
+			NameOfProject = project.Name;
+
+			// All Angular projects are Copy
+			DeployMethod = SlugCIDeployMethod.Copy;
+		}
 	}
 }

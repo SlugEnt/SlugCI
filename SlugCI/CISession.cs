@@ -44,6 +44,13 @@ namespace Slug.CI.NukeClasses
 		/// </summary>
 		public AbsolutePath SourceDirectory { get; set; }
 
+
+		/// <summary>
+		/// Angular root folder.
+		/// </summary>
+		public AbsolutePath AngularDirectory { get; set; }
+
+
 		/// <summary>
 		/// The location of the Tests folder
 		/// </summary>
