@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Nuke.Common;
 using Nuke.Common.Tooling;
 using Semver;
@@ -141,19 +142,21 @@ namespace Slug.CI
 		/// <summary>
 		/// Perform Git Processing startup processes
 		/// </summary>
-		public void Startup () {
-			GetGitCommandVersion();
-			Colorful.Console.WriteLine("Git Command Version:  " + GitCommandVersion, Color.Yellow);
+		public async Task Startup () {
+			Task GetGitTask =  GetGitCommandVersionAsync();
 
 			// Get some basic Git info about the repository.
-			GetRepositoryInfo();
+			Task RepoInfoTask = GetRepositoryInfoAsync();
+
+			GetGitTask.Wait();
+			RepoInfoTask.Wait();
 		}
 
 
 		/// <summary>
 		/// Gets basic info about the repository
 		/// </summary>
-		public void GetRepositoryInfo () {
+		public async Task GetRepositoryInfoAsync () {
 			RefreshLocalBranchStatus();
 			GetMainBranchName();
 
@@ -167,7 +170,7 @@ namespace Slug.CI
 		/// <summary>
 		/// Prints the current version of the Git Command being used.  Version is only shown when PrintGitHistory is called.
 		/// </summary>
-		private void GetGitCommandVersion () {
+		private async Task GetGitCommandVersionAsync () {
 
 			List<Output> gitOutput;
 			string gitArgs = "--version";

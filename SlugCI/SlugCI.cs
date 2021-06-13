@@ -9,6 +9,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Semver;
 using Console = Colorful.Console;
 
@@ -45,18 +47,25 @@ namespace Slug.CI
 		private bool IsReady { get; set; }
 
 
+		/// <summary>
+		/// Output produced during the startup sequence
+		/// </summary>
+		private List<LineOut> LineOutput { get; set; } = new List<LineOut>();
 		
+		private LineOut NewLine { get; set; }
 
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		/// <param name="ciSession">The SlugCI Session object</param>
 		public SlugCI (CISession ciSession) {
-			Console.WriteLine(Environment.NewLine);
+			NewLine = LineOut.NewLine();
+			LineOutput.Add(NewLine);
+			//Console.WriteLine(Environment.NewLine);
 			Color lineColor = Color.WhiteSmoke;
-			Console.ForegroundColor = lineColor;
+			//Console.ForegroundColor = lineColor;
 
-			Misc.WriteMainHeader("SlugCI Initialization of Repository");
+			
 
 			
 
@@ -77,18 +86,30 @@ namespace Slug.CI
 		}
 
 
+		private async Task PreLoadSolutionAsync () {
+			foreach ( Nuke.Common.ProjectModel.Project x in CISession.Solution.AllProjects ) {
+				// Get Framework(s)
+				string framework = x.GetProperty("TargetFramework");
+			}
+		}
+
+
 		/// <summary>
 		/// Performs initial steps:  Load slugciconfig, load projects, etc.
 		/// </summary>
-		public void Startup () {
-			CISession.GitProcessor.Startup();
+		public async Task StartupAsync () {
+
+			Task gitProcessTask = Task.Run(CISession.GitProcessor.Startup);
+			
+			// Locate Solution and set solution related variables
+			LoadSolutionInfo();
+			Task slnPreLoadTask = Task.Run(PreLoadSolutionAsync);
+			
 
 			CheckForEnvironmentVariables();
 
-			// Locate Solution and set solution related variables
-			LoadSolutionInfo();
 
-
+//			slnPreLoadTask.Wait();
 			// Ensure Solution is in SlugCI format. If not migrate it.
 			ConvertToSlugCI converter = new ConvertToSlugCI(CISession);
 			if (!converter.IsInSlugCIFormat)
@@ -105,6 +126,7 @@ namespace Slug.CI
 
 			// Combine the Visual Studio solution project info into the individual projects of the
 			// SlugCIConfig projects for easier access later on.
+			slnPreLoadTask.Wait();
 			MergeVSProjectIntoSlugCI();
 
 
@@ -125,7 +147,6 @@ namespace Slug.CI
 				PublishResultRecord resultRecord = new PublishResultRecord(angularProject);
 				angularProject.Results = resultRecord;
 				CISession.PublishResults.Add(angularProject.Name, resultRecord);
-
 			}
 
 			// Quick stats on number of Deploy targets by type
@@ -154,7 +175,12 @@ namespace Slug.CI
 				}
 			}
 
-			GetBranchInfo();
+			gitProcessTask.Wait();
+
+			Task gbiTask = GetBranchInfoAsync();
+			gbiTask.Wait();
+
+			LineOutput.Add(new LineOut("Git Command Version:  " + CISession.GitProcessor.GitCommandVersion,Color.Yellow));
 
 			IsReady = true;
 		}
@@ -166,7 +192,7 @@ namespace Slug.CI
 		/// process this should result in all remote branches that have local counterparts
 		/// being removed from our processing lists.
 		/// </summary>
-		private void GetBranchInfo()
+		private async Task GetBranchInfoAsync()
 		{
 			List<RecordBranchLatestCommit> latestCommits;
 
@@ -194,6 +220,20 @@ namespace Slug.CI
 			}
 
 			foreach (string s in branchesToRemove) { CISession.GitBranches.Remove(s); }
+		}
+
+
+
+		/// <summary>
+		/// Writes all the lineout to the console.
+		/// </summary>
+		public void WriteLines ()
+		{
+			Misc.WriteMainHeader("SlugCI Initialization of Repository");
+			
+			foreach ( LineOut lineOut in LineOutput ) {
+				lineOut.WriteToConsole();
+			}
 		}
 
 
@@ -341,7 +381,6 @@ namespace Slug.CI
 
 				slugCIProject.AssemblyName = x.GetProperty("AssemblyName");
 				slugCIProject.PackageId = x.GetProperty("PackageId");
-				//slugCIProject.
 
 				ControlFlow.Assert(!slugCIProject.AssemblyName.IsNullOrEmpty(),
 				                   "Unable to locate the Assembly name from the .csproj for project [" + slugCIProject.Name + "]");
@@ -399,12 +438,14 @@ namespace Slug.CI
 
 			if (MissingEnvironmentVariables.Count == 0)
 			{
-				Console.WriteLine("All required environment variables found", Color.Green);
+				LineOutput.Add(LineOut.Success("All required environment variables found"));
 				return true;
 			}
 
-			Console.WriteLine(Environment.NewLine + "Some environment variables are missing.  These may or may not be required.", Color.Yellow);
-			foreach (string item in MissingEnvironmentVariables) Console.WriteLine("  -->  " + item,Color.Yellow);
+			LineOutput.Add(NewLine);
+			LineOutput.Add(new LineOut("Some environment variables are missing.  These may or may not be required.",Color.Yellow));
+			foreach (string item in MissingEnvironmentVariables) 
+				LineOutput.Add(new LineOut("  -->  " + item,Color.Yellow));
 			return false;
 		}
 
