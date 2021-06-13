@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Nuke.Common.Tooling;
 using Semver;
 using Console = Colorful.Console;
 
@@ -180,7 +181,7 @@ namespace Slug.CI
 			Task gbiTask = GetBranchInfoAsync();
 			gbiTask.Wait();
 
-			LineOutput.Add(new LineOut("Git Command Version:  " + CISession.GitProcessor.GitCommandVersion,Color.Yellow));
+			LineOutput.Add(new LineOut(OutputType.Std,"Git Command Version:  " + CISession.GitProcessor.GitCommandVersion,Color.Yellow));
 
 			IsReady = true;
 		}
@@ -443,9 +444,9 @@ namespace Slug.CI
 			}
 
 			LineOutput.Add(NewLine);
-			LineOutput.Add(new LineOut("Some environment variables are missing.  These may or may not be required.",Color.Yellow));
+			LineOutput.Add(new LineOut(OutputType.Warn,"Some environment variables are missing.  These may or may not be required.",Color.Yellow));
 			foreach (string item in MissingEnvironmentVariables) 
-				LineOutput.Add(new LineOut("  -->  " + item,Color.Yellow));
+				LineOutput.Add(new LineOut(OutputType.Warn,"  -->  " + item,Color.Yellow));
 			return false;
 		}
 

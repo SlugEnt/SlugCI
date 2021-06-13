@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using Nuke.Common.Tooling;
 using Console = Colorful.Console;
 
 namespace Slug.CI
@@ -22,6 +23,13 @@ namespace Slug.CI
 		/// </summary>
 		public string Text { get; private set; }
 
+
+		/// <summary>
+		/// Type of output line
+		/// </summary>
+		public OutputType OutputType { get; private set; }
+
+
 		/// <summary>
 		/// Default background color.
 		/// </summary>
@@ -33,8 +41,9 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="text"></param>
 		/// <param name="textColor"></param>
-		public LineOut (string text, Color textColor) {
+		public LineOut (OutputType type,string text, Color textColor) {
 			Text = text;
+			OutputType = type;
 			FGColor = textColor;
 			BGColor = DefaultBackgroundColor;
 		}
@@ -46,7 +55,7 @@ namespace Slug.CI
 		/// <param name="text"></param>
 		/// <returns></returns>
 		public static LineOut Error (string text) {
-			LineOut lo = new LineOut(text,Color.Red);
+			LineOut lo = new LineOut(OutputType.Err,text,Color.Red);
 			return lo;
 		}
 
@@ -58,7 +67,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		public static LineOut Success(string text)
 		{
-			LineOut lo = new LineOut(text, Color.Green);
+			LineOut lo = new LineOut(OutputType.Success,text, Color.Green);
 			return lo;
 		}
 
@@ -71,7 +80,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		public static LineOut Warning(string text)
 		{
-			LineOut lo = new LineOut(text, Color.Yellow);
+			LineOut lo = new LineOut(OutputType.Warn,text, Color.Yellow);
 			return lo;
 		}
 
@@ -83,7 +92,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		public static LineOut Info(string text)
 		{
-			LineOut lo = new LineOut(text, Color.Cyan);
+			LineOut lo = new LineOut(OutputType.Info,text, Color.Cyan);
 			return lo;
 		}
 
@@ -95,7 +104,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		public static LineOut Normal(string text)
 		{
-			LineOut lo = new LineOut(text, Color.WhiteSmoke);
+			LineOut lo = new LineOut(OutputType.Std,text, Color.WhiteSmoke);
 			return lo;
 		}
 
@@ -105,7 +114,7 @@ namespace Slug.CI
 		/// </summary>
 		/// <returns></returns>
 		public static LineOut NewLine () {
-			LineOut lo = new LineOut("",Color.WhiteSmoke);
+			LineOut lo = new LineOut(OutputType.Std,"",Color.WhiteSmoke);
 			return lo;
 		}
 

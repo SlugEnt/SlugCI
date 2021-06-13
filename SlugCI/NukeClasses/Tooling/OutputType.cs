@@ -9,7 +9,10 @@ namespace Nuke.Common.Tooling
 {
     public enum OutputType
     {
+        Success,
         Std,
-        Err
+        Info,
+        Warn,
+        Err,
     }
 }
