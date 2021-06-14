@@ -107,6 +107,20 @@ namespace Slug.CI
 			LineOut lo = new LineOut(OutputType.Std,text, Color.WhiteSmoke);
 			return lo;
 		}
+		
+
+		/// <summary>
+		/// Writes a line of normal text in the given color
+		/// </summary>
+		/// <param name="text"></param>
+		/// <param name="textColor"></param>
+		/// <returns></returns>
+		public static LineOut Normal(string text, Color textColor)
+		{
+			LineOut lo = new LineOut(OutputType.Std, text, textColor);
+			return lo;
+		}
+
 
 
 		/// <summary>
@@ -120,10 +134,34 @@ namespace Slug.CI
 
 
 		/// <summary>
-		/// Writes the record to the Console.
+		/// Writes the record to the Console in color if raw is false
+		/// <param name="raw"></param> If true, it writes to the console, just the text with a prefix marker stating what type of Output Type it is.
 		/// </summary>
-		public void WriteToConsole () {
-			Console.WriteLine(Text,FGColor);
+		public void WriteToConsole (bool raw = false) {
+			if (raw)
+				Console.WriteLine(ToString(),FGColor);
+			else {
+				Console.WriteLine(Text, FGColor);
+			}
+		}
+
+
+		/// <summary>
+		/// Just displays the text...
+		/// </summary>
+		/// <returns></returns>
+		public override string ToString () {
+			string prefix = "Norm --> ";
+			if (OutputType == OutputType.Std)            prefix = "Std  --> ";
+			else if (OutputType == OutputType.Info)      prefix = "Info --> ";
+			else if ( OutputType == OutputType.Success ) prefix = "Ok   --> ";
+			else if ( OutputType == OutputType.Warn )    prefix = "Warn --> ";
+			else if ( OutputType == OutputType.Err )
+				prefix = "Err  --> ";
+			else
+				prefix = "???  --> ";
+
+			return prefix + Text;
 		}
 	}
 }

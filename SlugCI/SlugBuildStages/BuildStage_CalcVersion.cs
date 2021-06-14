@@ -41,8 +41,6 @@ namespace Slug.CI.SlugBuildStages
 		/// </summary>
 		/// <returns></returns>
 		protected override StageCompletionStatusEnum ExecuteProcess () {
-			//GetBranchInfo();
-			
 			currentBranchName = CISession.GitProcessor.CurrentBranch.ToLower();
 
 			GitBranchInfo comparisonBranch = null;
@@ -68,7 +66,7 @@ namespace Slug.CI.SlugBuildStages
 				ControlFlow.Assert(CISession.ManuallySetVersion > currentBranch.LatestSemVersionOnBranch,
 				                   "Manually set version must be greater than the most current version on the branch deploying to");
 				string releaseType = "";
-				string semVersionPreRelease = "";
+				
 				if ( CISession.PublishTarget == PublishTargetEnum.Alpha ) releaseType = "alpha";
 				else if (CISession.PublishTarget == PublishTargetEnum.Beta) releaseType = "beta";
 				else if ( CISession.PublishTarget == PublishTargetEnum.Production ) {
@@ -79,6 +77,7 @@ namespace Slug.CI.SlugBuildStages
 				SemVersionPreRelease semPre = new SemVersionPreRelease(releaseType, 0, IncrementTypeEnum.None);
 				newVersion = new SemVersion(CISession.ManuallySetVersion.Major, CISession.ManuallySetVersion.Minor, CISession.ManuallySetVersion.Patch, semPre.Tag());
 				CISession.VersionInfo = new VersionInfo(newVersion, currentBranch.LatestCommitOnBranch.CommitHash);
+				AOT_Info("Success:  Manual Version Set:  " + newVersion);
 				return StageCompletionStatusEnum.Success;
 			}
 
@@ -92,8 +91,8 @@ namespace Slug.CI.SlugBuildStages
 					CISession.WasPreviouslyCommitted = true;
 					newVersion = mostCurrentSemVerOnBranch;
 					CISession.VersionInfo = new VersionInfo(newVersion, currentBranch.LatestCommitOnBranch.CommitHash);
-					Console.WriteLine("No changes require a version change.  Assuming this is a continuation of a prior post compile failure.",Color.Yellow);
-					Logger.Success("Existing Version is:  " + newVersion);
+					AOT_Warning("No changes require a version change.  Assuming this is a continuation of a prior post compile failure.");
+					AOT_Info("No Version Change!  Existing Version is:  " + newVersion);
 					return StageCompletionStatusEnum.Success;
 				}
 			}
@@ -132,8 +131,7 @@ namespace Slug.CI.SlugBuildStages
 			// Store the version that should be set for the build.
 			CISession.VersionInfo = new VersionInfo(newVersion, currentBranch.LatestCommitOnBranch.CommitHash);
 			
-			
-			Logger.Success("New Version is:  " + newVersion);
+			AOT_Info("New Version is:  " + newVersion);
 
 			return StageCompletionStatusEnum.Success;
 		}

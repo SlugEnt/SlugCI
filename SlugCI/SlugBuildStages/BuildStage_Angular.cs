@@ -16,9 +16,8 @@ namespace Slug.CI.SlugBuildStages
 			/// </summary>
 			public BuildStage_Angular(CISession ciSession) : base(BuildStageStatic.STAGE_ANGULAR, ciSession)
 			{
-			//	PredecessorList.Add(BuildStageStatic.STAGE_PUBLISH);
+				PredecessorList.Add(BuildStageStatic.STAGE_CALCVERSION);
 			}
-
 
 
 			/// <summary>

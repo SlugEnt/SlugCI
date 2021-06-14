@@ -98,17 +98,6 @@ namespace Slug.CI
 		}
 
 
-		protected void AddOutputText (string text, OutputType outputType) {
-			LineOut output;
-			if (outputType == OutputType.Success) output = LineOut.Success(text);
-			else if (outputType == OutputType.Err) output = LineOut.Error(text);
-			else if (outputType == OutputType.Warn) output = LineOut.Warning(text);
-			else if (outputType == OutputType.Info) output = LineOut.Info(text);
-			else output = LineOut.Normal(text);
-			StageOutput.Add(output);
-		}
-
-
 		/// <summary>
 		/// Method that must be overridden in child classes.  This is where the main logic for the child process lives.
 		/// </summary>
@@ -165,7 +154,7 @@ namespace Slug.CI
 
 
 				if ( ShouldSkip ) {
-					Console.WriteLine("Stage skipped due to skip stage setting being set.", Color.Yellow);
+					AOT_Warning("Stage skipped due to skip stage setting being set.");
 					CompletionStatus = StageCompletionStatusEnum.Skipped;
 					_stopwatch.Stop();
 					return true;
@@ -174,19 +163,16 @@ namespace Slug.CI
 					Finished(ExecuteProcess());
 
 
-				// Write Finishing Stage Message
-				Color lineColor = Color.Red;
+				string finalMsg = String.Format("Stage Result:  {0}", CompletionStatus.ToString());
 
-				lineColor = CompletionStatus switch
+				Color lineColor = CompletionStatus switch
 				{
 					StageCompletionStatusEnum.Success => Color.Green,
 					StageCompletionStatusEnum.Skipped => Color.Cyan,
 					StageCompletionStatusEnum.Warning => Color.Yellow,
 					_ => Color.Red,
 				};
-
-				
-				Console.WriteLine("Stage Result:  {0}", CompletionStatus.ToString(), lineColor);
+				AOT_Normal(finalMsg,lineColor);
 
 
 				// Return success / Failure result
@@ -204,7 +190,7 @@ namespace Slug.CI
 		}
 
 
-
+#region "Equality Methods"
 		bool IEqualityComparer<BuildStage>.Equals(BuildStage x, BuildStage y) {
 			if ( x.Name == y.Name ) return true;
 			return false;
@@ -246,5 +232,104 @@ namespace Slug.CI
 		/// </summary>
 		/// <returns></returns>
 		public override string ToString () { return Name + " [ " + CompletionStatus + " ]"; }
+
+#endregion
+
+
+		/// <summary>
+		/// If True, all the AddOutputText functions will store the given output to the StageOutput list AND write it to console.
+		/// If False, it only logs it to the StageOutput List.
+		/// </summary>
+		public bool ShouldLogToConsoleRealTime { get; set; } = true;
+
+
+		/// <summary>
+		/// Adds the given text to output list and logs it to screen.
+		/// </summary>
+		/// <param name="text"></param>
+		/// <param name="outputType"></param>
+		public void AddOutputText(string text, OutputType outputType)
+		{
+			LineOut output;
+			if (outputType == OutputType.Success) AOT_Success(text);
+			else if (outputType == OutputType.Err) AOT_Error(text);
+			else if (outputType == OutputType.Warn) AOT_Warning(text);
+			else if (outputType == OutputType.Info) AOT_Info(text);
+			else AOT_Normal(text);
+		}
+
+
+		/// <summary>
+		/// Writes the given text as Success output to both BuildStage output and to the console real time.
+		/// </summary>
+		/// <param name="text"></param>
+		public void AOT_Success (string text) {
+			StageOutput.Add(LineOut.Success(text));
+			if (ShouldLogToConsoleRealTime) Console.WriteLine(text,Color.Green);
+		}
+
+
+		/// <summary>
+		/// Writes the given text as Errored output to both BuildStage output and to the console real time.
+		/// </summary>
+		/// <param name="text"></param>
+		protected void AOT_Error (string text)
+		{
+			StageOutput.Add(LineOut.Error(text));
+			if (ShouldLogToConsoleRealTime) Console.WriteLine(text,Color.Red);
+		}
+
+
+		/// <summary>
+		/// Writes the given text as warning output to both BuildStage output and to the console real time.
+		/// </summary>
+		/// <param name="text"></param>
+		protected void AOT_Warning(string text)
+		{
+			StageOutput.Add(LineOut.Warning(text));
+			if (ShouldLogToConsoleRealTime) Console.WriteLine(text, Color.Yellow);
+		}
+
+
+		/// <summary>
+		/// Writes the given text as Informational output to both BuildStage output and to the console real time.
+		/// </summary>
+		/// <param name="text"></param>
+		protected void AOT_Info(string text)
+		{
+			StageOutput.Add(LineOut.Info(text));
+			if (ShouldLogToConsoleRealTime) Console.WriteLine(text, Color.Cyan);
+		}
+
+
+		/// <summary>
+		/// Writes the given text as normal output to both BuildStage output and to the console real time.
+		/// </summary>
+		/// <param name="text"></param>
+		protected void AOT_Normal(string text)
+		{
+			StageOutput.Add(LineOut.Normal(text));
+			if (ShouldLogToConsoleRealTime) Console.WriteLine(text, Color.WhiteSmoke);
+		}
+
+
+		/// <summary>
+		/// Writes the given text as normal output to both BuildStage output and to the console real time.
+		/// </summary>
+		/// <param name="text"></param>
+		protected void AOT_Normal(string text, Color textColor)
+		{
+			StageOutput.Add(LineOut.Normal(text,textColor));
+			if (ShouldLogToConsoleRealTime) Console.WriteLine(text, textColor);
+		}
+
+
+		/// <summary>
+		/// Writes a new blank line
+		/// </summary>
+		protected void AOT_NewLine () {
+			StageOutput.Add(LineOut.NewLine());
+			if (ShouldLogToConsoleRealTime) Console.WriteLine();
+		}
 	}
 }

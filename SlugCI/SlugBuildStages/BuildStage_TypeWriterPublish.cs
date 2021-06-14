@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.VisualBasic;
 using Nuke.Common;
 using Nuke.Common.IO;
@@ -35,8 +37,8 @@ namespace Slug.CI.SlugBuildStages
 			CompletionStatus = StageCompletionStatusEnum.InProcess;
 
 			foreach ( SlugCIProject project in CISession.Projects ) {
-				AddOutputText("Project: " + project.Name, OutputType.Std );
-				AddOutputText("  --> HasTypeWriterScripts:  " + project.HasTypeWriterScripts,OutputType.Std );
+				AOT_Normal("Project: " + project.Name, Color.Magenta );
+				AOT_Normal("  --> HasTypeWriterScripts:  " + project.HasTypeWriterScripts,Color.Magenta );
 				
 				if ( !project.HasTypeWriterScripts )
 					continue;
@@ -60,18 +62,19 @@ namespace Slug.CI.SlugBuildStages
 
 
 		/// <summary>
-		/// NPM logs to informational messages to StdError.  Only know if NPM errored by checking return code.
+		/// NPM logs to informational messages to StdError.  Only knows if NPM errored by checking return code.
 		/// </summary>
 		/// <param name="type"></param>
 		/// <param name="output"></param>
-		public static void NPMLogger(OutputType type, string output)
+		public void NPMLogger(OutputType type, string text)
 		{
 			if (type == OutputType.Std)
-				Logger.Normal(output);
-			else if (output.StartsWith("npm notice"))
-				Logger.Normal(output);
-			else if (output.StartsWith("npm ERR:"))Logger.Error(output);
-			else Logger.Normal(output);
+				AOT_Normal(text);
+			else if (text.StartsWith("npm notice"))
+				AOT_Info(text);
+			else if (text.StartsWith("npm ERR:"))
+				AOT_Error(text);
+			AOT_Normal(text);
 		}
 	}
 }

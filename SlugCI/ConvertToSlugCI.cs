@@ -74,7 +74,8 @@ namespace Slug.CI
 
 			
 			if ( ciSession.IsFastStart ) {
-				Misc.WriteSubHeader("FastStart:  Skipping normal checks and validations");
+				// TODO - Need to restore this at some point, but needs to write to a AddOutputStage instead of screen. It interferes with prompting.
+				// Misc.WriteSubHeader("FastStart:  Skipping normal checks and validations");
 			}
 			else
 				PreCheck();

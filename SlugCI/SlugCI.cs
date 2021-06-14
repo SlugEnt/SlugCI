@@ -62,13 +62,7 @@ namespace Slug.CI
 		public SlugCI (CISession ciSession) {
 			NewLine = LineOut.NewLine();
 			LineOutput.Add(NewLine);
-			//Console.WriteLine(Environment.NewLine);
 			Color lineColor = Color.WhiteSmoke;
-			//Console.ForegroundColor = lineColor;
-
-			
-
-			
 
 			CISession = ciSession;
 			CISession.SlugCIPath = CISession.RootDirectory / ".slugci";
@@ -77,8 +71,6 @@ namespace Slug.CI
 			CISession.OutputDirectory = CISession.RootDirectory / "artifacts";
 			CISession.SlugCIFileName = CISession.SlugCIPath / SLUG_CI_CONFIG_FILE;
 			CISession.AngularDirectory = CISession.RootDirectory / "angular";
-
-
 			CISession.CoveragePath = CISession.OutputDirectory / "Coverage";
 			CISession.TestOutputPath = CISession.OutputDirectory / "Tests";
 
@@ -88,7 +80,7 @@ namespace Slug.CI
 
 
 		private async Task PreLoadSolutionAsync () {
-			foreach ( Nuke.Common.ProjectModel.Project x in CISession.Solution.AllProjects ) {
+			foreach ( Project x in CISession.Solution.AllProjects ) {
 				// Get Framework(s)
 				string framework = x.GetProperty("TargetFramework");
 			}
