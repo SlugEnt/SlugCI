@@ -210,12 +210,12 @@ namespace Slug.CI.SlugBuildStages
 				try
 				{
 					settings.TargetPath = nugetPackage;
-					IReadOnlyCollection<Output> nugetOutput = DotNetNuGetPush(settings);
+					IReadOnlyCollection<LineOut> nugetOutput = DotNetNuGetPush(settings);
 					StageOutput.AddRange(nugetOutput);
 					if (nugetOutput.Count > 0)
 					{
 						// Look for skipped message.
-						foreach (Output outputLine in nugetOutput)
+						foreach (LineOut outputLine in nugetOutput)
 						{
 							if (outputLine.Text.Contains("already exists at feed")) {
 								stepStatus = StageCompletionStatusEnum.Warning;

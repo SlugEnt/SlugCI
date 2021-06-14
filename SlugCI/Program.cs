@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
@@ -12,6 +13,7 @@ using Nuke.Common.Utilities;
 using Slug.CI.NukeClasses;
 using Slug.CI.SlugBuildStages;
 using Console = Colorful.Console;
+using Logger = Nuke.Common.Logger;
 
 namespace Slug.CI
 {
@@ -36,15 +38,15 @@ namespace Slug.CI
 		/// <para>  Valid values are:</para>
 		/// <para>    debug, warn, info</para></param>
 		/// <returns></returns>
-		public static int Main(string rootdir = "", 
-		                       string deployto = "test", 
-		                       string compileconfig = "", 
-		                       bool faststart = false, 
-		                       string verbosity = "", 
-		                       bool interactive = true,
-		                       bool skipnuget = false,
-							   bool failedtestsok = false,
-		                       bool info = false) {
+		public static async Task<int> Main(string rootdir = "", 
+		                                   string deployto = "test", 
+		                                   string compileconfig = "", 
+		                                   bool faststart = false, 
+		                                   string verbosity = "", 
+		                                   bool interactive = true,
+		                                   bool skipnuget = false,
+		                                   bool failedtestsok = false,
+		                                   bool info = false) {
 			CISession ciSession = new CISession();
 
 			Logger.SetOutputSink(CISession.OutputSink);
@@ -109,15 +111,19 @@ namespace Slug.CI
 				ValidateDependencies validation = new ValidateDependencies(ciSession);
 				if (!validation.Validate()) throw new ApplicationException("One or more required features is missing from this pc.");
 
+				// Create the SlugCI which is main processing class.
+				SlugCI slugCI = new SlugCI(ciSession);
+				Task slugCITask = Task.Run(slugCI.StartupAsync);
+				
 
 				// Interactive mode....
 				if (interactive)
 					UserPrompting(ciSession);
 
 
-				// Create the SlugCI which is main processing class.
-				SlugCI slugCI = new SlugCI(ciSession);
-				slugCI.Startup();
+				
+				slugCITask.Wait();
+				slugCI.WriteLines();
 
 				if (interactive)
 					if ( !Menu(ciSession, slugCI) )

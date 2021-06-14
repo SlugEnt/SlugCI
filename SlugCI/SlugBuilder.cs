@@ -44,15 +44,17 @@ namespace Slug.CI
 
 			// TODO Remove or comment this out, this is for speeding up testing.
 #if DEBUG
+			/*
 			foreach ( BuildStage stage in _executionPlan.KnownStages ) {
 				//if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH && stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER) stage.ShouldSkip = true;
-				if ( stage.Name != BuildStageStatic.STAGE_PUBLISH ) stage.ShouldSkip = true;
-/*				if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH  && 
+//				if ( stage.Name != BuildStageStatic.STAGE_PUBLISH ) stage.ShouldSkip = true;
+				if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH  && 
 				     stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER &&
 				     stage.Name != BuildStageStatic.STAGE_PUBLISH) stage.ShouldSkip = true;
-*/
 			}
+/			// Only need this if we have skipped the calc version step above...
 			ciSession.VersionInfo = new VersionInfo(new SemVersion(3,56,43),"656gtg" );
+*/
 #endif
 
 			_executionPlan.BuildExecutionPlan(BuildStageStatic.STAGE_FINAL);
@@ -65,8 +67,8 @@ namespace Slug.CI
 
 
 			// TODO Move this somewhere...
-			BuildStage_TypeWriterPublish tw = (BuildStage_TypeWriterPublish) _executionPlan.GetBuildStage(BuildStageStatic.STAGE_TYPEWRITER_PUBLISH);
-			foreach ( Output output in tw.StageOutput ) { Console.WriteLine(output); }
+//			BuildStage_TypeWriterPublish tw = (BuildStage_TypeWriterPublish) _executionPlan.GetBuildStage(BuildStageStatic.STAGE_TYPEWRITER_PUBLISH);
+//			foreach ( LineOut output in tw.StageOutput ) { Console.WriteLine(output); }
 		}
 
 
@@ -193,12 +195,8 @@ namespace Slug.CI
 					Console.WriteLine();
 					Misc.WriteSubHeader(stage.Name, new List<string>() {"Detailed Output"});
 					Color lineColor = Color.WhiteSmoke;
-					foreach ( Output output in stage.StageOutput ) {
-						if ( output.Type == OutputType.Err )
-							lineColor = Color.Red;
-						else
-							lineColor = Color.WhiteSmoke;
-						Console.WriteLine("{0}  |  {1}", output.Type.ToString(), output.Text, lineColor);
+					foreach ( LineOut output in stage.StageOutput ) {
+						output.WriteToConsole();
 					}
 
 					Console.WriteLine();

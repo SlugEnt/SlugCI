@@ -151,7 +151,6 @@ namespace Slug.CI
 				foreach ( BuildStage buildStage in Plan ) {
 					buildStage.Execute();
 					stageStatus = buildStage.CompletionStatus;
-//					if ( FinalStatus > StageCompletionStatusEnum.NotStarted && stageStatus < FinalStatus) { FinalStatus = stageStatus; }
 
 					// Anything less than Skipped is an error and we stop immediately.
 					if ( stageStatus < StageCompletionStatusEnum.Skipped ) { break; }

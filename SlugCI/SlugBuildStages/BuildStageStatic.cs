@@ -19,11 +19,11 @@ namespace Slug.CI.SlugBuildStages
 		public const string STAGE_COMPILE = "Compile";
 		public const string STAGE_RESTORE = "Restore";
 		public const string STAGE_CLEAN = "Clean";
-		public const string STAGE_GITCOMMIT = "GitCommit";
-		public const string STAGE_GITCLEAN = "GitClean";
-		public const string STAGE_TYPEWRITER_VER = "TypeWriterVer";
+		public const string STAGE_GITCOMMIT = "Git Commit";
+		public const string STAGE_GITCLEAN = "Git Clean";
+		public const string STAGE_TYPEWRITER_VER = "TypeWriter Build";
 		public const string STAGE_TYPEWRITER_PUBLISH = "TypeWriter";
-		public const string STAGE_ANGULAR = "Angular Publish";
+		public const string STAGE_ANGULAR = "Angular Compile";
 		public const string STAGE_FINAL = "Final";
 	}
 }

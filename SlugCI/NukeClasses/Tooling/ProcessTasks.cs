@@ -12,6 +12,7 @@ using System.Text;
 using JetBrains.Annotations;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
+using Slug.CI;
 
 namespace Nuke.Common.Tooling
 {
@@ -188,37 +189,42 @@ namespace Nuke.Common.Tooling
                 startInfo.Environment[key] = value;
         }
 
-        private static BlockingCollection<Output> GetOutputCollection(
+        private static BlockingCollection<LineOut> GetOutputCollection(
             Process process,
             bool logTimestamp,
             [CanBeNull] Action<OutputType, string> logger,
             [CanBeNull] StreamWriter logFile,
             Func<string, string> outputFilter)
         {
-            var output = new BlockingCollection<Output>();
+            var output = new BlockingCollection<LineOut>();
 
             string GetProcessedOutput(string data)
                 => logTimestamp
                     ? $"{DateTime.Now.ToLongTimeString()} {outputFilter.Invoke(data)}"
                     : outputFilter.Invoke(data);
 
+
+            // ********************************************************************************
             process.OutputDataReceived += (_, e) =>
             {
                 if (e.Data == null)
                     return;
 
-                output.Add(new Output { Text = e.Data, Type = OutputType.Std });
+                output.Add(LineOut.Normal(e.Data));
 
                 var processedOutput = GetProcessedOutput(e.Data);
                 logFile?.WriteLine($"[STD] {processedOutput}");
                 logger?.Invoke(OutputType.Std, processedOutput);
             };
+
+
+            // ********************************************************************************
             process.ErrorDataReceived += (_, e) =>
             {
                 if (e.Data == null)
                     return;
 
-                output.Add(new Output { Text = e.Data, Type = OutputType.Err });
+                output.Add(LineOut.Error(e.Data));
 
                 var processedOutput = GetProcessedOutput(e.Data);
                 logFile?.WriteLine($"[ERR] {processedOutput}");
@@ -238,6 +244,7 @@ namespace Nuke.Common.Tooling
             else
                 Logger.Error(output);
         }
+
 
         private static void PrintEnvironmentVariables(ProcessStartInfo startInfo)
         {

@@ -56,7 +56,7 @@ namespace Slug.CI.SlugBuildStages
 				                   .SetInformationalVersion(CISession.VersionInfo.InformationalVersion)
 				                   .SetVersion(CISession.VersionInfo.SemVersionAsString);
 
-				IReadOnlyCollection<Output> output = DotNetTasks.DotNetPack(settings);
+				IReadOnlyCollection<LineOut> output = DotNetTasks.DotNetPack(settings);
 				StageOutput.AddRange(output);
 
 				// See if successful.

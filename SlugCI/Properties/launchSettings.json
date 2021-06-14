@@ -1,7 +1,8 @@
 {
   "profiles": {
     "SlugCI": {
-      "commandName": "Executable"
+      "commandName": "Executable",
+      "executablePath": "C:\\A_Dev\\SlugEnt\\SlugCI\\SlugCI\\bin\\Debug\\net5.0\\SlugCI.exe"
     },
     "No Args": {
       "commandName": "Project"

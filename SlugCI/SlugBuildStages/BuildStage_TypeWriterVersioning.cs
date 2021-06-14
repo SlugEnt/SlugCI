@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Nuke.Common;
@@ -34,22 +35,15 @@ namespace Slug.CI.SlugBuildStages
 		protected override StageCompletionStatusEnum ExecuteProcess() {
 			CompletionStatus = StageCompletionStatusEnum.InProcess;
 
-			// TODO REMOVE THIS - TEST ONLY
-			//CISession.VersionInfo = new VersionInfo(new SemVersion(0,23,5,"alpha.1"),"g98g9k" );
-
 			// Read the package.json file if necessary...
 			foreach ( SlugCIProject project in CISession.Projects ) {
-				StageOutput.Add(new Output
-				{
-					Text = "Project: " + project.Name,
-					Type = OutputType.Std
-				});
-				AddOutputText("  --> HasTypeWriterScripts:  " + project.HasTypeWriterScripts, OutputType.Std);
+				AOT_Normal("Project: " + project.Name,Color.Magenta);
+				AOT_Normal("  --> HasTypeWriterScripts:  " + project.HasTypeWriterScripts,Color.Magenta);
 				if ( !project.HasTypeWriterScripts ) continue;
 
 				
 				AbsolutePath scriptsFolder = project.VSProject.Directory / "_scripts";
-				AddOutputText("  --> Scripts Folder: " + scriptsFolder, OutputType.Std );
+				AOT_Normal("  --> Scripts Folder: " + scriptsFolder);
 
 				AbsolutePath scriptsFile = scriptsFolder / "package.json";
 				TypeWriterConfig typeWriterConfig = null;
@@ -60,7 +54,7 @@ namespace Slug.CI.SlugBuildStages
 					});
 				}
 				else {
-					AddOutputText("  --> package.json file was not found.", OutputType.Err);
+					AOT_Error("  --> package.json file was not found."); 
 					ControlFlow.Assert(true == false,"Package.json file was not found");
 				}
 
@@ -107,7 +101,7 @@ namespace Slug.CI.SlugBuildStages
 				}
 
 
-				SetInprocessStageStatus(StageCompletionStatusEnum.Success);
+				//SetInprocessStageStatus(StageCompletionStatusEnum.Success);
 			}
 
 			if ( CompletionStatus == StageCompletionStatusEnum.InProcess ) CompletionStatus = StageCompletionStatusEnum.Skipped;

@@ -42,15 +42,15 @@ namespace Slug.CI.SlugBuildStages
 			                                         .SetAssemblyVersion(CISession.VersionInfo.AssemblyVersion)
 			                                         .SetFileVersion(CISession.VersionInfo.FileVersion);
 
-			IReadOnlyCollection<Output> compileOut = DotNetTasks.DotNetBuild(dotNetBuildSettings);
+			IReadOnlyCollection<LineOut> compileOut = DotNetTasks.DotNetBuild(dotNetBuildSettings);
 			StageOutput.AddRange(compileOut);
 
-			Console.WriteLine();
-			Console.WriteLine("Compilation Success:");
+			AOT_NewLine();
+			AOT_Info("Compilation Status:");
 			foreach ( SlugCIProject project in CISession.SlugCIConfigObj.Projects ) {
-				foreach ( Output output in compileOut ) {
+				foreach ( LineOut output in compileOut ) {
 					if ( output.Text.StartsWith("  " + project.Name + " -> ") ) {
-						Logger.Success("Compile Success:  " + output.Text);
+						AOT_Success("Compile Success:  " + output.Text);
 						project.Results.CompileSuccess = true;
 						break;
 					}

@@ -24,7 +24,7 @@ namespace Nuke.Common.Tooling
                 .AppendLine($"{indentation}> {process.FileName.DoubleQuoteIfNeeded()} {process.Arguments}")
                 .AppendLine($"{indentation}@ {process.WorkingDirectory}");
 
-            var errorOutput = process.Output.Where(x => x.Type == OutputType.Err).ToList();
+            var errorOutput = process.Output.Where(x => x.OutputType == OutputType.Err).ToList();
             if (errorOutput.Count > 0)
             {
                 messageBuilder.AppendLine("Error output:");
