@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Nuke.Common.Utilities.Collections;
+using Slug.CI;
 
 namespace Nuke.Common.Tooling
 {
@@ -26,9 +27,9 @@ namespace Nuke.Common.Tooling
             return (configurator ?? (x => x)).Invoke(obj);
         }
 
-        public static IReadOnlyCollection<(TSettings Settings, IReadOnlyCollection<Output> Output)> Invoke<TSettings>(
+        public static IReadOnlyCollection<(TSettings Settings, IReadOnlyCollection<LineOut> Output)> Invoke<TSettings>(
             this CombinatorialConfigure<TSettings> configurator,
-            Func<TSettings, IReadOnlyCollection<Output>> executor,
+            Func<TSettings, IReadOnlyCollection<LineOut>> executor,
             Action<OutputType, string> logger,
             int degreeOfParallelism,
             bool completeOnFailure)
@@ -43,9 +44,9 @@ namespace Nuke.Common.Tooling
                 completeOnFailure);
         }
 
-        public static IReadOnlyCollection<(TSettings Settings, TResult Result, IReadOnlyCollection<Output> Output)> Invoke<TSettings, TResult>(
+        public static IReadOnlyCollection<(TSettings Settings, TResult Result, IReadOnlyCollection<LineOut> Output)> Invoke<TSettings, TResult>(
             this CombinatorialConfigure<TSettings> configurator,
-            Func<TSettings, (TResult Result, IReadOnlyCollection<Output> Output)> executor,
+            Func<TSettings, (TResult Result, IReadOnlyCollection<LineOut> Output)> executor,
             Action<OutputType, string> logger,
             int degreeOfParallelism,
             bool completeOnFailure)
@@ -64,7 +65,7 @@ namespace Nuke.Common.Tooling
         private static IReadOnlyCollection<TResult> Invoke<TSettings, TResult>(
             CombinatorialConfigure<TSettings> configurator,
             Func<TSettings, TResult> executor,
-            Func<TResult, IReadOnlyCollection<Output>> outputSelector,
+            Func<TResult, IReadOnlyCollection<LineOut>> outputSelector,
             Action<OutputType, string> logger,
             int degreeOfParallelism,
             bool completeOnFailure)
@@ -109,7 +110,7 @@ namespace Nuke.Common.Tooling
                             !(x.Exception is ProcessException processException)
                                 ? outputSelector(x.Result)
                                 : processException.Process.Output)
-                        .ForEach(x => logger(x.Type, x.Text));
+                        .ForEach(x => logger(x.OutputType, x.Text));
                 }
             }
         }

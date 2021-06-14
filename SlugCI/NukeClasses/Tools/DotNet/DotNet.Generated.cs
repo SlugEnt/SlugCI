@@ -7,6 +7,7 @@ using Nuke.Common;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools;
 using Nuke.Common.Utilities.Collections;
+using Slug.CI;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -35,7 +36,7 @@ namespace Nuke.Common.Tools.DotNet
         /// <summary>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
-        public static IReadOnlyCollection<Output> DotNet(string arguments, string workingDirectory = null, IReadOnlyDictionary<string, string> environmentVariables = null, int? timeout = null, bool? logOutput = null, bool? logInvocation = null, bool? logTimestamp = null, string logFile = null, Func<string, string> outputFilter = null)
+        public static IReadOnlyCollection<LineOut> DotNet(string arguments, string workingDirectory = null, IReadOnlyDictionary<string, string> environmentVariables = null, int? timeout = null, bool? logOutput = null, bool? logInvocation = null, bool? logTimestamp = null, string logFile = null, Func<string, string> outputFilter = null)
         {
             using var process = ProcessTasks.StartProcess(DotNetPath, arguments, workingDirectory, environmentVariables, timeout, logOutput, logInvocation, logTimestamp, logFile, DotNetLogger, outputFilter);
             process.AssertZeroExitCode();
@@ -80,7 +81,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetTestSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetTest(DotNetTestSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetTest(DotNetTestSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetTestSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -126,7 +127,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetTestSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetTest(Configure<DotNetTestSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetTest(Configure<DotNetTestSettings> configurator)
         {
             return DotNetTest(configurator(new DotNetTestSettings()));
         }
@@ -169,7 +170,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetTestSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetTestSettings Settings, IReadOnlyCollection<Output> Output)> DotNetTest(CombinatorialConfigure<DotNetTestSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetTestSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetTest(CombinatorialConfigure<DotNetTestSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetTest, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -203,7 +204,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetRunSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetRun(DotNetRunSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetRun(DotNetRunSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetRunSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -240,7 +241,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetRunSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetRun(Configure<DotNetRunSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetRun(Configure<DotNetRunSettings> configurator)
         {
             return DotNetRun(configurator(new DotNetRunSettings()));
         }
@@ -274,7 +275,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetRunSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetRunSettings Settings, IReadOnlyCollection<Output> Output)> DotNetRun(CombinatorialConfigure<DotNetRunSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetRunSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetRun(CombinatorialConfigure<DotNetRunSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetRun, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -303,7 +304,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetRestoreSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetRestore(DotNetRestoreSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetRestore(DotNetRestoreSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetRestoreSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -335,7 +336,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetRestoreSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetRestore(Configure<DotNetRestoreSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetRestore(Configure<DotNetRestoreSettings> configurator)
         {
             return DotNetRestore(configurator(new DotNetRestoreSettings()));
         }
@@ -364,7 +365,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetRestoreSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetRestoreSettings Settings, IReadOnlyCollection<Output> Output)> DotNetRestore(CombinatorialConfigure<DotNetRestoreSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetRestoreSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetRestore(CombinatorialConfigure<DotNetRestoreSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetRestore, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -401,7 +402,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetPackSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetPack(DotNetPackSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetPack(DotNetPackSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetPackSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -441,7 +442,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetPackSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetPack(Configure<DotNetPackSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetPack(Configure<DotNetPackSettings> configurator)
         {
             return DotNetPack(configurator(new DotNetPackSettings()));
         }
@@ -478,7 +479,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetPackSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetPackSettings Settings, IReadOnlyCollection<Output> Output)> DotNetPack(CombinatorialConfigure<DotNetPackSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetPackSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetPack(CombinatorialConfigure<DotNetPackSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetPack, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -515,7 +516,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetBuildSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetBuild(DotNetBuildSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetBuild(DotNetBuildSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetBuildSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -555,7 +556,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetBuildSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetBuild(Configure<DotNetBuildSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetBuild(Configure<DotNetBuildSettings> configurator)
         {
             return DotNetBuild(configurator(new DotNetBuildSettings()));
         }
@@ -592,7 +593,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetBuildSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetBuildSettings Settings, IReadOnlyCollection<Output> Output)> DotNetBuild(CombinatorialConfigure<DotNetBuildSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetBuildSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetBuild(CombinatorialConfigure<DotNetBuildSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetBuild, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -618,7 +619,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/verbosity</c> via <see cref="DotNetMSBuildSettings.Verbosity"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetMSBuild(DotNetMSBuildSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetMSBuild(DotNetMSBuildSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetMSBuildSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -647,7 +648,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/verbosity</c> via <see cref="DotNetMSBuildSettings.Verbosity"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetMSBuild(Configure<DotNetMSBuildSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetMSBuild(Configure<DotNetMSBuildSettings> configurator)
         {
             return DotNetMSBuild(configurator(new DotNetMSBuildSettings()));
         }
@@ -673,7 +674,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/verbosity</c> via <see cref="DotNetMSBuildSettings.Verbosity"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetMSBuildSettings Settings, IReadOnlyCollection<Output> Output)> DotNetMSBuild(CombinatorialConfigure<DotNetMSBuildSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetMSBuildSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetMSBuild(CombinatorialConfigure<DotNetMSBuildSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetMSBuild, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -694,7 +695,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetCleanSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetClean(DotNetCleanSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetClean(DotNetCleanSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetCleanSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -718,7 +719,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetCleanSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetClean(Configure<DotNetCleanSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetClean(Configure<DotNetCleanSettings> configurator)
         {
             return DotNetClean(configurator(new DotNetCleanSettings()));
         }
@@ -739,7 +740,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetCleanSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetCleanSettings Settings, IReadOnlyCollection<Output> Output)> DotNetClean(CombinatorialConfigure<DotNetCleanSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetCleanSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetClean(CombinatorialConfigure<DotNetCleanSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetClean, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -776,7 +777,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetPublishSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetPublish(DotNetPublishSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetPublish(DotNetPublishSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetPublishSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -816,7 +817,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetPublishSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetPublish(Configure<DotNetPublishSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetPublish(Configure<DotNetPublishSettings> configurator)
         {
             return DotNetPublish(configurator(new DotNetPublishSettings()));
         }
@@ -853,7 +854,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetPublishSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetPublishSettings Settings, IReadOnlyCollection<Output> Output)> DotNetPublish(CombinatorialConfigure<DotNetPublishSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetPublishSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetPublish(CombinatorialConfigure<DotNetPublishSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetPublish, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -877,7 +878,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--timeout</c> via <see cref="DotNetNuGetPushSettings.Timeout"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetNuGetPush(DotNetNuGetPushSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetNuGetPush(DotNetNuGetPushSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetNuGetPushSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -904,7 +905,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--timeout</c> via <see cref="DotNetNuGetPushSettings.Timeout"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetNuGetPush(Configure<DotNetNuGetPushSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetNuGetPush(Configure<DotNetNuGetPushSettings> configurator)
         {
             return DotNetNuGetPush(configurator(new DotNetNuGetPushSettings()));
         }
@@ -928,7 +929,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--timeout</c> via <see cref="DotNetNuGetPushSettings.Timeout"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetNuGetPushSettings Settings, IReadOnlyCollection<Output> Output)> DotNetNuGetPush(CombinatorialConfigure<DotNetNuGetPushSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetNuGetPushSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetNuGetPush(CombinatorialConfigure<DotNetNuGetPushSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetNuGetPush, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -947,7 +948,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--valid-authentication-types</c> via <see cref="DotNetNuGetAddSourceSettings.ValidAuthenticationTypes"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetNuGetAddSource(DotNetNuGetAddSourceSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetNuGetAddSource(DotNetNuGetAddSourceSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetNuGetAddSourceSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -969,7 +970,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--valid-authentication-types</c> via <see cref="DotNetNuGetAddSourceSettings.ValidAuthenticationTypes"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetNuGetAddSource(Configure<DotNetNuGetAddSourceSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetNuGetAddSource(Configure<DotNetNuGetAddSourceSettings> configurator)
         {
             return DotNetNuGetAddSource(configurator(new DotNetNuGetAddSourceSettings()));
         }
@@ -988,7 +989,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--valid-authentication-types</c> via <see cref="DotNetNuGetAddSourceSettings.ValidAuthenticationTypes"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetNuGetAddSourceSettings Settings, IReadOnlyCollection<Output> Output)> DotNetNuGetAddSource(CombinatorialConfigure<DotNetNuGetAddSourceSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetNuGetAddSourceSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetNuGetAddSource(CombinatorialConfigure<DotNetNuGetAddSourceSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetNuGetAddSource, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -1009,7 +1010,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--version</c> via <see cref="DotNetToolInstallSettings.Version"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetToolInstall(DotNetToolInstallSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetToolInstall(DotNetToolInstallSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetToolInstallSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -1033,7 +1034,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--version</c> via <see cref="DotNetToolInstallSettings.Version"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetToolInstall(Configure<DotNetToolInstallSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetToolInstall(Configure<DotNetToolInstallSettings> configurator)
         {
             return DotNetToolInstall(configurator(new DotNetToolInstallSettings()));
         }
@@ -1054,7 +1055,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--version</c> via <see cref="DotNetToolInstallSettings.Version"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetToolInstallSettings Settings, IReadOnlyCollection<Output> Output)> DotNetToolInstall(CombinatorialConfigure<DotNetToolInstallSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetToolInstallSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetToolInstall(CombinatorialConfigure<DotNetToolInstallSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetToolInstall, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -1074,7 +1075,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--tool-manifest</c> via <see cref="DotNetToolRestoreSettings.ToolManifest"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetToolRestore(DotNetToolRestoreSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetToolRestore(DotNetToolRestoreSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetToolRestoreSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -1097,7 +1098,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--tool-manifest</c> via <see cref="DotNetToolRestoreSettings.ToolManifest"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetToolRestore(Configure<DotNetToolRestoreSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetToolRestore(Configure<DotNetToolRestoreSettings> configurator)
         {
             return DotNetToolRestore(configurator(new DotNetToolRestoreSettings()));
         }
@@ -1117,7 +1118,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--tool-manifest</c> via <see cref="DotNetToolRestoreSettings.ToolManifest"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetToolRestoreSettings Settings, IReadOnlyCollection<Output> Output)> DotNetToolRestore(CombinatorialConfigure<DotNetToolRestoreSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetToolRestoreSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetToolRestore(CombinatorialConfigure<DotNetToolRestoreSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetToolRestore, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -1134,7 +1135,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--verbosity</c> via <see cref="DotNetToolUninstallSettings.Verbosity"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetToolUninstall(DotNetToolUninstallSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetToolUninstall(DotNetToolUninstallSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetToolUninstallSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -1154,7 +1155,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--verbosity</c> via <see cref="DotNetToolUninstallSettings.Verbosity"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetToolUninstall(Configure<DotNetToolUninstallSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetToolUninstall(Configure<DotNetToolUninstallSettings> configurator)
         {
             return DotNetToolUninstall(configurator(new DotNetToolUninstallSettings()));
         }
@@ -1171,7 +1172,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--verbosity</c> via <see cref="DotNetToolUninstallSettings.Verbosity"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetToolUninstallSettings Settings, IReadOnlyCollection<Output> Output)> DotNetToolUninstall(CombinatorialConfigure<DotNetToolUninstallSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetToolUninstallSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetToolUninstall(CombinatorialConfigure<DotNetToolUninstallSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetToolUninstall, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }
@@ -1192,7 +1193,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--version</c> via <see cref="DotNetToolUpdateSettings.Version"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetToolUpdate(DotNetToolUpdateSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOut> DotNetToolUpdate(DotNetToolUpdateSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetToolUpdateSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -1216,7 +1217,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--version</c> via <see cref="DotNetToolUpdateSettings.Version"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<Output> DotNetToolUpdate(Configure<DotNetToolUpdateSettings> configurator)
+        public static IReadOnlyCollection<LineOut> DotNetToolUpdate(Configure<DotNetToolUpdateSettings> configurator)
         {
             return DotNetToolUpdate(configurator(new DotNetToolUpdateSettings()));
         }
@@ -1237,7 +1238,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--version</c> via <see cref="DotNetToolUpdateSettings.Version"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetToolUpdateSettings Settings, IReadOnlyCollection<Output> Output)> DotNetToolUpdate(CombinatorialConfigure<DotNetToolUpdateSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        public static IEnumerable<(DotNetToolUpdateSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetToolUpdate(CombinatorialConfigure<DotNetToolUpdateSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetToolUpdate, DotNetLogger, degreeOfParallelism, completeOnFailure);
         }

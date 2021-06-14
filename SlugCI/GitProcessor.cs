@@ -108,7 +108,7 @@ namespace Slug.CI
 		/// <summary>
 		/// Keeps track of all of the Git Command output for debugging purposes.
 		/// </summary>
-		public List<Output> GitCommandOutputHistory = new List<Output>();
+		public List<LineOut> GitCommandOutputHistory = new List<LineOut>();
 
 
 		/// <summary>
@@ -172,7 +172,7 @@ namespace Slug.CI
 		/// </summary>
 		private async Task GetGitCommandVersionAsync () {
 
-			List<Output> gitOutput;
+			List<LineOut> gitOutput;
 			string gitArgs = "--version";
 			ExecuteGitTryCatch("GetGitCommandVersion", gitArgs, out gitOutput);
 			if ( gitOutput [0].Text.StartsWith("git version") ) { GitCommandVersion = gitOutput [0].Text.Substring(12); }
@@ -191,7 +191,7 @@ namespace Slug.CI
 		public string GetCurrentBranch () {
 			try {
 				string cmdArgs = "branch --show-current";
-				if ( !ExecuteGit(cmdArgs, out List<Output> output) ) throw new ApplicationException("GetCurrentBranch::: Git Command failed:  git " + cmdArgs);
+				if ( !ExecuteGit(cmdArgs, out List<LineOut> output) ) throw new ApplicationException("GetCurrentBranch::: Git Command failed:  git " + cmdArgs);
 				CurrentBranch = output.First().Text;
 				return CurrentBranch;
 			}
@@ -210,7 +210,7 @@ namespace Slug.CI
 		/// <param name="commitHash">The hash of the commit to retrieve info about</param>
 		/// <returns></returns>
 		public GitCommitInfo GetCommitInfo (string commitHash) {
-			List<Output> gitOutput;
+			List<LineOut> gitOutput;
 			gitOutput = ShowCommitNoDiff(commitHash);
 			return new GitCommitInfo(gitOutput);
 		}
@@ -225,7 +225,7 @@ namespace Slug.CI
 		public List<RecordBranchLatestCommit> GetAllBranchesWithLatestCommit (bool refresh = false) {
 			if ( AllBranchInfo.Count != 0 && refresh == false ) return AllBranchInfo;
 
-			List<Output> gitOutput;
+			List<LineOut> gitOutput;
 			string gitArgs = "branch --sort=-committerdate --all -vv";
 			ExecuteGitTryCatch("GetAllBranchesWithLatestCommit", gitArgs, out gitOutput);
 
@@ -233,7 +233,7 @@ namespace Slug.CI
 			if ( gitOutput.Count == 0 ) return results;
 
 			// Convert output into record results
-			foreach ( Output output in gitOutput ) {
+			foreach ( LineOut output in gitOutput ) {
 				RecordBranchLatestCommit record;
 				if ( output.Text.Substring(0, 1) == "*" ) {
 					string [] elements = output.Text.Substring(2).Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
@@ -260,7 +260,7 @@ namespace Slug.CI
 		/// <param name="branchName">Branch name to search for the version tag on</param>
 		/// <returns></returns>
 		private RecordGitDescribeTag FindLatestGitVersionTagOnBranch (string branchName) {
-			List<Output> gitOutput;
+			List<LineOut> gitOutput;
 			string gitArgs = "describe --tags " + branchName + " --long --match \"Ver*\"";
 			ExecuteGit( gitArgs, out gitOutput);
 			if ( gitOutput.Count == 0 ) return new RecordGitDescribeTag("", 0, "");
@@ -360,7 +360,7 @@ namespace Slug.CI
 		/// </summary>
 		/// <returns></returns>
 		public void GetMainBranchName () {
-			List<Output> gitOutput;
+			List<LineOut> gitOutput;
 			string gitArgs = "remote show origin";
 			ExecuteGitTryCatch("GetMainBranchName", gitArgs, out gitOutput);
 			if ( gitOutput.Count == 0 ) {
@@ -368,7 +368,7 @@ namespace Slug.CI
 				ControlFlow.Assert(gitOutput.Count != 0, "GetMainBranchName failed to return any results...");
 			}
 
-			foreach ( Output output in gitOutput ) {
+			foreach ( LineOut output in gitOutput ) {
 				if ( output.Text.Trim().StartsWith("HEAD branch: ") ) {
 					// We found what is considered the main branch.  Retrieve it.
 					MainBranchName = output.Text.Trim().Substring(13);
@@ -410,7 +410,7 @@ namespace Slug.CI
 		/// <param name="branch"></param>
 		/// <returns></returns>
 		public SemVersion GetMostRecentVersionTagOfBranch (string branch) {
-			List<Output> gitOutput;
+			List<LineOut> gitOutput;
 			string gitArgs = "for-each-ref refs/tags/Ver*-" + branch + "* --count=1 --sort=-version:refname";
 			ExecuteGitTryCatch("GetMostRecentVersionTagOfBranch", gitArgs, out gitOutput);
 			if ( gitOutput.Count == 0 ) {
@@ -462,7 +462,7 @@ namespace Slug.CI
 			try
 			{
 				string commitErrStart = "CommitChanges:::  Git Command Failed:  git ";
-				List<Output> gitOutput;
+				List<LineOut> gitOutput;
 				string gitArgs = string.Format("commit --all --message=\"{0}\"",  commitMsg);
 				if ( !ExecuteGit(gitArgs, out gitOutput) ) {
 					if ( gitOutput.Count > 0 ) {
@@ -513,7 +513,7 @@ namespace Slug.CI
 		/// </summary>
 		public void CommitMainVersionChanges (string tagVersion, string tagDescription) {
 			string gitArgs;
-			List<Output> gitOutput;
+			List<LineOut> gitOutput;
 
 			// This is not an update, it is a redo of a previous run that may have errored or its a clean run, but no changes have been committed.  So we skip this.
 			if ( WasVersionPreviouslyCommitted ) return;
@@ -591,8 +591,7 @@ namespace Slug.CI
 			HasErrored = false;
 
 			// Log it
-			Output output = new Output();
-			output.Text = GIT_COMMAND_MARKER + command + " " + cmdArguments;
+			LineOut output = LineOut.Normal(GIT_COMMAND_MARKER + command + " " + cmdArguments);
 			GitCommandOutputHistory.Add(output);
 
 			IProcess process = ProcessTasks.StartProcess(command, cmdArguments, CISession.RootDirectory,logInvocation: logInvocationLogging, logOutput: logOutputLogging); 
@@ -618,13 +617,12 @@ namespace Slug.CI
 		/// <param name="cmdArguments"></param>
 		/// <param name="output"></param>
 		/// <returns></returns>
-		private bool ExecuteGit (string cmdArguments, out List<Output> output) {
+		private bool ExecuteGit (string cmdArguments, out List<LineOut> output) {
 			string command = GIT_COMMAND;
 			HasErrored = false;
 
 			// Log it
-			Output outputCmd = new Output();
-			outputCmd.Text = GIT_COMMAND_MARKER + command + " " + cmdArguments;
+			LineOut outputCmd = LineOut.Normal(GIT_COMMAND_MARKER + command + " " + cmdArguments);
 
 			GitCommandOutputHistory.Add(outputCmd);
 
@@ -653,7 +651,7 @@ namespace Slug.CI
 		/// <param name="cmdName">Descriptive name for the command being run</param>
 		/// <param name="cmdArguments">The arguments to pass to the git command</param>
 		/// <param name="output">The output of the git command if successful</param>
-		private void ExecuteGitTryCatch (string cmdName, string cmdArguments, out List<Output> output) {
+		private void ExecuteGitTryCatch (string cmdName, string cmdArguments, out List<LineOut> output) {
 			try {
 				string gitArgs = cmdArguments;
 				ControlFlow.Assert(ExecuteGit(gitArgs, out output) == true, cmdName + ":::  .Git Command Failed:  git " + gitArgs);
@@ -672,7 +670,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		public int GetBranchCommitCount () {
 			string gitArgs = string.Format("reflog show --no-abbrev {0}", CurrentBranch);
-			if ( ExecuteGit(gitArgs, out List<Output> gitOutput) ) { return gitOutput.Count - 1; }
+			if ( ExecuteGit(gitArgs, out List<LineOut> gitOutput) ) { return gitOutput.Count - 1; }
 
 			ControlFlow.Assert(1 == 0, "Unable to determine how many commits are on current branch.");
 			return 0;
@@ -686,7 +684,7 @@ namespace Slug.CI
 			
 			throw new NotImplementedException();
 
-			List<Output> gitOutput;
+			List<LineOut> gitOutput;
 			string gitArgs = "remote -v";
 			ExecuteGitTryCatch("FetchRemotes", gitArgs, out gitOutput);
 			ControlFlow.Assert(gitOutput.Count > 1,
@@ -712,7 +710,7 @@ namespace Slug.CI
 
 			Console.WriteLine("");
 			Console.WriteLine("Git Command Execution History is below for debugging purposes", Color.DeepSkyBlue);
-			foreach ( Output line in GitCommandOutputHistory ) {
+			foreach ( LineOut line in GitCommandOutputHistory ) {
 				if ( line.Text.StartsWith(GIT_COMMAND_MARKER) )
 					Console.WriteLine("  " + line.Text.Substring(1), Color.Orange);
 				else
@@ -727,8 +725,8 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="commitHash"></param>
 		/// <returns></returns>
-		public List<Output> ShowCommitNoDiff (string commitHash) {
-			List<Output> gitOutput;
+		public List<LineOut> ShowCommitNoDiff (string commitHash) {
+			List<LineOut> gitOutput;
 
 			// git show --format=format:"M:slugci%ncommit: %h%nparents: %P%ncommitter: %cn%ncdate: %ct%nrefs: %d%nmsg: %s" 65a8e5
 			string gitArgs = "show --no-patch --format=format:\"" +
@@ -766,21 +764,18 @@ namespace Slug.CI
 		/// <param name="commitHash"></param>
 		/// <returns></returns>
 		public List<string> BranchMerged (string branchName, string commitHash) {
-			List<Output> gitOutput;
+			List<LineOut> gitOutput;
 			string gitArgs = "branch --merged " + commitHash;
 			ExecuteGitTryCatch("BranchMerged", gitArgs, out gitOutput);
 
-			//List<RecordBranchMerged> merged = new List<RecordBranchMerged>();
+			
 			List<string> merged = new List<string>();
 
-			foreach ( Output output in gitOutput ) {
+			foreach ( LineOut output in gitOutput ) {
 				if ( output.Text.StartsWith("*") ) continue;
 
 				string branchFound = output.Text.Trim();
 				if ( (branchFound != branchName) ) merged.Add(branchFound);
-
-				//	RecordBranchMerged record = new RecordBranchMerged(isChecked,branchName);
-				//	merged.Add(record);
 			}
 
 			return merged;
@@ -794,7 +789,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		public bool FetchOriginToLocal (string branchName, bool rejectionIsValid = true) {
 			if ( CurrentBranch == branchName ) return true;
-			List<Output> gitOutput;
+			List<LineOut> gitOutput;
 			string gitArgs = "fetch origin " + branchName + ":" + branchName;
 
 			if ( !ExecuteGit(gitArgs, out gitOutput) ) 
@@ -817,7 +812,7 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="branchName"></param>
 		public bool DeleteBranch (string branchName, bool local = true) {
-			List<Output> gitOutput;
+			List<LineOut> gitOutput;
 			string gitArgs = "";
 			if ( local == false )
 				gitArgs = "push origin --delete " + branchName;
@@ -827,7 +822,7 @@ namespace Slug.CI
 			bool success = ExecuteGit(gitArgs, out gitOutput);
 			if ( !success ) {
 				// See if it is an acceptable error
-				foreach ( Output output in gitOutput ) {
+				foreach ( LineOut output in gitOutput ) {
 					if ( output.Text.Contains("remote ref does not exist") ) return false;
 				}
 
@@ -844,7 +839,7 @@ namespace Slug.CI
 		/// Fetches remote and removes any local branches that were removed from the remote
 		/// </summary>
 		public void FetchPrune () {
-			List<Output> gitOutput;
+			List<LineOut> gitOutput;
 			string gitArgs = "fetch -p";
 			ExecuteGitTryCatch("FetchPrune", gitArgs, out gitOutput);
 		}

@@ -39,11 +39,7 @@ namespace Slug.CI.SlugBuildStages
 
 			// Read the package.json file if necessary...
 			foreach ( SlugCIProject project in CISession.Projects ) {
-				StageOutput.Add(new Output
-				{
-					Text = "Project: " + project.Name,
-					Type = OutputType.Std
-				});
+				StageOutput.Add(LineOut.Normal("Project: " + project.Name));
 				AddOutputText("  --> HasTypeWriterScripts:  " + project.HasTypeWriterScripts, OutputType.Std);
 				if ( !project.HasTypeWriterScripts ) continue;
 

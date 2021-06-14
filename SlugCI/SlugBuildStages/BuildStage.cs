@@ -54,7 +54,7 @@ namespace Slug.CI
 		/// <summary>
 		/// All recorded output from the stage.  Note: How much is output is determined by the Verbosity setting for the stage.
 		/// </summary>
-		public List<Output> StageOutput { get; private set; } = new List<Output>();
+		public List<LineOut> StageOutput { get; private set; } = new List<LineOut>();
 
 
 		/// <summary>
@@ -99,9 +99,12 @@ namespace Slug.CI
 
 
 		protected void AddOutputText (string text, OutputType outputType) {
-			Output output = new Output();
-			output.Type = outputType;
-			output.Text = text;
+			LineOut output;
+			if (outputType == OutputType.Success) output = LineOut.Success(text);
+			else if (outputType == OutputType.Err) output = LineOut.Error(text);
+			else if (outputType == OutputType.Warn) output = LineOut.Warning(text);
+			else if (outputType == OutputType.Info) output = LineOut.Info(text);
+			else output = LineOut.Normal(text);
 			StageOutput.Add(output);
 		}
 

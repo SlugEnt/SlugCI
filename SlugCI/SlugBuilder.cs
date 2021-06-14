@@ -66,7 +66,7 @@ namespace Slug.CI
 
 			// TODO Move this somewhere...
 			BuildStage_TypeWriterPublish tw = (BuildStage_TypeWriterPublish) _executionPlan.GetBuildStage(BuildStageStatic.STAGE_TYPEWRITER_PUBLISH);
-			foreach ( Output output in tw.StageOutput ) { Console.WriteLine(output); }
+			foreach ( LineOut output in tw.StageOutput ) { Console.WriteLine(output); }
 		}
 
 
@@ -193,12 +193,12 @@ namespace Slug.CI
 					Console.WriteLine();
 					Misc.WriteSubHeader(stage.Name, new List<string>() {"Detailed Output"});
 					Color lineColor = Color.WhiteSmoke;
-					foreach ( Output output in stage.StageOutput ) {
-						if ( output.Type == OutputType.Err )
+					foreach ( LineOut output in stage.StageOutput ) {
+						if ( output.OutputType == OutputType.Err )
 							lineColor = Color.Red;
 						else
 							lineColor = Color.WhiteSmoke;
-						Console.WriteLine("{0}  |  {1}", output.Type.ToString(), output.Text, lineColor);
+						Console.WriteLine("{0}  |  {1}", output.OutputType.ToString(), output.Text, lineColor);
 					}
 
 					Console.WriteLine();
