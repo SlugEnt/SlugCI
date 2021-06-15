@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Drawing;
 using System.Linq;
@@ -15,21 +18,48 @@ using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using Console = Colorful.Console;
 
-namespace Slug.CI
+namespace Slug.CI.SlugBuildStages
 {
-	/// <summary>
-	/// Takes an existing solution setup that is not SlugCI and converts it to the SlugCI structure.
-	/// Also validates the existing SlugCI and performs any updated to config values.
-	/// </summary>
-	public class ConvertToSlugCI {
+	public class PreStage_ConvertToSlugCI : BuildStage
+	{
+
+		/// <summary>
+		/// Constructor
+		/// </summary>
+		public PreStage_ConvertToSlugCI (CISession ciSession) : base(BuildStageStatic.PRESTAGE_CONVERT_TO_SLUGCI, ciSession)
+		{
+		// Set expected directories.
+			ExpectedSolutionPath = CISession.SourceDirectory;
+			
+			DotNetPath = ToolPathResolver.GetPathExecutable("dotnet");
+
+			if (ciSession.IsFastStart)
+			{
+				// TODO - Need to restore this at some point, but needs to write to a AddOutputStage instead of screen. It interferes with prompting.
+				// Misc.WriteSubHeader("FastStart:  Skipping normal checks and validations");
+			}
+
+		}
 
 
 		/// <summary>
-		/// The Current Session information
+		/// Perform The Conversion
 		/// </summary>
-		private CISession CISession { get; set; }
+		/// <returns></returns>
+		protected override StageCompletionStatusEnum ExecuteProcess()
+		{
+			PreCheck();
 
+			// Load Config file
+			SlugCIConfig slugCiConfig = GetSlugCIConfig();
+			if (slugCiConfig == null)
+				throw new ApplicationException("The FastStart option was set, but there is not a valid SlugCIConfig file.  Either remove FastStart option or fix the problem.");
+			IsInSlugCIFormat = true;
 
+			return StageCompletionStatusEnum.Success;
+		}
+
+		
 		/// <summary>
 		/// True if the solution was moved as part of Converter process
 		/// </summary>
@@ -38,19 +68,20 @@ namespace Slug.CI
 
 		internal AbsolutePath CurrentSolutionPath { get; set; }
 		internal AbsolutePath ExpectedSolutionPath { get; set; }
-		
+
 
 		internal string DotNetPath { get; set; }
 
 
 		private readonly List<VisualStudioProject> Projects = new List<VisualStudioProject>();
 
+
 		/// <summary>
 		/// True if the solution folder structure is setup for .Nuke / SlugNuke
 		/// </summary>
 		private bool IsSlugNukeFormat { get; set; }
 
-		
+
 		/// <summary>
 		/// Returns true if the solution is in proper SluCI Format
 		/// </summary>
@@ -61,31 +92,6 @@ namespace Slug.CI
 		/// Returns the SlugCIConfig value
 		/// </summary>
 		private SlugCIConfig SlugCIConfig { get; set; }
-
-
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		public ConvertToSlugCI(CISession ciSession) {
-			CISession = ciSession;
-
-			// Set expected directories.
-			ExpectedSolutionPath = CISession.SourceDirectory;
-			DotNetPath = ToolPathResolver.GetPathExecutable("dotnet");
-
-			if ( ciSession.IsFastStart ) {
-				// TODO - Need to restore this at some point, but needs to write to a AddOutputStage instead of screen. It interferes with prompting.
-				// Misc.WriteSubHeader("FastStart:  Skipping normal checks and validations");
-			}
-			else
-				PreCheck();
-
-			// Load Config file
-			SlugCIConfig slugCiConfig = GetSlugCIConfig();
-			if (slugCiConfig == null)
-				throw new ApplicationException("The FastStart option was set, but there is not a valid SlugCIConfig file.  Either remove FastStart option or fix the problem.");
-			IsInSlugCIFormat = true;
-		}
 
 
 
@@ -102,12 +108,13 @@ namespace Slug.CI
 			ControlFlow.Assert(FileSystemTasks.DirectoryExists(CISession.RootDirectory), "Root Directory does not exist.  Should be specified on command line or be run from the projects entry folder");
 
 			// Check for old SlugNuke solution
-			if ( DirectoryExists(CISession.RootDirectory / ".nuke") || FileExists(CISession.RootDirectory / ".nuke")) {
+			if (DirectoryExists(CISession.RootDirectory / ".nuke") || FileExists(CISession.RootDirectory / ".nuke"))
+			{
 				IsSlugNukeFormat = true;
 				Logger.Warn("Detected previous SlugNuke Solution.  Will convert to SlugCI!");
 			}
 
-		
+
 			// Check for new SlugCI
 			if (!FileSystemTasks.DirectoryExists(CISession.SlugCIPath))
 			{
@@ -116,7 +123,7 @@ namespace Slug.CI
 			}
 
 			// Convert the project
-			ControlFlow.Assert(Converter(),"Failure during SlugCI Converter processing.");
+			ControlFlow.Assert(Converter(), "Failure during SlugCI Converter processing.");
 			IsInSlugCIFormat = true;
 			return true;
 		}
@@ -126,9 +133,10 @@ namespace Slug.CI
 		/// Converts a folder into SlugCI format
 		/// </summary>
 		/// <returns></returns>
-		public bool Converter () {
+		public bool Converter()
+		{
 			bool solutionConverted = false;
-			if ( CISession.SolutionFileName != null && CISession.SolutionFileName != string.Empty ) solutionConverted= Convert_VisualStudioSolution();
+			if (CISession.SolutionFileName != null && CISession.SolutionFileName != string.Empty) solutionConverted = Convert_VisualStudioSolution();
 
 			// Ensure Config file is valid and up-to-date with current Class Structure
 			ProcessSlugCIConfigFile();
@@ -154,16 +162,19 @@ namespace Slug.CI
 
 
 			// B.  We need to upgrade from SlugNuke if the SlugNuke config file was found.
-			if ( IsSlugNukeFormat ) {
+			if (IsSlugNukeFormat)
+			{
 				// Move the config file to new name and location.  Delete no longer needed files.
-				try {
+				try
+				{
 					AbsolutePath oldNukeFile = CISession.RootDirectory / "nukeSolutionBuild.conf";
 					EnsureExistingDirectory(CISession.SlugCIPath);
-					if (!FileExists(CISession.SlugCIFileName)) 
+					if (!FileExists(CISession.SlugCIFileName))
 						MoveFile(oldNukeFile, CISession.SlugCIFileName);
-					else if ( FileExists(oldNukeFile) ) {
+					else if (FileExists(oldNukeFile))
+					{
 						Logger.Warn(CISession.SlugCIFileName +
-						            " already exists.  But so too does the old Config file.  Assuming this was from a prior error.  Removing the old file and LEAVING the current file intact.  Please check to ensure it is correct");
+									" already exists.  But so too does the old Config file.  Assuming this was from a prior error.  Removing the old file and LEAVING the current file intact.  Please check to ensure it is correct");
 						DeleteFile(oldNukeFile);
 					}
 
@@ -177,12 +188,13 @@ namespace Slug.CI
 					DeleteFile(CISession.RootDirectory / "gitversion.yml");
 					IsSlugNukeFormat = false;
 				}
-				catch ( Exception e ) {
+				catch (Exception e)
+				{
 					Logger.Warn("Failed to move the old SlugNuke Config file to new SlugCI file.");
 					Logger.Error(e);
 				}
 			}
-			
+
 			return true;
 		}
 
@@ -195,8 +207,10 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="forceReload"></param>
 		/// <returns></returns>
-		public SlugCIConfig GetSlugCIConfig (bool forceReload = false) {
-			if ( SlugCIConfig == null || forceReload == true ) {
+		public SlugCIConfig GetSlugCIConfig(bool forceReload = false)
+		{
+			if (SlugCIConfig == null || forceReload == true)
+			{
 				SlugCIConfig slugCiConfig;
 				if (FileExists(CISession.SlugCIFileName))
 				{
@@ -220,7 +234,8 @@ namespace Slug.CI
 		/// Ensures there is a valid SlugCI Config file and updates it if necessary OR creates it.
 		/// </summary>
 		/// <returns></returns>
-		private bool ProcessSlugCIConfigFile() {
+		private bool ProcessSlugCIConfigFile()
+		{
 			SlugCIConfig slugCiConfig = GetSlugCIConfig();
 			if (slugCiConfig == null)
 			{
@@ -259,14 +274,16 @@ namespace Slug.CI
 						// Also add the Required Nuget Coverage package
 						CoverletInstall(project);
 					}
-					else {
+					else
+					{
 						slugCIProject.Deploy = PromptUserForDeployMethod(project.Name);
-						
+
 					}
 					slugCiConfig.Projects.Add(slugCIProject);
 				}
-				else {
-					if ( slugCIProject.IsTestProject )
+				else
+				{
+					if (slugCIProject.IsTestProject)
 						// Also add the Required Nuget Coverage package
 						CoverletInstall(project);
 				}
@@ -276,8 +293,10 @@ namespace Slug.CI
 
 
 			// Ensure Deploy Roots have values if at least one of the projects has a deploy method of Copy
-			if (hasCopyDeployMethod) {
-				foreach (PublishTargetEnum value in Enum.GetValues(typeof(PublishTargetEnum))) {
+			if (hasCopyDeployMethod)
+			{
+				foreach (PublishTargetEnum value in Enum.GetValues(typeof(PublishTargetEnum)))
+				{
 					ValidateDeployFolders(value, slugCiConfig);
 				}
 			}
@@ -288,13 +307,15 @@ namespace Slug.CI
 
 
 			// Determine if we need to save new config.
-			if ( origSlugCiConfig != slugCiConfig ) {
+			if (origSlugCiConfig != slugCiConfig)
+			{
 				string json = JsonSerializer.Serialize<SlugCIConfig>(slugCiConfig, SlugCIConfig.SerializerOptions());
 				File.WriteAllText(CISession.SlugCIFileName, json);
-				Console.WriteLine("SlugCIConfig file updated to latest version / values",Color.Green);
+				Console.WriteLine("SlugCIConfig file updated to latest version / values", Color.Green);
 
 				SlugCIConfig = GetSlugCIConfig(true);
-				if ( updateProjectAdd ) {
+				if (updateProjectAdd)
+				{
 					Logger.Warn("The file: {0} was updated.  One ore more projects were added.  Ensure they have the correct Deploy setting.", CISession.SlugCIFileName);
 				}
 			}
@@ -308,8 +329,10 @@ namespace Slug.CI
 		/// Checks for Angular projects and ensures they exist in the SlugCIConfig.
 		/// </summary>
 		/// <param name="slugCiConfig"></param>
-		private void ProcessAngularProjects ( SlugCIConfig slugCiConfig) {
-			if ( !DirectoryExists(CISession.AngularDirectory) ) {
+		private void ProcessAngularProjects(SlugCIConfig slugCiConfig)
+		{
+			if (!DirectoryExists(CISession.AngularDirectory))
+			{
 				Logger.Warn("No Angular directory found off root folder");
 				return;
 			}
@@ -317,17 +340,18 @@ namespace Slug.CI
 			// Find all subdirectories - these are the angular projects.
 			List<string> webProjects = Directory.EnumerateDirectories(CISession.AngularDirectory, "*.web").ToList();
 
-			foreach ( string webProject in webProjects ) {
+			foreach (string webProject in webProjects)
+			{
+				AbsolutePath webFolder = (AbsolutePath)webProject;
+				string name = Path.GetFileName(webFolder);
 				// See if already part of config, if so, nothing to do.
-				if ( slugCiConfig.AngularProjects.Exists(a => a.Name == webProject) ) continue;
+				if (slugCiConfig.AngularProjects.Exists(a => a.Name == name)) continue;
 
 				// Make sure it contains a package.json file.  If so we will assume it is a web project.
-
-				AbsolutePath webFolder = (AbsolutePath) webProject;
-				string name = Path.GetFileName(webFolder);
 				AbsolutePath webFile = webFolder / "package.json";
 
-				if ( !FileExists(webFile) ) {
+				if (!FileExists(webFile))
+				{
 					Logger.Warn("Angular Folder does not contain a package.json file.  NOT ADDING TO AnuglarProjects - " + webFolder);
 					continue;
 				}
@@ -344,19 +368,22 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="projectName"></param>
 		/// <returns></returns>
-		private SlugCIDeployMethod PromptUserForDeployMethod (string projectName) {
+		private SlugCIDeployMethod PromptUserForDeployMethod(string projectName)
+		{
 			Console.WriteLine();
-			Colorful.Console.WriteLine("Project - [" + projectName + "]  has been added to the SlugCI config file.  What deployment method does this project use?",Color.Yellow);
+			Colorful.Console.WriteLine("Project - [" + projectName + "]  has been added to the SlugCI config file.  What deployment method does this project use?", Color.Yellow);
 			bool continuePrompting = true;
-			while ( continuePrompting ) {
+			while (continuePrompting)
+			{
 				Console.WriteLine("Press: ");
 				Console.WriteLine("   (N) For Nuget Deploy");
 				Console.WriteLine("   (C) For File Copy Deploy");
 				Console.WriteLine("   (0) For Not Specified");
-				ConsoleKeyInfo inputKey =  Console.ReadKey();
-				if ( inputKey.Key == ConsoleKey.N ) return SlugCIDeployMethod.Nuget;
-				if ( inputKey.Key == ConsoleKey.C ) return SlugCIDeployMethod.Copy;
-				if ( inputKey.Key == ConsoleKey.D0 ) return SlugCIDeployMethod.None;
+				while ( Console.KeyAvailable ) Console.ReadKey(false);
+				ConsoleKeyInfo inputKey = Console.ReadKey();
+				if (inputKey.Key == ConsoleKey.N) return SlugCIDeployMethod.Nuget;
+				if (inputKey.Key == ConsoleKey.C) return SlugCIDeployMethod.Copy;
+				if (inputKey.Key == ConsoleKey.D0) return SlugCIDeployMethod.None;
 			}
 
 			return SlugCIDeployMethod.None;
@@ -373,38 +400,41 @@ namespace Slug.CI
 		private bool ValidateDeployFolders(PublishTargetEnum config, SlugCIConfig slugCiConfig)
 		{
 			// Does the config have a root folder set?
-			if ( !slugCiConfig.IsRootFolderSpecified(config) ) {
+			if (!slugCiConfig.IsRootFolderSpecified(config))
+			{
 				string name = config.ToString();
 
 				Misc.WriteSubHeader(name + ": Set Deploy Folder");
 				Console.WriteLine("The [" + config + "] deployment folder is undefined in the SlugCI config file, You can enter a value OR press enter to force the system to look for and use environment variables.",
-				                  Color.DarkOrange);
+								  Color.DarkOrange);
 				Console.WriteLine(
 					"--: If you want to always use the environment variables for these entries, just hit the Enter key.  Otherwise enter a valid path to the root location they should be deployed too.",
 					Color.DarkOrange);
 				bool invalidAnswer = true;
 				string answer = "";
-				while ( invalidAnswer ) {
+				while (invalidAnswer)
+				{
 					Console.WriteLine();
 					Console.WriteLine("Enter the root deployment folder for {0} [{1}]", Color.DarkCyan, name, config);
 					answer = Console.ReadLine();
 					answer = answer.Trim();
-					if ( answer == string.Empty ) answer = "_";
+					if (answer == string.Empty) answer = "_";
 
 					// Make sure such a folder exists.
-					if ( answer != "_" ) {
-						if ( DirectoryExists((AbsolutePath) answer) ) invalidAnswer = false;
+					if (answer != "_")
+					{
+						if (DirectoryExists((AbsolutePath)answer)) invalidAnswer = false;
 					}
 					else invalidAnswer = false;
 				}
 
-				if ( config == PublishTargetEnum.Production) 
+				if (config == PublishTargetEnum.Production)
 					slugCiConfig.DeployProdRoot = answer;
-				else if ( config == PublishTargetEnum.Alpha)
+				else if (config == PublishTargetEnum.Alpha)
 					slugCiConfig.DeployAlphaRoot = answer;
-				else if ( config == PublishTargetEnum.Beta )
+				else if (config == PublishTargetEnum.Beta)
 					slugCiConfig.DeployBetaRoot = answer;
-				else if ( config == PublishTargetEnum.Development ) slugCiConfig.DeployDevRoot = answer;
+				else if (config == PublishTargetEnum.Development) slugCiConfig.DeployDevRoot = answer;
 			}
 			return true;
 		}
@@ -432,14 +462,14 @@ namespace Slug.CI
 
 			// TODO Solution Project Name Fix
 
-/*
-			CurrentSolutionPath = (AbsolutePath)Path.GetDirectoryName(solutionFile);
+			/*
+						CurrentSolutionPath = (AbsolutePath)Path.GetDirectoryName(solutionFile);
 
-			DotNetPath = ToolPathResolver.GetPathExecutable("dotnet");
-			IProcess slnfind = ProcessTasks.StartProcess(DotNetPath, "sln " + CurrentSolutionPath + " list", logOutput: false);
-			slnfind.AssertWaitForExit();
-			IReadOnlyCollection<Output> output = slnfind.Output;
-*/
+						DotNetPath = ToolPathResolver.GetPathExecutable("dotnet");
+						IProcess slnfind = ProcessTasks.StartProcess(DotNetPath, "sln " + CurrentSolutionPath + " list", logOutput: false);
+						slnfind.AssertWaitForExit();
+						IReadOnlyCollection<Output> output = slnfind.Output;
+			*/
 
 			// There are 2 things we need to check.
 			//  1.  Is solution in right folder?
@@ -451,10 +481,12 @@ namespace Slug.CI
 			//   4. Move solution file to proper location
 			//   5. Re-add all projects to solution
 			bool solutionNeedsToMove = false;
-			if (CISession.Solution.Directory.ToString() != ExpectedSolutionPath.ToString()) solutionNeedsToMove = true;
+			CurrentSolutionPath = CISession.Solution.Directory;
+			if (CurrentSolutionPath.ToString() != ExpectedSolutionPath.ToString()) solutionNeedsToMove = true;
 
 			List<VisualStudioProject> movedProjects = new List<VisualStudioProject>();
-			foreach ( Project project in CISession.Solution.AllProjects ) {
+			foreach (Project project in CISession.Solution.AllProjects)
+			{
 
 				VisualStudioProject vsProject = GetInitProject(project);
 				Projects.Add(vsProject);
@@ -463,27 +495,9 @@ namespace Slug.CI
 					movedProjects.Add(vsProject);
 					MoveProjectStepA(vsProject);
 				}
-
 			}
-			/*
-			List<VisualStudioProject> movedProjects = new List<VisualStudioProject>();
-			// Step 3
-			foreach (Output outputRec in output)
-			{
-				if (outputRec.Text.EndsWith(".csproj"))
-				{
-					VisualStudioProject project = GetInitProject(outputRec.Text);
-					Projects.Add(project);
 
-					// Do we need to move the project?
-					if ((project.OriginalPath.ToString() != project.NewPath.ToString()) || solutionNeedsToMove)
-					{
-						movedProjects.Add(project);
-						MoveProjectStepA(project);
-					}
-				}
-			}
-			*/
+
 			// Step 4:  Is Solution in proper directory.  If not move it.
 			if (solutionNeedsToMove)
 			{
@@ -517,7 +531,7 @@ namespace Slug.CI
 
 			// Remove from Solution
 			string removeParam = Path.Combine(project.OriginalPath, project.Namecsproj);
-			IProcess sln = ProcessTasks.StartProcess(DotNetPath, "sln " + CurrentSolutionPath + " remove " + removeParam, logOutput: true);
+			IProcess sln = ProcessTasks.StartProcess(DotNetPath, "sln " + CISession.SolutionFileName + " remove " + removeParam, logOutput: true);
 			sln.AssertWaitForExit();
 			ControlFlow.Assert(sln.ExitCode == 0, "Failed to remove Project: " + project.Name + " from solution so we could move it.");
 
@@ -552,12 +566,12 @@ namespace Slug.CI
 		{
 			VisualStudioProject visualStudioProject = new VisualStudioProject(nukeProject);
 
-/*			VisualStudioProject visualStudioProject = new VisualStudioProject()
-			{
-				Namecsproj = Path.GetFileName(path),
-				Name = Path.GetFileName(Path.GetDirectoryName(path))
-			};
-*/
+			/*			VisualStudioProject visualStudioProject = new VisualStudioProject()
+						{
+							Namecsproj = Path.GetFileName(path),
+							Name = Path.GetFileName(Path.GetDirectoryName(path))
+						};
+			*/
 
 			string lcprojName = visualStudioProject.Name.ToLower();
 
@@ -574,7 +588,7 @@ namespace Slug.CI
 
 			// Determine Framework type.
 			//DetermineFramework(visualStudioProject);
-			
+
 			return visualStudioProject;
 		}
 
@@ -596,7 +610,7 @@ namespace Slug.CI
 				value = doc.XPathSelectElement("//PropertyGroup/TargetFramework").Value;
 			else if (doc.XPathSelectElement("//PropertyGroup/TargetFrameworks") != null)
 				value = doc.XPathSelectElement("//PropertyGroup/TargetFrameworks").Value;
-			
+
 
 			//ControlFlow.Assert(value != string.Empty, "Unable to locate a FrameWork value from the csproj file.  This is a required property. Project: " + project.Namecsproj);
 			project.Frameworks = value.Split(";").ToList();

@@ -44,17 +44,19 @@ namespace Slug.CI
 
 			// TODO Remove or comment this out, this is for speeding up testing.
 #if DEBUG
-			/*
+			bool calcVersionSkipped = false;
 			foreach ( BuildStage stage in _executionPlan.KnownStages ) {
 				//if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH && stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER) stage.ShouldSkip = true;
-//				if ( stage.Name != BuildStageStatic.STAGE_PUBLISH ) stage.ShouldSkip = true;
-				if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH  && 
-				     stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER &&
-				     stage.Name != BuildStageStatic.STAGE_PUBLISH) stage.ShouldSkip = true;
+				if ( stage.Name != BuildStageStatic.STAGE_PUBLISH ) stage.ShouldSkip = true;
+				/*				if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH  && 
+									 stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER &&
+									 stage.Name != BuildStageStatic.STAGE_PUBLISH) stage.ShouldSkip = true;
+				*/
+
+				// Leave this in - it determines if we will have a version calculated.  If not, then it manually sets one, so steps can complete.
+				if (stage.Name == BuildStageStatic.STAGE_CALCVERSION)
+					ciSession.VersionInfo = new VersionInfo(new SemVersion(3, 56, 43), "656gtg");
 			}
-/			// Only need this if we have skipped the calc version step above...
-			ciSession.VersionInfo = new VersionInfo(new SemVersion(3,56,43),"656gtg" );
-*/
 #endif
 
 			_executionPlan.BuildExecutionPlan(BuildStageStatic.STAGE_FINAL);
@@ -283,8 +285,11 @@ namespace Slug.CI
 					case StageCompletionStatusEnum.NotStarted:
 						CISession.OutputSink.WriteWarning(line);
 						break;
+					case StageCompletionStatusEnum.InProcess:
+						CISession.OutputSink.WriteWarning(line);
+						break;
 					default:
-						throw new NotSupportedException(stageStat.CompletionStatus.ToString());
+						throw new NotSupportedException("Stage [ " + stageStat.Name + " ]  had an unknown stagus of "  + stageStat.CompletionStatus);
 				}
 			}
 

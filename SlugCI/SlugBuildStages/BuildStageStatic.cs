@@ -10,12 +10,13 @@ namespace Slug.CI.SlugBuildStages
 	/// All of the build stages
 	/// </summary>
 	public static class BuildStageStatic {
+		public const string PRESTAGE_CONVERT_TO_SLUGCI = "SlugCI Config";
+
 		public const string STAGE_CALCVERSION = "Calculate Version #";
 		public const string STAGE_COVER = "Code Coverage";
 		public const string STAGE_PUBLISH = "Publish";
 		public const string STAGE_PACK = "Pack";
 		public const string STAGE_TEST = "Unit Tests";
-		
 		public const string STAGE_COMPILE = "Compile";
 		public const string STAGE_RESTORE = "Restore";
 		public const string STAGE_CLEAN = "Clean";

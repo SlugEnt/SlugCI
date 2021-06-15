@@ -10,11 +10,6 @@
 		/// </summary>
 		NotStarted = 0, 
 
-		/// <summary>
-		/// Stage was started and is in process.
-		/// </summary>
-		InProcess = 10, 
-
 
 		/// <summary>
 		/// Stage was not run, either due to failed dependencies or pre-stage errors
@@ -38,6 +33,13 @@
 		/// Stage was purposefully skipped
 		/// </summary>
 		Skipped = 200,
+
+
+		/// <summary>
+		/// Stage was started and is in process.
+		/// </summary>
+		InProcess = 220,
+
 
 		/// <summary>
 		/// Stage completed successfully

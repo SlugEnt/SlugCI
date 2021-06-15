@@ -114,7 +114,8 @@ namespace Slug.CI
 				// Create the SlugCI which is main processing class.
 				SlugCI slugCI = new SlugCI(ciSession);
 				Task slugCITask = Task.Run(slugCI.StartupAsync);
-				
+
+				slugCITask.Wait();
 
 				// Interactive mode....
 				if (interactive)
@@ -122,7 +123,6 @@ namespace Slug.CI
 
 
 				
-				slugCITask.Wait();
 				slugCI.WriteLines();
 
 				if (interactive)

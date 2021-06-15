@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Nuke.Common.Tooling;
 using Semver;
+using Slug.CI.SlugBuildStages;
 using Console = Colorful.Console;
 
 
@@ -80,6 +81,7 @@ namespace Slug.CI
 
 
 		private async Task PreLoadSolutionAsync () {
+			
 			foreach ( Project x in CISession.Solution.AllProjects ) {
 				// Get Framework(s)
 				string framework = x.GetProperty("TargetFramework");
@@ -102,9 +104,10 @@ namespace Slug.CI
 			CheckForEnvironmentVariables();
 
 
-//			slnPreLoadTask.Wait();
+			slnPreLoadTask.Wait();
 			// Ensure Solution is in SlugCI format. If not migrate it.
-			ConvertToSlugCI converter = new ConvertToSlugCI(CISession);
+			PreStage_ConvertToSlugCI converter = new PreStage_ConvertToSlugCI(CISession);
+			converter.Execute();
 			if (!converter.IsInSlugCIFormat)
 			{
 				ControlFlow.Assert(converter.IsInSlugCIFormat, "The solution is not in the proper SlugCI format.  This should be something that is automatically done.  Obviously something went wrong.");
@@ -119,7 +122,7 @@ namespace Slug.CI
 
 			// Combine the Visual Studio solution project info into the individual projects of the
 			// SlugCIConfig projects for easier access later on.
-			slnPreLoadTask.Wait();
+			//slnPreLoadTask.Wait();
 			MergeVSProjectIntoSlugCI();
 
 

@@ -146,7 +146,7 @@ namespace Slug.CI
 				
 				Console.ForegroundColor = Color.WhiteSmoke;
 
-				Misc.WriteMainHeader("SlugBuilder::  " + Name);
+				Misc.WriteMainHeader("ConvertToSlugCI::  " + Name);
 
 
 				// Set log level to std.  Let the process override if necessary.
@@ -159,8 +159,9 @@ namespace Slug.CI
 					_stopwatch.Stop();
 					return true;
 				}
-				else
-					Finished(ExecuteProcess());
+
+				CompletionStatus = StageCompletionStatusEnum.InProcess;
+				Finished(ExecuteProcess());
 
 
 				string finalMsg = String.Format("Stage Result:  {0}", CompletionStatus.ToString());

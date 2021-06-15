@@ -48,7 +48,7 @@ namespace Slug.CI.SlugBuildStages
 			// Publish Angular Projects
 			Publish_Copy_Angular();
 
-			Logger.Success("Version: " + CISession.VersionInfo.SemVersionAsString + " fully committed and deployed to target location.");
+			AOT_Success("Version: " + CISession.VersionInfo.SemVersionAsString + " fully committed and deployed to target location.");
 
 
 			return CompletionStatus;
@@ -59,7 +59,7 @@ namespace Slug.CI.SlugBuildStages
 		/// Copies from the compiled directory to the publish directory with the version as the last folder for Visual Studio projects..
 		/// </summary>
 		private void Publish_Copy_VS () {
-			Logger.Info("Publishing Visual Studio Projects");
+			AOT_Normal("Publishing Visual Studio Projects");
 			foreach (SlugCIProject project in CISession.Projects) {
 				if ( project.Deploy != SlugCIDeployMethod.Copy ) continue;
 
@@ -71,7 +71,7 @@ namespace Slug.CI.SlugBuildStages
 
 					AbsolutePath srcFolder = project.VSProject.Directory / "bin" / CISession.CompileConfig / item;
 					FileSystemTasks.CopyDirectoryRecursively(srcFolder, destFolder, DirectoryExistsPolicy.Merge, FileExistsPolicy.OverwriteIfNewer);
-					Logger.Success("Copied:  " + project.Name + " to Deployment folder: " + destFolder);
+					AOT_Success("Copied:  " + project.Name + " to Deployment folder: " + destFolder);
 				}
 
 				SetInprocessStageStatus(StageCompletionStatusEnum.Success);
@@ -84,7 +84,7 @@ namespace Slug.CI.SlugBuildStages
 		/// Publish Angular projects
 		/// </summary>
 		private void Publish_Copy_Angular() {
-			Logger.Info("Publishing Angular Projects");
+			AOT_Normal("Publishing Angular Projects");
 
 			// Angular projects:  We only support single app publishes per project.  Angular NX supports more, we just don't have any examples at the moment.
 
@@ -116,7 +116,7 @@ namespace Slug.CI.SlugBuildStages
 				}
 
 				FileSystemTasks.CopyDirectoryRecursively(srcFolder, destFolder, DirectoryExistsPolicy.Merge, FileExistsPolicy.OverwriteIfNewer);
-					Logger.Success("Copied:  " + project.Name + " to Deployment folder: " + destFolder);
+					AOT_Success("Copied:  " + project.Name + " to Deployment folder: " + destFolder);
 
 				SetInprocessStageStatus(StageCompletionStatusEnum.Success);
 				project.Results.PublishedSuccess = true;
