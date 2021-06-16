@@ -104,23 +104,19 @@ namespace Slug.CI.SlugBuildStages
 			// TODO - Uncomment this when using AddOutputText...in future...
 			//Misc.WriteMainHeader("SlugCI: PreCheck",new List<string>() {"SlugCIConfig File"});
 
-			// See if the Root directory exists
-			ControlFlow.Assert(FileSystemTasks.DirectoryExists(CISession.RootDirectory), "Root Directory does not exist.  Should be specified on command line or be run from the projects entry folder");
 
 			// Check for old SlugNuke solution
 			if (DirectoryExists(CISession.RootDirectory / ".nuke") || FileExists(CISession.RootDirectory / ".nuke"))
 			{
 				IsSlugNukeFormat = true;
-				Logger.Warn("Detected previous SlugNuke Solution.  Will convert to SlugCI!");
+				AOT_Warning("Detected previous SlugNuke Solution.  Will convert to SlugCI!");
 			}
 
 
 			// Check for new SlugCI
 			if (!FileSystemTasks.DirectoryExists(CISession.SlugCIPath))
-			{
-				Logger.Warn(".SlugCI directory does not exist.  Proceeding with converting solution to .SlugCI format specifications");
-				// Need to convert project to SlugCI layout.
-			}
+				AOT_Warning(".SlugCI directory does not exist.  Proceeding with converting solution to .SlugCI format specifications");
+			
 
 			// Convert the project
 			ControlFlow.Assert(Converter(), "Failure during SlugCI Converter processing.");
@@ -130,7 +126,7 @@ namespace Slug.CI.SlugBuildStages
 
 
 		/// <summary>
-		/// Converts a folder into SlugCI format
+		/// Either upgrades a current config or converts an existing solution into SlugCI format
 		/// </summary>
 		/// <returns></returns>
 		public bool Converter()
@@ -198,9 +194,7 @@ namespace Slug.CI.SlugBuildStages
 			return true;
 		}
 
-
-
-
+		
 
 		/// <summary>
 		/// Returns the current SlugCIConfig object or loads it if null or force reload is true.
@@ -209,21 +203,10 @@ namespace Slug.CI.SlugBuildStages
 		/// <returns></returns>
 		public SlugCIConfig GetSlugCIConfig(bool forceReload = false)
 		{
-			if (SlugCIConfig == null || forceReload == true)
+			if (CISession.SlugCIConfigObj == null || forceReload == true)
 			{
-				SlugCIConfig slugCiConfig;
-				if (FileExists(CISession.SlugCIFileName))
-				{
-					string Json = File.ReadAllText(CISession.SlugCIFileName);
-					slugCiConfig = JsonSerializer.Deserialize<SlugCIConfig>(Json, SlugCIConfig.SerializerOptions());
-					SlugCIConfig = slugCiConfig;
-					CISession.SlugCIConfigObj = slugCiConfig;
-					return SlugCIConfig;
-				}
-
-				return null;
+				CISession.SlugCIConfigObj  = SlugCIConfig = SlugCIConfig.LoadFromFile(CISession.SlugCIFileName);
 			}
-
 
 			return SlugCIConfig;
 		}
@@ -250,7 +233,7 @@ namespace Slug.CI.SlugBuildStages
 
 			// Ensure the version of the config file layout is set to most current.  We do this after the copy, so we can 
 			// detect changes in the file layout, fields, etc.
-			slugCiConfig.UpdateFileVersion();
+			slugCiConfig.ConfigStructureVersion = CISession.SlugCI_Version;
 
 			bool updateProjectAdd = false;
 			bool hasCopyDeployMethod = false;
@@ -264,7 +247,7 @@ namespace Slug.CI.SlugBuildStages
 				{
 					updateProjectAdd = true;
 					slugCIProject = new SlugCIProject() { Name = project.Name };
-					// TODO fix this
+					
 					slugCIProject.IsTestProject = project.IsTestProject;
 
 					if (project.IsTestProject)
@@ -277,15 +260,8 @@ namespace Slug.CI.SlugBuildStages
 					else
 					{
 						slugCIProject.Deploy = PromptUserForDeployMethod(project.Name);
-
 					}
 					slugCiConfig.Projects.Add(slugCIProject);
-				}
-				else
-				{
-					if (slugCIProject.IsTestProject)
-						// Also add the Required Nuget Coverage package
-						CoverletInstall(project);
 				}
 
 				if (slugCIProject.Deploy == SlugCIDeployMethod.Copy) hasCopyDeployMethod = true;
@@ -460,16 +436,6 @@ namespace Slug.CI.SlugBuildStages
 			// Query the solution for the projects that are in it.
 			// We allow all tests to run, instead of failing at first failure.
 
-			// TODO Solution Project Name Fix
-
-			/*
-						CurrentSolutionPath = (AbsolutePath)Path.GetDirectoryName(solutionFile);
-
-						DotNetPath = ToolPathResolver.GetPathExecutable("dotnet");
-						IProcess slnfind = ProcessTasks.StartProcess(DotNetPath, "sln " + CurrentSolutionPath + " list", logOutput: false);
-						slnfind.AssertWaitForExit();
-						IReadOnlyCollection<Output> output = slnfind.Output;
-			*/
 
 			// There are 2 things we need to check.
 			//  1.  Is solution in right folder?
@@ -484,35 +450,38 @@ namespace Slug.CI.SlugBuildStages
 			CurrentSolutionPath = CISession.Solution.Directory;
 			if (CurrentSolutionPath.ToString() != ExpectedSolutionPath.ToString()) solutionNeedsToMove = true;
 
-			List<VisualStudioProject> movedProjects = new List<VisualStudioProject>();
-			foreach (Project project in CISession.Solution.AllProjects)
-			{
+			try {
+				List<VisualStudioProject> movedProjects = new List<VisualStudioProject>();
+				foreach ( Project project in CISession.Solution.AllProjects ) {
+					VisualStudioProject vsProject = GetInitProject(project);
+					Projects.Add(vsProject);
+					if ( (vsProject.OriginalPath.ToString() != vsProject.NewPath.ToString()) || solutionNeedsToMove ) {
+						movedProjects.Add(vsProject);
+						MoveProjectStepA(vsProject);
+					}
+				}
 
-				VisualStudioProject vsProject = GetInitProject(project);
-				Projects.Add(vsProject);
-				if ((vsProject.OriginalPath.ToString() != vsProject.NewPath.ToString()) || solutionNeedsToMove)
-				{
-					movedProjects.Add(vsProject);
-					MoveProjectStepA(vsProject);
+
+				// Step 4:  Is Solution in proper directory.  If not move it.
+				if ( solutionNeedsToMove ) {
+					string slnFileCurrent = CurrentSolutionPath / Path.GetFileName(solutionFile);
+					string slnFileFuture = ExpectedSolutionPath / Path.GetFileName(solutionFile);
+					File.Move(slnFileCurrent, slnFileFuture);
+					SolutionWasMoved = true;
+				}
+
+
+				// Step 5.  Read project to solution
+				if ( movedProjects.Count > 0 ) {
+					foreach ( VisualStudioProject project in movedProjects ) { MoveProjectStepB(project); }
 				}
 			}
-
-
-			// Step 4:  Is Solution in proper directory.  If not move it.
-			if (solutionNeedsToMove)
-			{
-				string slnFileCurrent = CurrentSolutionPath / Path.GetFileName(solutionFile);
-				string slnFileFuture = ExpectedSolutionPath / Path.GetFileName(solutionFile);
-				File.Move(slnFileCurrent, slnFileFuture);
-				SolutionWasMoved = true;
+			catch ( Exception e ) {
+				AOT_Error("An error occured during the project migration to SlugCI format.  Because of where this error occurred the project may be in an unusable state at this time.");
+				AOT_Error("You can either revert all the changes in git, delete the entire project from this machine, re-clone it and start again, or attempt to fix it.");
+				throw;
 			}
 
-
-			// Step 5.  Read project to solution
-			if (movedProjects.Count > 0)
-			{
-				foreach (VisualStudioProject project in movedProjects) { MoveProjectStepB(project); }
-			}
 			return true;
 		}
 
@@ -552,7 +521,7 @@ namespace Slug.CI.SlugBuildStages
 			sln.AssertWaitForExit();
 			ControlFlow.Assert(sln.ExitCode == 0, "Failed to re-add Project: " + project.Name + " to solution so we could complete the move");
 
-			Logger.Success("Project: {0} successfully relocated into proper new directory layout.", project.Name);
+			AOT_Success(String.Format("Project: {0} successfully relocated into proper new directory layout.", project.Name));
 			return true;
 		}
 
@@ -566,28 +535,26 @@ namespace Slug.CI.SlugBuildStages
 		{
 			VisualStudioProject visualStudioProject = new VisualStudioProject(nukeProject);
 
-			/*			VisualStudioProject visualStudioProject = new VisualStudioProject()
-						{
-							Namecsproj = Path.GetFileName(path),
-							Name = Path.GetFileName(Path.GetDirectoryName(path))
-						};
-			*/
-
 			string lcprojName = visualStudioProject.Name.ToLower();
 
 			AbsolutePath newRootPath = ExpectedSolutionPath;
 			if (lcprojName.StartsWith("test") || lcprojName.EndsWith("test"))
 			{
-				visualStudioProject.IsTestProject = true;
-				newRootPath = CISession.TestsDirectory;
+				Console.WriteLine("The Project [ " + nukeProject + " ]  Appears to be a test project.  If this is correct then it will be moved to the Tests Folder.  Is this correct (Y/N)?",Color.Yellow);
+				while (true) {
+					ConsoleKeyInfo key = Console.ReadKey();
+					if ( key.Key == ConsoleKey.Y ) {
+						visualStudioProject.IsTestProject = true;
+						newRootPath = CISession.TestsDirectory;
+						break;
+					}
+
+					if ( key.Key == ConsoleKey.N ) break;
+				}
 			}
 
 			visualStudioProject.OriginalPath = nukeProject.Directory;
 			visualStudioProject.NewPath = newRootPath / Path.GetFileName(nukeProject.Directory);
-
-
-			// Determine Framework type.
-			//DetermineFramework(visualStudioProject);
 
 			return visualStudioProject;
 		}

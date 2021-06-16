@@ -10,6 +10,7 @@ namespace Slug.CI.SlugBuildStages
 	/// All of the build stages
 	/// </summary>
 	public static class BuildStageStatic {
+		public const string PRESTAGE_INITIALIZATION = "Initialization";
 		public const string PRESTAGE_CONVERT_TO_SLUGCI = "SlugCI Config";
 
 		public const string STAGE_CALCVERSION = "Calculate Version #";

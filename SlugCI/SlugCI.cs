@@ -37,16 +37,11 @@ namespace Slug.CI
 		public CISession CISession { get; private set; }
 
 
-		/// <summary>
-		/// List of Environment Variables that are missing
-		/// </summary>
-		private List<string> MissingEnvironmentVariables { get; set; }
-
 
 		/// <summary>
 		/// Once Startup has been run this is true.
 		/// </summary>
-		private bool IsReady { get; set; }
+		public bool IsReady { get; set; }
 
 
 		/// <summary>
@@ -75,7 +70,6 @@ namespace Slug.CI
 			CISession.CoveragePath = CISession.OutputDirectory / "Coverage";
 			CISession.TestOutputPath = CISession.OutputDirectory / "Tests";
 
-
 			ciSession.GitProcessor = new GitProcessor(ciSession);
 		}
 
@@ -93,31 +87,51 @@ namespace Slug.CI
 		/// Performs initial steps:  Load slugciconfig, load projects, etc.
 		/// </summary>
 		public async Task StartupAsync () {
-
-			Task gitProcessTask = Task.Run(CISession.GitProcessor.Startup);
+			// Get SlugCI Version
+			CISession.SlugCI_Version = GetType().Assembly.GetName().Version.ToString();
 			
+			
+			// Run Some intialization checks and setup
+			PreStage_Initialization preStageInitialization = new PreStage_Initialization(CISession);
+			if ( !preStageInitialization.Execute() ) return;
+
+			Task gitProcessTask = null;
+			if (!CISession.IsInSetupMode) 
+				gitProcessTask = Task.Run(CISession.GitProcessor.Startup);
+
 			// Locate Solution and set solution related variables
 			LoadSolutionInfo();
-			Task slnPreLoadTask = Task.Run(PreLoadSolutionAsync);
-			
-
-			CheckForEnvironmentVariables();
 
 
-			slnPreLoadTask.Wait();
-			// Ensure Solution is in SlugCI format. If not migrate it.
-			PreStage_ConvertToSlugCI converter = new PreStage_ConvertToSlugCI(CISession);
-			converter.Execute();
-			if (!converter.IsInSlugCIFormat)
-			{
-				ControlFlow.Assert(converter.IsInSlugCIFormat, "The solution is not in the proper SlugCI format.  This should be something that is automatically done.  Obviously something went wrong.");
-				CISession.GitProcessor.RefreshUncommittedChanges();
+			// If We are in setup mode, then perform initial or update steps on the Config file.
+			if ( CISession.IsInSetupMode ) {
+				PreStage_ConvertToSlugCI converter = new PreStage_ConvertToSlugCI(CISession);
+				converter.Execute();
+				if (!converter.IsInSlugCIFormat)
+				{
+					ControlFlow.Assert(converter.IsInSlugCIFormat, "The solution is not in the proper SlugCI format.  This should be something that is automatically done.  Obviously something went wrong.");
+					CISession.GitProcessor.RefreshUncommittedChanges();
+				}
+
+				// Reload solution info if it was moved.
+				if (converter.SolutionWasMoved)
+					LoadSolutionInfo();
+
+				Console.WriteLine("Setup is complete.  Upon this apps exit, open the project in Visual Studio and ensure it all still opens and compiles.  Test projects are notorious for missing the source projects.",Color.Yellow);
+				Console.WriteLine("Then restart SlugCI tool!",Color.Yellow);
+				return;
 			}
 
 
-			// Reload solution info if it was moved.
-			if (converter.SolutionWasMoved)
-				LoadSolutionInfo();
+			//Task slnPreLoadTask = Task.Run(PreLoadSolutionAsync);
+
+
+
+			//slnPreLoadTask.Wait();
+
+			// Ensure Solution is in SlugCI format. If not migrate it.
+
+
 
 
 			// Combine the Visual Studio solution project info into the individual projects of the
@@ -289,7 +303,7 @@ namespace Slug.CI
 			}
 
 			Console.WriteLine(Environment.NewLine + "  Missing Required:", Color.Red);
-			foreach ( string envVar in MissingEnvironmentVariables ) {
+			foreach ( string envVar in CISession.MissingEnvironmentVariables ) {
 				Console.WriteLine("  {0,-35}", envVar, Color.WhiteSmoke);
 			}
 
@@ -397,53 +411,6 @@ namespace Slug.CI
 			SlugBuilder slugBuilder = new SlugBuilder(CISession);
 		}
 
-		/// <summary>
-		/// Checks to ensure environment variables are set.
-		/// </summary>
-		/// <returns></returns>
-		private bool CheckForEnvironmentVariables()
-		{
-			List<string> requiredEnvironmentVariables  = new List<string>()
-			{
-				ENV_SLUGCI_DEPLOY_PROD,
-				ENV_SLUGCI_DEPLOY_BETA,
-				ENV_SLUGCI_DEPLOY_ALPHA,
-				ENV_SLUGCI_DEPLOY_DEV,
-				ENV_NUGET_REPO_URL,
-				ENV_NUGET_API_KEY
-			};
-
-			MissingEnvironmentVariables = new List<string>();
-
-			foreach (string name in requiredEnvironmentVariables)
-			{
-				string result = Environment.GetEnvironmentVariable(name);
-				if (result == null) MissingEnvironmentVariables.Add(name);
-				else {
-					CISession.EnvironmentVariables.Add(name,result);
-
-					// Load the Environment Variables
-					switch ( name ) {
-						case ENV_NUGET_REPO_URL: CISession.NugetRepoURL = result;
-							break;
-						case ENV_NUGET_API_KEY: CISession.NugetAPIKey = result;
-							break;
-					}
-				}
-			}
-
-			if (MissingEnvironmentVariables.Count == 0)
-			{
-				LineOutput.Add(LineOut.Success("All required environment variables found"));
-				return true;
-			}
-
-			LineOutput.Add(NewLine);
-			LineOutput.Add(new LineOut(OutputType.Warn,"Some environment variables are missing.  These may or may not be required.",Color.Yellow));
-			foreach (string item in MissingEnvironmentVariables) 
-				LineOutput.Add(new LineOut(OutputType.Warn,"  -->  " + item,Color.Yellow));
-			return false;
-		}
 
 
 
@@ -490,5 +457,7 @@ namespace Slug.CI
 			CISession.ManuallySetVersion = semVersion;
 			return true;
 		}
+
+
 	}
 }

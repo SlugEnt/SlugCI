@@ -142,6 +142,11 @@ namespace Slug.CI.NukeClasses
 
 
 		/// <summary>
+		/// If program was started in setup mode.
+		/// </summary>
+		public bool IsInSetupMode { get; set; }
+
+		/// <summary>
 		///  Level of verbosity for git Output
 		/// </summary>
 		public ProcessVerbosity VerbosityGitVersion { get; set; } = ProcessVerbosity.Nothing;
@@ -254,6 +259,17 @@ namespace Slug.CI.NukeClasses
 		/// </summary>
 		public bool FailedUnitTestsOkay { get; set; }
 
+
+		/// <summary>
+		/// List of Environment Variables that are missing
+		/// </summary>
+		public List<string> MissingEnvironmentVariables { get; set; }
+
+
+		/// <summary>
+		/// The version of SlugCI that's running
+		/// </summary>
+		public string SlugCI_Version { get; set; }
 
 		/// <summary>
 		/// Constructor
