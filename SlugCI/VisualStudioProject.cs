@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Nuke.Common.IO;
 
 namespace Slug.CI
@@ -13,6 +14,9 @@ namespace Slug.CI
 		public AbsolutePath NewPath { get; set; }
 		public bool IsTestProject { get; set; }
 		public List<string> Frameworks { get; set; } = new List<string>();
+
+		// Library or Exe
+		public string ProjectType { get; set; }
 
 		public VisualStudioProject () {}
 

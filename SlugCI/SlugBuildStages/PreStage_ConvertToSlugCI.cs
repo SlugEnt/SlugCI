@@ -259,7 +259,7 @@ namespace Slug.CI.SlugBuildStages
 					}
 					else
 					{
-						slugCIProject.Deploy = PromptUserForDeployMethod(project.Name);
+						slugCIProject.Deploy = PromptUserForDeployMethod(project);
 					}
 					slugCiConfig.Projects.Add(slugCIProject);
 				}
@@ -344,10 +344,24 @@ namespace Slug.CI.SlugBuildStages
 		/// </summary>
 		/// <param name="projectName"></param>
 		/// <returns></returns>
-		private SlugCIDeployMethod PromptUserForDeployMethod(string projectName)
+		private SlugCIDeployMethod PromptUserForDeployMethod(VisualStudioProject project)
 		{
 			Console.WriteLine();
-			Colorful.Console.WriteLine("Project - [" + projectName + "]  has been added to the SlugCI config file.  What deployment method does this project use?", Color.Yellow);
+			Console.WriteLine();
+			AOT_Info("Project - [" + project.Name + "]  has been added to the SlugCI config file.");
+
+			// Determine Deploy Method
+			string deployMethod = "";
+			if ( project.ProjectType == "Library" ) 
+				deployMethod = "Nuget";
+			else if ( project.ProjectType == "Exe" )
+				deployMethod = "Copy";
+			else
+				deployMethod = "None";
+			AOT_Normal("It appears the deployment method for this project would be " + deployMethod,Color.Yellow);
+
+
+			//"What deployment method does this project use?", Color.Yellow);
 			bool continuePrompting = true;
 			while (continuePrompting)
 			{
@@ -552,37 +566,14 @@ namespace Slug.CI.SlugBuildStages
 					if ( key.Key == ConsoleKey.N ) break;
 				}
 			}
+			
+			visualStudioProject.ProjectType = nukeProject.GetProperty("OutputType");
 
 			visualStudioProject.OriginalPath = nukeProject.Directory;
 			visualStudioProject.NewPath = newRootPath / Path.GetFileName(nukeProject.Directory);
 
 			return visualStudioProject;
 		}
-
-
-
-		/// <summary>
-		/// Determines the Project's targeted framework.  It checks both FrameWork and Frameworks and throws the results into a list.
-		/// </summary>
-		/// <param name="project"></param>
-		private void DetermineFramework(VisualStudioProject project)
-		{
-			// Determine csproj path
-			AbsolutePath csprojPath = project.OriginalPath / project.Namecsproj;
-
-
-			XDocument doc = XDocument.Load(csprojPath);
-			string value = "";
-			if (doc.XPathSelectElement("//PropertyGroup/TargetFramework") != null)
-				value = doc.XPathSelectElement("//PropertyGroup/TargetFramework").Value;
-			else if (doc.XPathSelectElement("//PropertyGroup/TargetFrameworks") != null)
-				value = doc.XPathSelectElement("//PropertyGroup/TargetFrameworks").Value;
-
-
-			//ControlFlow.Assert(value != string.Empty, "Unable to locate a FrameWork value from the csproj file.  This is a required property. Project: " + project.Namecsproj);
-			project.Frameworks = value.Split(";").ToList();
-		}
-
 
 
 		/// <summary>
@@ -597,10 +588,6 @@ namespace Slug.CI.SlugBuildStages
 			DotNet("add package coverlet.msbuild --version 3.0.3", csprojPath);
 			return true;
 		}
-
-
-
-
 
 	}
 }

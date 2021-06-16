@@ -88,7 +88,9 @@ namespace Slug.CI
 		/// </summary>
 		public async Task StartupAsync () {
 			// Get SlugCI Version
-			CISession.SlugCI_Version = GetType().Assembly.GetName().Version.ToString();
+			string tempVersion = GetType().Assembly.GetName().Version.ToString();
+			string [] versionBreaks = tempVersion.Split('.');
+			CISession.SlugCI_Version = versionBreaks [0] + "." + versionBreaks [1] + "." + versionBreaks [2];
 			
 			
 			// Run Some intialization checks and setup

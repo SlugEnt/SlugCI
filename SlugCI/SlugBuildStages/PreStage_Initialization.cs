@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
+using Semver;
 using Slug.CI.NukeClasses;
 
 
@@ -41,7 +42,7 @@ namespace Slug.CI.SlugBuildStages
 
 			// Load the SlugCI Config for the project
 			CISession.SlugCIConfigObj = SlugCIConfig.LoadFromFile(CISession.SlugCIFileName);
-			if ( !CISession.IsInSetupMode ) {
+			if ( !CISession.IsInSetupMode && CISession.SlugCIConfigObj == null) {
 				CompletionStatus = StageCompletionStatusEnum.Failure;
 				ControlFlow.Assert(CISession.SlugCIConfigObj != null, "Failure loading the SlugCI Configuration file - [ " + CISession.SlugCIFileName + " ]");
 			}
