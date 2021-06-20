@@ -13,6 +13,7 @@ namespace Slug.CI
 		public AbsolutePath OriginalPath { get; set; }
 		public AbsolutePath NewPath { get; set; }
 		public bool IsTestProject { get; set; }
+		public SlugCIDeployMethod SlugCIDeploymentMethod { get; set; }
 		public List<string> Frameworks { get; set; } = new List<string>();
 
 		// Library or Exe

@@ -46,16 +46,18 @@ namespace Slug.CI
 #if DEBUG
 			bool calcVersionSkipped = false;
 			foreach ( BuildStage stage in _executionPlan.KnownStages ) {
+				/*
 				//if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH && stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER) stage.ShouldSkip = true;
 				if ( stage.Name != BuildStageStatic.STAGE_PUBLISH ) stage.ShouldSkip = true;
-				/*				if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH  && 
+								if ( stage.Name != BuildStageStatic.STAGE_TYPEWRITER_PUBLISH  && 
 									 stage.Name != BuildStageStatic.STAGE_TYPEWRITER_VER &&
 									 stage.Name != BuildStageStatic.STAGE_PUBLISH) stage.ShouldSkip = true;
-				*/
+				
 
 				// Leave this in - it determines if we will have a version calculated.  If not, then it manually sets one, so steps can complete.
 				if (stage.Name == BuildStageStatic.STAGE_CALCVERSION)
 					ciSession.VersionInfo = new VersionInfo(new SemVersion(3, 56, 43), "656gtg");
+				*/
 			}
 #endif
 
