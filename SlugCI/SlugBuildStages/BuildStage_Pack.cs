@@ -32,7 +32,7 @@ namespace Slug.CI.SlugBuildStages
 		{
 			CISession.OutputDirectory.GlobFiles("*.nupkg", "*symbols.nupkg").ForEach(DeleteFile);
 
-			DotNetPackSettings settings;// = new DotNetPackSettings()
+			DotNetPackSettings settings;
 
 			foreach ( SlugCIProject project in CISession.Projects ) {
 				AddOutputText("Project: " + project.Name, OutputType.Std);
@@ -49,7 +49,6 @@ namespace Slug.CI.SlugBuildStages
 					PropertiesInternal = new Dictionary<string, object>(),
 				};
 
-				string version = CISession.VersionInfo.SemVersionAsString;
 				settings = settings.SetFileVersion(CISession.VersionInfo.FileVersion)
 				                   .SetAssemblyVersion(CISession.VersionInfo.AssemblyVersion)
 				                   .SetConfiguration(CISession.CompileConfig)
