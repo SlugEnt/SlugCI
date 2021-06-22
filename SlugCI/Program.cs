@@ -467,6 +467,9 @@ namespace Slug.CI
 
 			ConsoleKey userSelectedConsoleKey = defaultKey;
 
+			// Flush Keyboard buffer
+			while ( Console.KeyAvailable ) Console.ReadKey();
+
 			while ( keepLooping ) {
 				ConsoleKeyInfo choice = Console.ReadKey();
 				if ( validKeys.Contains(choice.Key) ) userSelectedConsoleKey = choice.Key;

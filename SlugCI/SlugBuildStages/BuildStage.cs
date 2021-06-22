@@ -181,11 +181,13 @@ namespace Slug.CI
 			}
 			catch ( ProcessException p ) {
 				CompletionStatus = StageCompletionStatusEnum.Failure;
-				Logger.Error(p,true);
+				AOT_Error(p);
+				//Logger.Error(p,true);
 			}
 			catch ( Exception e ) {
 				CompletionStatus = StageCompletionStatusEnum.Failure;
-				Logger.Error(e);
+				AOT_Error(e);
+				//Logger.Error(e);
 			}
 			return false;
 		}
@@ -274,6 +276,26 @@ namespace Slug.CI
 		/// Writes the given text as Errored output to both BuildStage output and to the console real time.
 		/// </summary>
 		/// <param name="text"></param>
+		protected void AOT_Error(Exception exception) {
+			string exceptionSeparator = "************************  [ Exception Encountered ] ************************";
+			int start = StageOutput.Count;
+			StageOutput.Add(LineOut.Error(exceptionSeparator));
+			StageOutput.Add(LineOut.Error(exception.Message));
+			StageOutput.Add(LineOut.Error(exceptionSeparator));
+			StageOutput.Add(LineOut.NewLine());
+			StageOutput.Add(LineOut.Error(exception.ToString()));
+			StageOutput.Add(LineOut.NewLine());
+
+			
+			if (ShouldLogToConsoleRealTime) Print_StageOutput(start);
+		}
+
+
+
+		/// <summary>
+		/// Writes the given text as Errored output to both BuildStage output and to the console real time.
+		/// </summary>
+		/// <param name="text"></param>
 		protected void AOT_Error (string text)
 		{
 			StageOutput.Add(LineOut.Error(text));
@@ -331,6 +353,22 @@ namespace Slug.CI
 		protected void AOT_NewLine () {
 			StageOutput.Add(LineOut.NewLine());
 			if (ShouldLogToConsoleRealTime) Console.WriteLine();
+		}
+
+
+		/// <summary>
+		/// Prints the given lines of StageOutput
+		/// </summary>
+		/// <param name="startLine">Starting index number of StageOutput to print.  Is zero based.</param>
+		/// <param name="endLine">Ending index number of StageOutput to print.  Is 1 based.  If value is zero then it prints to end of list</param>
+		public void Print_StageOutput (int startLine, int endLine = 0) {
+			if ( endLine == 0 ) endLine = StageOutput.Count;
+			if ( StageOutput.Count == 0 ) return;
+
+			int count = endLine - startLine;
+			if ( startLine > StageOutput.Count ) return;
+			for (int i = startLine; i < endLine; i++) 
+				Console.WriteLine(StageOutput[i].Text,StageOutput[i].FGColor);
 		}
 	}
 }
