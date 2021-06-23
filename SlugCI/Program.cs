@@ -46,7 +46,8 @@ namespace Slug.CI
 		                                   bool interactive = true,
 		                                   bool skipnuget = false,
 		                                   bool failedtestsok = false,
-		                                   bool info = false) {
+		                                   bool info = false,
+		                                   bool setup = false) {
 			CISession ciSession = new CISession();
 
 			Logger.SetOutputSink(CISession.OutputSink);
@@ -107,6 +108,9 @@ namespace Slug.CI
 				ciSession.FailedUnitTestsOkay = failedtestsok;
 
 
+				// Setup mode
+				ciSession.IsInSetupMode = setup;
+
 				// Perform Validation 
 				ValidateDependencies validation = new ValidateDependencies(ciSession);
 				if (!validation.Validate()) throw new ApplicationException("One or more required features is missing from this pc.");
@@ -116,6 +120,12 @@ namespace Slug.CI
 				Task slugCITask = Task.Run(slugCI.StartupAsync);
 
 				slugCITask.Wait();
+
+				if ( !slugCI.IsReady ) {
+					Colorful.Console.WriteLine("SlugCI Initializer is not ready to continue processing the solution.  Exiting...", Color.Red);
+					return 1;
+				}
+
 
 				// Interactive mode....
 				if (interactive)
@@ -456,6 +466,9 @@ namespace Slug.CI
 			bool keepLooping = true;
 
 			ConsoleKey userSelectedConsoleKey = defaultKey;
+
+			// Flush Keyboard buffer
+			while ( Console.KeyAvailable ) Console.ReadKey();
 
 			while ( keepLooping ) {
 				ConsoleKeyInfo choice = Console.ReadKey();

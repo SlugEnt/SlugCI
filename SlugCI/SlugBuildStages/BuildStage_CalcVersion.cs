@@ -34,8 +34,6 @@ namespace Slug.CI.SlugBuildStages
 		}
 
 
-
-
 		/// <summary>
 		/// Runs the Calculate Version process
 		/// </summary>

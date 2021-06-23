@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Runtime.Serialization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Nuke.Common.IO;
+using static Nuke.Common.IO.FileSystemTasks;
 
 
 namespace Slug.CI {
@@ -220,16 +223,25 @@ namespace Slug.CI {
 			return b;
 		}
 
-
+		
 		/// <summary>
-		/// Updates the version # of the Config file to be the current layout version #.
-		/// We do this so we know when we have new structural versions of the file to write out.
+		/// Loads the config file from a file.  Returns the config object or null if the file was not found.
 		/// </summary>
-		public void UpdateFileVersion () {
-			ConfigStructureVersion = CONFIG_STRUCTURE_VERSION;
+		/// <param name="fileName"></param>
+		/// <returns></returns>
+		public static SlugCIConfig LoadFromFile (AbsolutePath fileName) {
+			SlugCIConfig slugCiConfig;
+			if (FileExists(fileName))
+			{
+				string Json = File.ReadAllText(fileName);
+				slugCiConfig = JsonSerializer.Deserialize<SlugCIConfig>(Json, SlugCIConfig.SerializerOptions());
+				return slugCiConfig;
+			}
+
+			return null;
 		}
 
-
+		#region "Equality Operators"
 		/// <summary>
 		/// Equals method override
 		/// </summary>
@@ -301,6 +313,8 @@ namespace Slug.CI {
 		}
 
 		public static bool operator !=(SlugCIConfig lhs, SlugCIConfig rhs) => !(lhs == rhs);
+
+		#endregion
 	}
 
 }

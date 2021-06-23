@@ -48,7 +48,6 @@ namespace Slug.CI.SlugBuildStages
 				                                                    .Add("/p:CoverletOutput={0}/", CISession.CoveragePath)
 				                                                    .Add("/p:CoverletOutputFormat={0}", "cobertura")
 				                                                    .Add("/p:Threshold={0}", CISession.SlugCIConfigObj.CodeCoverageThreshold)
-				                                                    .Add("/p:Threshold={0}", 5)
 				                                                    .Add("/p:SkipAutoProps={0}", true)
 				                                                    .Add("/p:ExcludeByAttribute={0}",
 				                                                         "\"Obsolete%2cGeneratedCodeAttribute%2cCompilerGeneratedAttribute\"")
