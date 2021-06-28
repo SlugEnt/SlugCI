@@ -173,19 +173,6 @@ namespace Slug.CI
 			}
 
 
-			// If we have Deploy "Copy" targets then make sure the variables are set and folders are valid
-			if (CISession.CountOfDeployTargetsCopy > 0)
-			{
-				CISession.DeployCopyPath = GetDeployFolder();
-				if (CISession.DeployCopyPath == null)
-				{
-					if (CISession.SlugCIConfigObj.IsRootFolderUsingEnvironmentVariable(CISession.PublishTarget))
-						ControlFlow.Assert(CISession.DeployCopyPath != null,
-										   "The deploy folder for Copy Targets is null.  The slugci config file says to use environment variables to determine this setting.....");
-					else
-						ControlFlow.Assert(CISession.DeployCopyPath != null, "The deploy folder specified in slugci config file is empty..");
-				}
-			}
 
 			gitProcessTask.Wait();
 
@@ -409,6 +396,21 @@ namespace Slug.CI
 		public void Execute () {
 			if (CISession.GitProcessor.AreUncommitedChangesOnLocalBranch)
 				throw new ApplicationException("There are uncommitted changes on the current branch: " + CISession.GitProcessor.CurrentBranch + "  Commit or discard existing changes and then try again.");
+
+			// If we have Deploy "Copy" targets then make sure the variables are set and folders are valid
+			if (CISession.CountOfDeployTargetsCopy > 0)
+			{
+				CISession.DeployCopyPath = GetDeployFolder();
+				if (CISession.DeployCopyPath == null)
+				{
+					if (CISession.SlugCIConfigObj.IsRootFolderUsingEnvironmentVariable(CISession.PublishTarget))
+						ControlFlow.Assert(CISession.DeployCopyPath != null,
+						                   "The deploy folder for Copy Targets is null.  The slugci config file says to use environment variables to determine this setting.....");
+					else
+						ControlFlow.Assert(CISession.DeployCopyPath != null, "The deploy folder specified in slugci config file is empty..");
+				}
+			}
+
 
 			SlugBuilder slugBuilder = new SlugBuilder(CISession);
 		}
