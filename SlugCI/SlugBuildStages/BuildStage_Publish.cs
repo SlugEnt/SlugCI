@@ -7,6 +7,7 @@ using Slug.CI.NukeClasses;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 namespace Slug.CI.SlugBuildStages
@@ -86,11 +87,15 @@ namespace Slug.CI.SlugBuildStages
 		private void Publish_Copy_Angular() {
 			AOT_Normal("Publishing Angular Projects");
 
-			// Angular projects:  We only support single app publishes per project.  Angular NX supports more, we just don't have any examples at the moment.
+			if (CISession.SkipAngularBuild)
+				AOT_Warning("All Angular Projects were skipped due to manually set argument.");
 
+
+			// Angular projects:  We only support single app publishes per project.  Angular NX supports more, we just don't have any examples at the moment.
 			foreach (AngularProject project in CISession.SlugCIConfigObj.AngularProjects)
 			{
 				project.Results.PublishedSuccess = false;
+				if ( CISession.SkipAngularBuild ) continue;
 
 				// TODO - Replace "" with Angular Apps from dist folder 
 				AbsolutePath destFolder = BuildDestinationFolderName_Angular(project, "");
@@ -254,6 +259,13 @@ namespace Slug.CI.SlugBuildStages
 					// Loop thru projects looking for that assembly name
 					foreach ( SlugCIProject project in CISession.Projects ) {
 						if ( project.AssemblyName.ToLower() == fileName || project.PackageId.ToLower() == fileName) {
+							// For Tool Deployed projects, we need to copy the current version out to the deploy folder 
+							if ( project.Deploy == SlugCIDeployMethod.Tool ) {
+								AbsolutePath deployFile = CISession.DeployCopyPath / project.Name / CISession.PublishTarget.ToString() / "Version.json";
+								ToolVersionJSON toolVersionJSON = new ToolVersionJSON() {ToolVersion = CISession.VersionInfo.SemVersionAsString};
+								string json = JsonSerializer.Serialize<ToolVersionJSON>(toolVersionJSON, ToolVersionJSON.SerializerOptions());
+								File.WriteAllText(deployFile, json);
+							}
 							project.Results.PublishedSuccess = true;
 							break;
 						}

@@ -352,7 +352,7 @@ namespace Slug.CI.SlugBuildStages
 			{
 				string json = JsonSerializer.Serialize<SlugCIConfig>(slugCiConfig, SlugCIConfig.SerializerOptions());
 				File.WriteAllText(CISession.SlugCIFileName, json);
-				Console.WriteLine("SlugCIConfig file updated to latest version / values", Color.Green);
+				AOT_Success("SlugCIConfig file updated to latest version / values");
 
 				SlugCIConfig = GetSlugCIConfig(true);
 				if (updateProjectAdd)
@@ -420,7 +420,10 @@ namespace Slug.CI.SlugBuildStages
 			if ( project.ProjectType == "Library" ) 
 				deployMethod = "Nuget";
 			else if ( project.ProjectType == "Exe" )
-				deployMethod = "Copy";
+				if ( project.IsToolPackage )
+					deployMethod = "Tool";
+				else 
+					deployMethod = "Copy";
 			else
 				deployMethod = "None";
 			AOT_Normal("It appears the deployment method for this project would be " + deployMethod + ".  Press enter to accept this default or select letter.",Color.Yellow);
@@ -433,6 +436,7 @@ namespace Slug.CI.SlugBuildStages
 				Console.WriteLine("Press: ");
 				Console.WriteLine("   (N) For Nuget Deploy");
 				Console.WriteLine("   (C) For File Copy Deploy");
+				Console.WriteLine("   (T) for Tool Deploy");
 				Console.WriteLine("   (0) For Not Specified");
 				while ( Console.KeyAvailable ) Console.ReadKey(false);
 				ConsoleKeyInfo inputKey = Console.ReadKey();
@@ -440,11 +444,14 @@ namespace Slug.CI.SlugBuildStages
 					if ( deployMethod == "Nuget" ) return SlugCIDeployMethod.Nuget;
 					else if ( deployMethod == "Copy" )
 						return SlugCIDeployMethod.Copy;
+					else if ( deployMethod == "Tool" )
+						return SlugCIDeployMethod.Tool;
 					else
 						return SlugCIDeployMethod.None;
 				}
 				if (inputKey.Key == ConsoleKey.N) return SlugCIDeployMethod.Nuget;
 				if (inputKey.Key == ConsoleKey.C) return SlugCIDeployMethod.Copy;
+				if ( inputKey.Key == ConsoleKey.T ) return SlugCIDeployMethod.Tool;
 				if (inputKey.Key == ConsoleKey.D0) return SlugCIDeployMethod.None;
 			}
 
@@ -617,6 +624,8 @@ namespace Slug.CI.SlugBuildStages
 			AbsolutePath newRootPath = ExpectedSolutionPath;
 
 			visualStudioProject.ProjectType = nukeProject.GetProperty("OutputType");
+			visualStudioProject.ToolName = nukeProject.GetProperty("ToolCommandName");
+			if ( visualStudioProject.ToolName != null ) visualStudioProject.IsToolPackage = true;
 
 			visualStudioProject.OriginalPath = nukeProject.Directory;
 			visualStudioProject.NewPath = newRootPath / Path.GetFileName(nukeProject.Directory);

@@ -29,6 +29,8 @@ namespace Slug.CI.SlugBuildStages
 				string command = "ng";
 				string ngArgs = "build";
 
+				if ( CISession.SkipAngularBuild ) return StageCompletionStatusEnum.Skipped;
+
 				CompletionStatus = StageCompletionStatusEnum.InProcess;
 
 				foreach (AngularProject project in CISession.SlugCIConfigObj.AngularProjects)
