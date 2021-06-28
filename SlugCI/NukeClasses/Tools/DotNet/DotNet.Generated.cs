@@ -81,12 +81,13 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetTestSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetTest(DotNetTestSettings toolSettings = null)
+        public static (IReadOnlyCollection<LineOut>,int) DotNetTest(DotNetTestSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetTestSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
-            process.AssertZeroExitCode();
-            return process.Output;
+            //process.AssertZeroExitCode();
+            process.WaitForExit();
+            return (process.Output,process.ExitCode);
         }
         /// <summary>
         ///   <p>The <c>dotnet test</c> command is used to execute unit tests in a given project. Unit tests are console application projects that have dependencies on the unit test framework (for example, MSTest, NUnit, or xUnit) and the dotnet test runner for the unit testing framework. These are packaged as NuGet packages and are restored as ordinary dependencies for the project.</p>
@@ -127,7 +128,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetTestSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetTest(Configure<DotNetTestSettings> configurator)
+        public static (IReadOnlyCollection<LineOut>, int) DotNetTest(Configure<DotNetTestSettings> configurator)
         {
             return DotNetTest(configurator(new DotNetTestSettings()));
         }
@@ -170,10 +171,10 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetTestSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IEnumerable<(DotNetTestSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetTest(CombinatorialConfigure<DotNetTestSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
+        /* public static IEnumerable<(DotNetTestSettings Settings, IReadOnlyCollection<LineOut> Output, int )> DotNetTest(CombinatorialConfigure<DotNetTestSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
         {
             return configurator.Invoke(DotNetTest, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
+        }*/
         /// <summary>
         ///   <p>The <c>dotnet run</c> command provides a convenient option to run your application from the source code with one command. It's useful for fast iterative development from the command line. The command depends on the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-build"><c>dotnet build</c></a> command to build the code. Any requirements for the build, such as that the project must be restored first, apply to <c>dotnet run</c> as well.</p><p>Output files are written into the default location, which is <c>bin/&lt;configuration&gt;/&lt;target&gt;</c>. For example if you have a <c>netcoreapp1.0</c> application and you run <c>dotnet run</c>, the output is placed in <c>bin/Debug/netcoreapp1.0</c>. Files are overwritten as needed. Temporary files are placed in the <c>obj</c> directory.</p><p>If the project specifies multiple frameworks, executing <c>dotnet run</c> results in an error unless the <c>-f|--framework &lt;FRAMEWORK&gt;</c> option is used to specify the framework.</p><p>The <c>dotnet run</c> command is used in the context of projects, not built assemblies. If you're trying to run a framework-dependent application DLL instead, you must use <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet">dotnet</a> without a command. For example, to run <c>myapp.dll</c>, use: <c>dotnet myapp.dll</c></p><p>For more information on the <c>dotnet</c> driver, see the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/index">.NET Core Command Line Tools (CLI)</a> topic.</p><p>In order to run the application, the <c>dotnet run</c> command resolves the dependencies of the application that are outside of the shared runtime from the NuGet cache. Because it uses cached dependencies, it's not recommended to use <c>dotnet run</c> to run applications in production. Instead, <a href="https://docs.microsoft.com/en-us/dotnet/core/deploying/index">create a deployment</a> using the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish"><c>dotnet publish</c></a> command and deploy the published output.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>

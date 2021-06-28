@@ -166,7 +166,7 @@ namespace Slug.CI
 			foreach (SlugCIProject slugCiProject in CISession.SlugCIConfigObj.Projects)
 			{
 				if (slugCiProject.Deploy == SlugCIDeployMethod.Copy) CISession.CountOfDeployTargetsCopy++;
-				else if (slugCiProject.Deploy == SlugCIDeployMethod.Nuget)
+				else if (slugCiProject.Deploy == SlugCIDeployMethod.Nuget || slugCiProject.Deploy == SlugCIDeployMethod.Tool)
 					CISession.CountOfDeployTargetsNuget++;
 				else
 					deployNone++;

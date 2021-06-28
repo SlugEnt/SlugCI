@@ -47,7 +47,8 @@ namespace Slug.CI
 		                                   bool skipnuget = false,
 		                                   bool failedtestsok = false,
 		                                   bool info = false,
-		                                   bool setup = false) {
+		                                   bool setup = false,
+		                                   bool skipangular = false) {
 			CISession ciSession = new CISession();
 
 			Logger.SetOutputSink(CISession.OutputSink);
@@ -102,6 +103,10 @@ namespace Slug.CI
 
 				// Skip Nuget
 				ciSession.SkipNuget = skipnuget;
+
+
+				// Skip Angular Web Build
+				ciSession.SkipAngularBuild = skipangular;
 
 
 				// Failed Unit tests are ok?
@@ -242,6 +247,14 @@ namespace Slug.CI
 				Console.WriteLine(" (S)  Skip Nuget Publish  [ " + ciSession.SkipNuget + " ]", lineColor);
 
 				// Menu Item
+				if (ciSession.SkipAngularBuild)
+					lineColor = Color.Yellow;
+				else
+					lineColor = Color.WhiteSmoke;
+				Console.WriteLine(" (A)  Skip Angular Build & Publish  [ " + ciSession.SkipAngularBuild + " ]", lineColor);
+
+
+				// Menu Item
 				if ( ciSession.FailedUnitTestsOkay )
 					lineColor = Color.Yellow;
 				else
@@ -263,6 +276,7 @@ namespace Slug.CI
 				// Set Valid Keys
 				List<ConsoleKey> validKeys = new List<ConsoleKey>()
 				{
+					ConsoleKey.A,
 					ConsoleKey.I,
 					ConsoleKey.C,
 					ConsoleKey.V,
@@ -277,6 +291,7 @@ namespace Slug.CI
 				else if ( answer == ConsoleKey.Enter && !ciSession.GitProcessor.AreUncommitedChangesOnLocalBranch) return true;
 				else if (answer == ConsoleKey.V) ManualVersionPrompts(ciSession,slugCi);
 				else if ( answer == ConsoleKey.S ) ciSession.SkipNuget = !ciSession.SkipNuget;
+				else if ( answer == ConsoleKey.A ) ciSession.SkipAngularBuild = !ciSession.SkipAngularBuild;
 				else if ( answer == ConsoleKey.X ) return false;
 				else if ( answer == ConsoleKey.R ) ciSession.GitProcessor.RefreshUncommittedChanges();
 				else if ( answer == ConsoleKey.C ) {

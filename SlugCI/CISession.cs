@@ -193,6 +193,12 @@ namespace Slug.CI.NukeClasses
 
 
 		/// <summary>
+		/// Skips the build and publish of an angular web project
+		/// </summary>
+		public bool SkipAngularBuild { get; set; }
+
+
+		/// <summary>
 		/// The number of projects whose deploy target is set to Nuget
 		/// </summary>
 		public short CountOfDeployTargetsNuget { get; set; }
