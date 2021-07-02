@@ -55,9 +55,10 @@ namespace Slug.CI.SlugBuildStages
 
 			};
 
-			IReadOnlyCollection<LineOut> testOutput =  DotNetTest(settings);
+			(IReadOnlyCollection<LineOut> testOutput, int processExitCode) =  DotNetTest(settings);
 			StageOutput.AddRange(testOutput);
 
+			if ( processExitCode != 0 ) return StageCompletionStatusEnum.Failure;
 			return StageCompletionStatusEnum.Success;
 		}
 	}

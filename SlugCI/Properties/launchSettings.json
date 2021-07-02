@@ -56,7 +56,7 @@
     },
     "GenericTest": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\slugent\\slugcisample --deployto alpha --faststart false"
+      "commandLineArgs": "--rootdir C:\\A_Dev\\slugent\\slugcisample --deployto alpha --faststart false --skipangular"
     }
   }
 }

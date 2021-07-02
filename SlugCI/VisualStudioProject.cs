@@ -21,6 +21,11 @@ namespace Slug.CI
 
 		public VisualStudioProject () {}
 
+		// True if the project is a .Net Tool
+		public bool IsToolPackage { get; set; }
+
+		public string ToolName { get; set; }
+
 
 		/// <summary>
 		/// Construct from a Visual Studio Project from Solution.

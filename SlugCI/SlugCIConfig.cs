@@ -30,7 +30,13 @@ namespace Slug.CI {
 		/// Is copied to a deployment folder location
 		/// </summary>
 		[EnumMember(Value = @"Copy")]
-		Copy = 2
+		Copy = 2,
+
+		/// <summary>
+		/// .Net Tool
+		/// </summary>
+		[EnumMember(Value = @"Tool")]
+		Tool = 3
 	}
 
 

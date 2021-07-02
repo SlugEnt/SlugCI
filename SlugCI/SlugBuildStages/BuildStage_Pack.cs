@@ -38,7 +38,7 @@ namespace Slug.CI.SlugBuildStages
 				AddOutputText("Project: " + project.Name, OutputType.Std);
 				AddOutputText("  --> Is Nuget Packable:  " + (project.Deploy == SlugCIDeployMethod.Nuget).ToString(), OutputType.Std);
 
-				if ( project.Deploy != SlugCIDeployMethod.Nuget ) {continue;}
+				if ( project.Deploy != SlugCIDeployMethod.Nuget && project.Deploy != SlugCIDeployMethod.Tool ) {continue;}
 				settings = new DotNetPackSettings()
 				{
 					Project = project.VSProject.Path,
@@ -54,6 +54,12 @@ namespace Slug.CI.SlugBuildStages
 				                   .SetConfiguration(CISession.CompileConfig)
 				                   .SetInformationalVersion(CISession.VersionInfo.InformationalVersion)
 				                   .SetVersion(CISession.VersionInfo.SemVersionAsString);
+
+				// We might need to override package name if this is an alpha or beta build.
+				if ( project.Deploy == SlugCIDeployMethod.Tool ) {
+					settings.SetPackageId(project.PackageId + "-" + CISession.PublishTarget.ToString());
+				}
+
 
 				IReadOnlyCollection<LineOut> output = DotNetTasks.DotNetPack(settings);
 				StageOutput.AddRange(output);
