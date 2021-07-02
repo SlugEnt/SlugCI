@@ -40,6 +40,8 @@ namespace Slug.CI.SlugBuildStages
 			                                         .SetVerbosity(DotNetVerbosity.Minimal)
 			                                         .EnableNoRestore()
 			                                         .SetAssemblyVersion(CISession.VersionInfo.AssemblyVersion)
+			                                         .SetVersion(CISession.VersionInfo.AssemblyVersion)
+			                                         .SetInformationalVersion(CISession.VersionInfo.InformationalVersion)
 			                                         .SetFileVersion(CISession.VersionInfo.FileVersion);
 
 			IReadOnlyCollection<LineOut> compileOut = DotNetTasks.DotNetBuild(dotNetBuildSettings);
