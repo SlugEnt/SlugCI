@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using CmdProcessor;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Slug.CI.NukeClasses;
@@ -29,7 +30,7 @@ namespace Slug.CI.SlugBuildStages
 			DotNetRestoreSettings settings = new DotNetRestoreSettings();
 			settings.ProjectFile = CISession.Solution;
 			settings.Verbosity = DotNetVerbosity.Minimal;
-			IReadOnlyCollection<LineOut> outputs = DotNetTasks.DotNetRestore(settings);
+			IReadOnlyCollection<LineOutColored> outputs = DotNetTasks.DotNetRestore(settings);
 			StageOutput.AddRange(outputs);
 			return StageCompletionStatusEnum.Success;
 		}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using CmdProcessor;
 using Nuke.Common;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
@@ -44,7 +45,7 @@ namespace Slug.CI.SlugBuildStages
 			                                         .SetInformationalVersion(CISession.VersionInfo.InformationalVersion)
 			                                         .SetFileVersion(CISession.VersionInfo.FileVersion);
 
-			IReadOnlyCollection<LineOut> compileOut = DotNetTasks.DotNetBuild(dotNetBuildSettings);
+			IReadOnlyCollection<LineOutColored> compileOut = DotNetTasks.DotNetBuild(dotNetBuildSettings);
 			StageOutput.AddRange(compileOut);
 
 			AOT_NewLine();

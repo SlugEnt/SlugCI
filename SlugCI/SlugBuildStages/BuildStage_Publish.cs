@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using CmdProcessor;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 namespace Slug.CI.SlugBuildStages
@@ -215,12 +216,12 @@ namespace Slug.CI.SlugBuildStages
 				try
 				{
 					settings.TargetPath = nugetPackage;
-					IReadOnlyCollection<LineOut> nugetOutput = DotNetNuGetPush(settings);
+					IReadOnlyCollection<LineOutColored> nugetOutput = DotNetNuGetPush(settings);
 					StageOutput.AddRange(nugetOutput);
 					if (nugetOutput.Count > 0)
 					{
 						// Look for skipped message.
-						foreach (LineOut outputLine in nugetOutput)
+						foreach (ILineOut outputLine in nugetOutput)
 						{
 							if (outputLine.Text.Contains("already exists at feed")) {
 								stepStatus = StageCompletionStatusEnum.Warning;

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using CmdProcessor;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
@@ -61,7 +62,7 @@ namespace Slug.CI.SlugBuildStages
 				}
 
 
-				IReadOnlyCollection<LineOut> output = DotNetTasks.DotNetPack(settings);
+				IReadOnlyCollection<LineOutColored> output = DotNetTasks.DotNetPack(settings);
 				StageOutput.AddRange(output);
 
 				// See if successful.

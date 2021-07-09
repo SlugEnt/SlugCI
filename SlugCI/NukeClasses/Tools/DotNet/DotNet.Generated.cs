@@ -1,5 +1,6 @@
 // Generated from https://github.com/nuke-build/nuke/blob/master/build/specifications/DotNet.json
 
+using CmdProcessor;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Nuke.Common;
@@ -36,7 +37,7 @@ namespace Nuke.Common.Tools.DotNet
         /// <summary>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
-        public static IReadOnlyCollection<LineOut> DotNet(string arguments, string workingDirectory = null, IReadOnlyDictionary<string, string> environmentVariables = null, int? timeout = null, bool? logOutput = null, bool? logInvocation = null, bool? logTimestamp = null, string logFile = null, Func<string, string> outputFilter = null)
+        public static IReadOnlyCollection<LineOutColored> DotNet(string arguments, string workingDirectory = null, IReadOnlyDictionary<string, string> environmentVariables = null, int? timeout = null, bool? logOutput = null, bool? logInvocation = null, bool? logTimestamp = null, string logFile = null, Func<string, string> outputFilter = null)
         {
             using var process = ProcessTasks.StartProcess(DotNetPath, arguments, workingDirectory, environmentVariables, timeout, logOutput, logInvocation, logTimestamp, logFile, DotNetLogger, outputFilter);
             process.AssertZeroExitCode();
@@ -81,7 +82,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetTestSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static (IReadOnlyCollection<LineOut>,int) DotNetTest(DotNetTestSettings toolSettings = null)
+        public static (IReadOnlyCollection<LineOutColored>,int) DotNetTest(DotNetTestSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetTestSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -89,223 +90,7 @@ namespace Nuke.Common.Tools.DotNet
             process.WaitForExit();
             return (process.Output,process.ExitCode);
         }
-        /// <summary>
-        ///   <p>The <c>dotnet test</c> command is used to execute unit tests in a given project. Unit tests are console application projects that have dependencies on the unit test framework (for example, MSTest, NUnit, or xUnit) and the dotnet test runner for the unit testing framework. These are packaged as NuGet packages and are restored as ordinary dependencies for the project.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;projectFile&gt;</c> via <see cref="DotNetTestSettings.ProjectFile"/></li>
-        ///     <li><c>--</c> via <see cref="DotNetTestSettings.RunSettings"/></li>
-        ///     <li><c>--blame</c> via <see cref="DotNetTestSettings.BlameMode"/></li>
-        ///     <li><c>--collect</c> via <see cref="DotNetTestSettings.DataCollector"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetTestSettings.Configuration"/></li>
-        ///     <li><c>--diag</c> via <see cref="DotNetTestSettings.DiagnosticsFile"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetTestSettings.DisableParallel"/></li>
-        ///     <li><c>--filter</c> via <see cref="DotNetTestSettings.Filter"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetTestSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetTestSettings.ForceEvaluate"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetTestSettings.Framework"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetTestSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--list-tests</c> via <see cref="DotNetTestSettings.ListTests"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetTestSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetTestSettings.LockedMode"/></li>
-        ///     <li><c>--logger</c> via <see cref="DotNetTestSettings.Logger"/></li>
-        ///     <li><c>--no-build</c> via <see cref="DotNetTestSettings.NoBuild"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetTestSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetTestSettings.NoDependencies"/></li>
-        ///     <li><c>--no-restore</c> via <see cref="DotNetTestSettings.NoRestore"/></li>
-        ///     <li><c>--output</c> via <see cref="DotNetTestSettings.Output"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetTestSettings.PackageDirectory"/></li>
-        ///     <li><c>--results-directory</c> via <see cref="DotNetTestSettings.ResultsDirectory"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetTestSettings.Runtime"/></li>
-        ///     <li><c>--settings</c> via <see cref="DotNetTestSettings.SettingsFile"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetTestSettings.Sources"/></li>
-        ///     <li><c>--test-adapter-path</c> via <see cref="DotNetTestSettings.TestAdapterPath"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetTestSettings.UseLockFile"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetTestSettings.Verbosity"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetTestSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static (IReadOnlyCollection<LineOut>, int) DotNetTest(Configure<DotNetTestSettings> configurator)
-        {
-            return DotNetTest(configurator(new DotNetTestSettings()));
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet test</c> command is used to execute unit tests in a given project. Unit tests are console application projects that have dependencies on the unit test framework (for example, MSTest, NUnit, or xUnit) and the dotnet test runner for the unit testing framework. These are packaged as NuGet packages and are restored as ordinary dependencies for the project.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;projectFile&gt;</c> via <see cref="DotNetTestSettings.ProjectFile"/></li>
-        ///     <li><c>--</c> via <see cref="DotNetTestSettings.RunSettings"/></li>
-        ///     <li><c>--blame</c> via <see cref="DotNetTestSettings.BlameMode"/></li>
-        ///     <li><c>--collect</c> via <see cref="DotNetTestSettings.DataCollector"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetTestSettings.Configuration"/></li>
-        ///     <li><c>--diag</c> via <see cref="DotNetTestSettings.DiagnosticsFile"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetTestSettings.DisableParallel"/></li>
-        ///     <li><c>--filter</c> via <see cref="DotNetTestSettings.Filter"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetTestSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetTestSettings.ForceEvaluate"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetTestSettings.Framework"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetTestSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--list-tests</c> via <see cref="DotNetTestSettings.ListTests"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetTestSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetTestSettings.LockedMode"/></li>
-        ///     <li><c>--logger</c> via <see cref="DotNetTestSettings.Logger"/></li>
-        ///     <li><c>--no-build</c> via <see cref="DotNetTestSettings.NoBuild"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetTestSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetTestSettings.NoDependencies"/></li>
-        ///     <li><c>--no-restore</c> via <see cref="DotNetTestSettings.NoRestore"/></li>
-        ///     <li><c>--output</c> via <see cref="DotNetTestSettings.Output"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetTestSettings.PackageDirectory"/></li>
-        ///     <li><c>--results-directory</c> via <see cref="DotNetTestSettings.ResultsDirectory"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetTestSettings.Runtime"/></li>
-        ///     <li><c>--settings</c> via <see cref="DotNetTestSettings.SettingsFile"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetTestSettings.Sources"/></li>
-        ///     <li><c>--test-adapter-path</c> via <see cref="DotNetTestSettings.TestAdapterPath"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetTestSettings.UseLockFile"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetTestSettings.Verbosity"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetTestSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        /* public static IEnumerable<(DotNetTestSettings Settings, IReadOnlyCollection<LineOut> Output, int )> DotNetTest(CombinatorialConfigure<DotNetTestSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetTest, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }*/
-        /// <summary>
-        ///   <p>The <c>dotnet run</c> command provides a convenient option to run your application from the source code with one command. It's useful for fast iterative development from the command line. The command depends on the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-build"><c>dotnet build</c></a> command to build the code. Any requirements for the build, such as that the project must be restored first, apply to <c>dotnet run</c> as well.</p><p>Output files are written into the default location, which is <c>bin/&lt;configuration&gt;/&lt;target&gt;</c>. For example if you have a <c>netcoreapp1.0</c> application and you run <c>dotnet run</c>, the output is placed in <c>bin/Debug/netcoreapp1.0</c>. Files are overwritten as needed. Temporary files are placed in the <c>obj</c> directory.</p><p>If the project specifies multiple frameworks, executing <c>dotnet run</c> results in an error unless the <c>-f|--framework &lt;FRAMEWORK&gt;</c> option is used to specify the framework.</p><p>The <c>dotnet run</c> command is used in the context of projects, not built assemblies. If you're trying to run a framework-dependent application DLL instead, you must use <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet">dotnet</a> without a command. For example, to run <c>myapp.dll</c>, use: <c>dotnet myapp.dll</c></p><p>For more information on the <c>dotnet</c> driver, see the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/index">.NET Core Command Line Tools (CLI)</a> topic.</p><p>In order to run the application, the <c>dotnet run</c> command resolves the dependencies of the application that are outside of the shared runtime from the NuGet cache. Because it uses cached dependencies, it's not recommended to use <c>dotnet run</c> to run applications in production. Instead, <a href="https://docs.microsoft.com/en-us/dotnet/core/deploying/index">create a deployment</a> using the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish"><c>dotnet publish</c></a> command and deploy the published output.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>--</c> via <see cref="DotNetRunSettings.ApplicationArguments"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetRunSettings.Configuration"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetRunSettings.DisableParallel"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetRunSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetRunSettings.ForceEvaluate"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetRunSettings.Framework"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetRunSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--launch-profile</c> via <see cref="DotNetRunSettings.LaunchProfile"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetRunSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetRunSettings.LockedMode"/></li>
-        ///     <li><c>--no-build</c> via <see cref="DotNetRunSettings.NoBuild"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetRunSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetRunSettings.NoDependencies"/></li>
-        ///     <li><c>--no-launch-profile</c> via <see cref="DotNetRunSettings.NoLaunchProfile"/></li>
-        ///     <li><c>--no-restore</c> via <see cref="DotNetRunSettings.NoRestore"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetRunSettings.PackageDirectory"/></li>
-        ///     <li><c>--project</c> via <see cref="DotNetRunSettings.ProjectFile"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetRunSettings.Runtime"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetRunSettings.Sources"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetRunSettings.UseLockFile"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetRunSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetRun(DotNetRunSettings toolSettings = null)
-        {
-            toolSettings = toolSettings ?? new DotNetRunSettings();
-            using var process = ProcessTasks.StartProcess(toolSettings);
-            process.AssertZeroExitCode();
-            return process.Output;
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet run</c> command provides a convenient option to run your application from the source code with one command. It's useful for fast iterative development from the command line. The command depends on the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-build"><c>dotnet build</c></a> command to build the code. Any requirements for the build, such as that the project must be restored first, apply to <c>dotnet run</c> as well.</p><p>Output files are written into the default location, which is <c>bin/&lt;configuration&gt;/&lt;target&gt;</c>. For example if you have a <c>netcoreapp1.0</c> application and you run <c>dotnet run</c>, the output is placed in <c>bin/Debug/netcoreapp1.0</c>. Files are overwritten as needed. Temporary files are placed in the <c>obj</c> directory.</p><p>If the project specifies multiple frameworks, executing <c>dotnet run</c> results in an error unless the <c>-f|--framework &lt;FRAMEWORK&gt;</c> option is used to specify the framework.</p><p>The <c>dotnet run</c> command is used in the context of projects, not built assemblies. If you're trying to run a framework-dependent application DLL instead, you must use <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet">dotnet</a> without a command. For example, to run <c>myapp.dll</c>, use: <c>dotnet myapp.dll</c></p><p>For more information on the <c>dotnet</c> driver, see the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/index">.NET Core Command Line Tools (CLI)</a> topic.</p><p>In order to run the application, the <c>dotnet run</c> command resolves the dependencies of the application that are outside of the shared runtime from the NuGet cache. Because it uses cached dependencies, it's not recommended to use <c>dotnet run</c> to run applications in production. Instead, <a href="https://docs.microsoft.com/en-us/dotnet/core/deploying/index">create a deployment</a> using the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish"><c>dotnet publish</c></a> command and deploy the published output.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>--</c> via <see cref="DotNetRunSettings.ApplicationArguments"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetRunSettings.Configuration"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetRunSettings.DisableParallel"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetRunSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetRunSettings.ForceEvaluate"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetRunSettings.Framework"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetRunSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--launch-profile</c> via <see cref="DotNetRunSettings.LaunchProfile"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetRunSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetRunSettings.LockedMode"/></li>
-        ///     <li><c>--no-build</c> via <see cref="DotNetRunSettings.NoBuild"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetRunSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetRunSettings.NoDependencies"/></li>
-        ///     <li><c>--no-launch-profile</c> via <see cref="DotNetRunSettings.NoLaunchProfile"/></li>
-        ///     <li><c>--no-restore</c> via <see cref="DotNetRunSettings.NoRestore"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetRunSettings.PackageDirectory"/></li>
-        ///     <li><c>--project</c> via <see cref="DotNetRunSettings.ProjectFile"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetRunSettings.Runtime"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetRunSettings.Sources"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetRunSettings.UseLockFile"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetRunSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetRun(Configure<DotNetRunSettings> configurator)
-        {
-            return DotNetRun(configurator(new DotNetRunSettings()));
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet run</c> command provides a convenient option to run your application from the source code with one command. It's useful for fast iterative development from the command line. The command depends on the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-build"><c>dotnet build</c></a> command to build the code. Any requirements for the build, such as that the project must be restored first, apply to <c>dotnet run</c> as well.</p><p>Output files are written into the default location, which is <c>bin/&lt;configuration&gt;/&lt;target&gt;</c>. For example if you have a <c>netcoreapp1.0</c> application and you run <c>dotnet run</c>, the output is placed in <c>bin/Debug/netcoreapp1.0</c>. Files are overwritten as needed. Temporary files are placed in the <c>obj</c> directory.</p><p>If the project specifies multiple frameworks, executing <c>dotnet run</c> results in an error unless the <c>-f|--framework &lt;FRAMEWORK&gt;</c> option is used to specify the framework.</p><p>The <c>dotnet run</c> command is used in the context of projects, not built assemblies. If you're trying to run a framework-dependent application DLL instead, you must use <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet">dotnet</a> without a command. For example, to run <c>myapp.dll</c>, use: <c>dotnet myapp.dll</c></p><p>For more information on the <c>dotnet</c> driver, see the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/index">.NET Core Command Line Tools (CLI)</a> topic.</p><p>In order to run the application, the <c>dotnet run</c> command resolves the dependencies of the application that are outside of the shared runtime from the NuGet cache. Because it uses cached dependencies, it's not recommended to use <c>dotnet run</c> to run applications in production. Instead, <a href="https://docs.microsoft.com/en-us/dotnet/core/deploying/index">create a deployment</a> using the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish"><c>dotnet publish</c></a> command and deploy the published output.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>--</c> via <see cref="DotNetRunSettings.ApplicationArguments"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetRunSettings.Configuration"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetRunSettings.DisableParallel"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetRunSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetRunSettings.ForceEvaluate"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetRunSettings.Framework"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetRunSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--launch-profile</c> via <see cref="DotNetRunSettings.LaunchProfile"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetRunSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetRunSettings.LockedMode"/></li>
-        ///     <li><c>--no-build</c> via <see cref="DotNetRunSettings.NoBuild"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetRunSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetRunSettings.NoDependencies"/></li>
-        ///     <li><c>--no-launch-profile</c> via <see cref="DotNetRunSettings.NoLaunchProfile"/></li>
-        ///     <li><c>--no-restore</c> via <see cref="DotNetRunSettings.NoRestore"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetRunSettings.PackageDirectory"/></li>
-        ///     <li><c>--project</c> via <see cref="DotNetRunSettings.ProjectFile"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetRunSettings.Runtime"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetRunSettings.Sources"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetRunSettings.UseLockFile"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetRunSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetRunSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetRun(CombinatorialConfigure<DotNetRunSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetRun, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet restore</c> command uses NuGet to restore dependencies as well as project-specific tools that are specified in the project file. By default, the restoration of dependencies and tools are performed in parallel.</p><p>Starting with .NET Core 2.0, you don't have to run <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-restore"><c>dotnet restore</c></a> because it's run implicitly by all commands, such as <c>dotnet build</c> and <c>dotnet run</c>, that require a restore to occur. It's still a valid command in certain scenarios where doing an explicit restore makes sense, such as <a href="https://docs.microsoft.com/en-us/vsts/build-release/apps/aspnet/build-aspnet-core">continuous integration builds in Visual Studio Team Services</a> or in build systems that need to explicitly control the time at which the restore occurs.</p><p>In order to restore the dependencies, NuGet needs the feeds where the packages are located. Feeds are usually provided via the <em>NuGet.config</em> configuration file. A default configuration file is provided when the CLI tools are installed. You specify additional feeds by creating your own <em>NuGet.config</em> file in the project directory. You also specify additional feeds per invocation at a command prompt.</p><p>For dependencies, you specify where the restored packages are placed during the restore operation using the <c>--packages</c> argument. If not specified, the default NuGet package cache is used, which is found in the <c>.nuget/packages</c> directory in the user's home directory on all operating systems (for example, <em>/home/user1</em> on Linux or <em>C:\Users\user1</em> on Windows).</p><p>For project-specific tooling, <c>dotnet restore</c> first restores the package in which the tool is packed, and then proceeds to restore the tool's dependencies as specified in its project file.</p><p>The behavior of the <c>dotnet restore</c> command is affected by some of the settings in the <em>Nuget.Config</em> file, if present. For example, setting the <c>globalPackagesFolder</c> in <em>NuGet.Config</em> places the restored NuGet packages in the specified folder. This is an alternative to specifying the <c>--packages</c> option on the <c>dotnet restore</c> command. For more information, see the <a href="https://docs.microsoft.com/nuget/schema/nuget-config-file">NuGet.Config reference</a>.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;projectFile&gt;</c> via <see cref="DotNetRestoreSettings.ProjectFile"/></li>
-        ///     <li><c>--configfile</c> via <see cref="DotNetRestoreSettings.ConfigFile"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetRestoreSettings.DisableParallel"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetRestoreSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetRestoreSettings.ForceEvaluate"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetRestoreSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetRestoreSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetRestoreSettings.LockedMode"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetRestoreSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetRestoreSettings.NoDependencies"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetRestoreSettings.PackageDirectory"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetRestoreSettings.Runtime"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetRestoreSettings.Sources"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetRestoreSettings.UseLockFile"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetRestoreSettings.Verbosity"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetRestoreSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetRestore(DotNetRestoreSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOutColored> DotNetRestore(DotNetRestoreSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetRestoreSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -313,64 +98,6 @@ namespace Nuke.Common.Tools.DotNet
             return process.Output;
         }
         /// <summary>
-        ///   <p>The <c>dotnet restore</c> command uses NuGet to restore dependencies as well as project-specific tools that are specified in the project file. By default, the restoration of dependencies and tools are performed in parallel.</p><p>Starting with .NET Core 2.0, you don't have to run <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-restore"><c>dotnet restore</c></a> because it's run implicitly by all commands, such as <c>dotnet build</c> and <c>dotnet run</c>, that require a restore to occur. It's still a valid command in certain scenarios where doing an explicit restore makes sense, such as <a href="https://docs.microsoft.com/en-us/vsts/build-release/apps/aspnet/build-aspnet-core">continuous integration builds in Visual Studio Team Services</a> or in build systems that need to explicitly control the time at which the restore occurs.</p><p>In order to restore the dependencies, NuGet needs the feeds where the packages are located. Feeds are usually provided via the <em>NuGet.config</em> configuration file. A default configuration file is provided when the CLI tools are installed. You specify additional feeds by creating your own <em>NuGet.config</em> file in the project directory. You also specify additional feeds per invocation at a command prompt.</p><p>For dependencies, you specify where the restored packages are placed during the restore operation using the <c>--packages</c> argument. If not specified, the default NuGet package cache is used, which is found in the <c>.nuget/packages</c> directory in the user's home directory on all operating systems (for example, <em>/home/user1</em> on Linux or <em>C:\Users\user1</em> on Windows).</p><p>For project-specific tooling, <c>dotnet restore</c> first restores the package in which the tool is packed, and then proceeds to restore the tool's dependencies as specified in its project file.</p><p>The behavior of the <c>dotnet restore</c> command is affected by some of the settings in the <em>Nuget.Config</em> file, if present. For example, setting the <c>globalPackagesFolder</c> in <em>NuGet.Config</em> places the restored NuGet packages in the specified folder. This is an alternative to specifying the <c>--packages</c> option on the <c>dotnet restore</c> command. For more information, see the <a href="https://docs.microsoft.com/nuget/schema/nuget-config-file">NuGet.Config reference</a>.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;projectFile&gt;</c> via <see cref="DotNetRestoreSettings.ProjectFile"/></li>
-        ///     <li><c>--configfile</c> via <see cref="DotNetRestoreSettings.ConfigFile"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetRestoreSettings.DisableParallel"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetRestoreSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetRestoreSettings.ForceEvaluate"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetRestoreSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetRestoreSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetRestoreSettings.LockedMode"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetRestoreSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetRestoreSettings.NoDependencies"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetRestoreSettings.PackageDirectory"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetRestoreSettings.Runtime"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetRestoreSettings.Sources"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetRestoreSettings.UseLockFile"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetRestoreSettings.Verbosity"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetRestoreSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetRestore(Configure<DotNetRestoreSettings> configurator)
-        {
-            return DotNetRestore(configurator(new DotNetRestoreSettings()));
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet restore</c> command uses NuGet to restore dependencies as well as project-specific tools that are specified in the project file. By default, the restoration of dependencies and tools are performed in parallel.</p><p>Starting with .NET Core 2.0, you don't have to run <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-restore"><c>dotnet restore</c></a> because it's run implicitly by all commands, such as <c>dotnet build</c> and <c>dotnet run</c>, that require a restore to occur. It's still a valid command in certain scenarios where doing an explicit restore makes sense, such as <a href="https://docs.microsoft.com/en-us/vsts/build-release/apps/aspnet/build-aspnet-core">continuous integration builds in Visual Studio Team Services</a> or in build systems that need to explicitly control the time at which the restore occurs.</p><p>In order to restore the dependencies, NuGet needs the feeds where the packages are located. Feeds are usually provided via the <em>NuGet.config</em> configuration file. A default configuration file is provided when the CLI tools are installed. You specify additional feeds by creating your own <em>NuGet.config</em> file in the project directory. You also specify additional feeds per invocation at a command prompt.</p><p>For dependencies, you specify where the restored packages are placed during the restore operation using the <c>--packages</c> argument. If not specified, the default NuGet package cache is used, which is found in the <c>.nuget/packages</c> directory in the user's home directory on all operating systems (for example, <em>/home/user1</em> on Linux or <em>C:\Users\user1</em> on Windows).</p><p>For project-specific tooling, <c>dotnet restore</c> first restores the package in which the tool is packed, and then proceeds to restore the tool's dependencies as specified in its project file.</p><p>The behavior of the <c>dotnet restore</c> command is affected by some of the settings in the <em>Nuget.Config</em> file, if present. For example, setting the <c>globalPackagesFolder</c> in <em>NuGet.Config</em> places the restored NuGet packages in the specified folder. This is an alternative to specifying the <c>--packages</c> option on the <c>dotnet restore</c> command. For more information, see the <a href="https://docs.microsoft.com/nuget/schema/nuget-config-file">NuGet.Config reference</a>.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;projectFile&gt;</c> via <see cref="DotNetRestoreSettings.ProjectFile"/></li>
-        ///     <li><c>--configfile</c> via <see cref="DotNetRestoreSettings.ConfigFile"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetRestoreSettings.DisableParallel"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetRestoreSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetRestoreSettings.ForceEvaluate"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetRestoreSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetRestoreSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetRestoreSettings.LockedMode"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetRestoreSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetRestoreSettings.NoDependencies"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetRestoreSettings.PackageDirectory"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetRestoreSettings.Runtime"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetRestoreSettings.Sources"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetRestoreSettings.UseLockFile"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetRestoreSettings.Verbosity"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetRestoreSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetRestoreSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetRestore(CombinatorialConfigure<DotNetRestoreSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetRestore, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
-        /// <summary>
         ///   <p>The <c>dotnet pack</c> command builds the project and creates NuGet packages. The result of this command is a NuGet package. If the <c>--include-symbols</c> option is present, another package containing the debug symbols is created.</p><p>NuGet dependencies of the packed project are added to the <em>.nuspec</em> file, so they're properly resolved when the package is installed. Project-to-project references aren't packaged inside the project. Currently, you must have a package per project if you have project-to-project dependencies.</p><p>By default, <c>dotnet pack</c> builds the project first. If you wish to avoid this behavior, pass the <c>--no-build</c> option. This is often useful in Continuous Integration (CI) build scenarios where you know the code was previously built.</p><p>You can provide MSBuild properties to the <c>dotnet pack</c> command for the packing process. For more information, see <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/csproj#nuget-metadata-properties">NuGet metadata properties</a> and the <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference">MSBuild Command-Line Reference</a>.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
@@ -403,7 +130,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetPackSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetPack(DotNetPackSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOutColored> DotNetPack(DotNetPackSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetPackSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -411,80 +138,6 @@ namespace Nuke.Common.Tools.DotNet
             return process.Output;
         }
         /// <summary>
-        ///   <p>The <c>dotnet pack</c> command builds the project and creates NuGet packages. The result of this command is a NuGet package. If the <c>--include-symbols</c> option is present, another package containing the debug symbols is created.</p><p>NuGet dependencies of the packed project are added to the <em>.nuspec</em> file, so they're properly resolved when the package is installed. Project-to-project references aren't packaged inside the project. Currently, you must have a package per project if you have project-to-project dependencies.</p><p>By default, <c>dotnet pack</c> builds the project first. If you wish to avoid this behavior, pass the <c>--no-build</c> option. This is often useful in Continuous Integration (CI) build scenarios where you know the code was previously built.</p><p>You can provide MSBuild properties to the <c>dotnet pack</c> command for the packing process. For more information, see <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/csproj#nuget-metadata-properties">NuGet metadata properties</a> and the <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference">MSBuild Command-Line Reference</a>.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;project&gt;</c> via <see cref="DotNetPackSettings.Project"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetPackSettings.Configuration"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetPackSettings.DisableParallel"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetPackSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetPackSettings.ForceEvaluate"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetPackSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--include-source</c> via <see cref="DotNetPackSettings.IncludeSource"/></li>
-        ///     <li><c>--include-symbols</c> via <see cref="DotNetPackSettings.IncludeSymbols"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetPackSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetPackSettings.LockedMode"/></li>
-        ///     <li><c>--no-build</c> via <see cref="DotNetPackSettings.NoBuild"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetPackSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetPackSettings.NoDependencies"/></li>
-        ///     <li><c>--no-restore</c> via <see cref="DotNetPackSettings.NoRestore"/></li>
-        ///     <li><c>--nologo</c> via <see cref="DotNetPackSettings.NoLogo"/></li>
-        ///     <li><c>--output</c> via <see cref="DotNetPackSettings.OutputDirectory"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetPackSettings.PackageDirectory"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetPackSettings.Runtime"/></li>
-        ///     <li><c>--serviceable</c> via <see cref="DotNetPackSettings.Serviceable"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetPackSettings.Sources"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetPackSettings.UseLockFile"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetPackSettings.Verbosity"/></li>
-        ///     <li><c>--version-suffix</c> via <see cref="DotNetPackSettings.VersionSuffix"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetPackSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetPack(Configure<DotNetPackSettings> configurator)
-        {
-            return DotNetPack(configurator(new DotNetPackSettings()));
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet pack</c> command builds the project and creates NuGet packages. The result of this command is a NuGet package. If the <c>--include-symbols</c> option is present, another package containing the debug symbols is created.</p><p>NuGet dependencies of the packed project are added to the <em>.nuspec</em> file, so they're properly resolved when the package is installed. Project-to-project references aren't packaged inside the project. Currently, you must have a package per project if you have project-to-project dependencies.</p><p>By default, <c>dotnet pack</c> builds the project first. If you wish to avoid this behavior, pass the <c>--no-build</c> option. This is often useful in Continuous Integration (CI) build scenarios where you know the code was previously built.</p><p>You can provide MSBuild properties to the <c>dotnet pack</c> command for the packing process. For more information, see <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/csproj#nuget-metadata-properties">NuGet metadata properties</a> and the <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference">MSBuild Command-Line Reference</a>.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;project&gt;</c> via <see cref="DotNetPackSettings.Project"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetPackSettings.Configuration"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetPackSettings.DisableParallel"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetPackSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetPackSettings.ForceEvaluate"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetPackSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--include-source</c> via <see cref="DotNetPackSettings.IncludeSource"/></li>
-        ///     <li><c>--include-symbols</c> via <see cref="DotNetPackSettings.IncludeSymbols"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetPackSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetPackSettings.LockedMode"/></li>
-        ///     <li><c>--no-build</c> via <see cref="DotNetPackSettings.NoBuild"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetPackSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetPackSettings.NoDependencies"/></li>
-        ///     <li><c>--no-restore</c> via <see cref="DotNetPackSettings.NoRestore"/></li>
-        ///     <li><c>--nologo</c> via <see cref="DotNetPackSettings.NoLogo"/></li>
-        ///     <li><c>--output</c> via <see cref="DotNetPackSettings.OutputDirectory"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetPackSettings.PackageDirectory"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetPackSettings.Runtime"/></li>
-        ///     <li><c>--serviceable</c> via <see cref="DotNetPackSettings.Serviceable"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetPackSettings.Sources"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetPackSettings.UseLockFile"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetPackSettings.Verbosity"/></li>
-        ///     <li><c>--version-suffix</c> via <see cref="DotNetPackSettings.VersionSuffix"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetPackSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetPackSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetPack(CombinatorialConfigure<DotNetPackSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetPack, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
-        /// <summary>
         ///   <p>The <c>dotnet build</c> command builds the project and its dependencies into a set of binaries. The binaries include the project's code in Intermediate Language (IL) files with a <em>.dll</em> extension and symbol files used for debugging with a <em>.pdb</em> extension. A dependencies JSON file (<em>*.deps.json</em>) is produced that lists the dependencies of the application. A <em>.runtimeconfig.json</em> file is produced, which specifies the shared runtime and its version for the application.</p><p>If the project has third-party dependencies, such as libraries from NuGet, they're resolved from the NuGet cache and aren't available with the project's built output. With that in mind, the product of <c>dotnet build</c>d isn't ready to be transferred to another machine to run. This is in contrast to the behavior of the .NET Framework in which building an executable project (an application) produces output that's runnable on any machine where the .NET Framework is installed. To have a similar experience with .NET Core, you use the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish"><c>dotnet publish</c></a> command. For more information, see <a href="https://docs.microsoft.com/en-us/dotnet/core/deploying/index">.NET Core Application Deployment</a>.</p><p>Building requires the <em>project.assets.json</em> file, which lists the dependencies of your application. The file is created <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-restore"><c>dotnet restore</c></a> is executed. Without the assets file in place, the tooling cannot resolve reference assemblies, which will result in errors. With .NET Core 1.x SDK, you needed to explicitily run the <c>dotnet restore</c> before running <c>dotnet build</c>. Starting with .NET Core 2.0 SDK, <c>dotnet restore</c> runs implicitily when you run <c>dotnet build</c>. If you want to disable implicit restore when running the build command, you can pass the <c>--no-restore</c> option.</p><p><c>dotnet build</c> uses MSBuild to build the project; thus, it supports both parallel and incremental builds. Refer to <a href="https://docs.microsoft.com/visualstudio/msbuild/incremental-builds">Incremental Builds</a> for more information.</p><p>In addition to its options, the <c>dotnet build</c> command accepts MSBuild options, such as <c>/p</c> for setting properties or <c>/l</c> to define a logger. Learn more about these options in the <a href="https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference">MSBuild Command-Line Reference</a>.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
@@ -517,7 +170,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetBuildSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetBuild(DotNetBuildSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOutColored> DotNetBuild(DotNetBuildSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetBuildSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -525,80 +178,6 @@ namespace Nuke.Common.Tools.DotNet
             return process.Output;
         }
         /// <summary>
-        ///   <p>The <c>dotnet build</c> command builds the project and its dependencies into a set of binaries. The binaries include the project's code in Intermediate Language (IL) files with a <em>.dll</em> extension and symbol files used for debugging with a <em>.pdb</em> extension. A dependencies JSON file (<em>*.deps.json</em>) is produced that lists the dependencies of the application. A <em>.runtimeconfig.json</em> file is produced, which specifies the shared runtime and its version for the application.</p><p>If the project has third-party dependencies, such as libraries from NuGet, they're resolved from the NuGet cache and aren't available with the project's built output. With that in mind, the product of <c>dotnet build</c>d isn't ready to be transferred to another machine to run. This is in contrast to the behavior of the .NET Framework in which building an executable project (an application) produces output that's runnable on any machine where the .NET Framework is installed. To have a similar experience with .NET Core, you use the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish"><c>dotnet publish</c></a> command. For more information, see <a href="https://docs.microsoft.com/en-us/dotnet/core/deploying/index">.NET Core Application Deployment</a>.</p><p>Building requires the <em>project.assets.json</em> file, which lists the dependencies of your application. The file is created <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-restore"><c>dotnet restore</c></a> is executed. Without the assets file in place, the tooling cannot resolve reference assemblies, which will result in errors. With .NET Core 1.x SDK, you needed to explicitily run the <c>dotnet restore</c> before running <c>dotnet build</c>. Starting with .NET Core 2.0 SDK, <c>dotnet restore</c> runs implicitily when you run <c>dotnet build</c>. If you want to disable implicit restore when running the build command, you can pass the <c>--no-restore</c> option.</p><p><c>dotnet build</c> uses MSBuild to build the project; thus, it supports both parallel and incremental builds. Refer to <a href="https://docs.microsoft.com/visualstudio/msbuild/incremental-builds">Incremental Builds</a> for more information.</p><p>In addition to its options, the <c>dotnet build</c> command accepts MSBuild options, such as <c>/p</c> for setting properties or <c>/l</c> to define a logger. Learn more about these options in the <a href="https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference">MSBuild Command-Line Reference</a>.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;projectFile&gt;</c> via <see cref="DotNetBuildSettings.ProjectFile"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetBuildSettings.Configuration"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetBuildSettings.DisableParallel"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetBuildSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetBuildSettings.ForceEvaluate"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetBuildSettings.Framework"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetBuildSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetBuildSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetBuildSettings.LockedMode"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetBuildSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetBuildSettings.NoDependencies"/></li>
-        ///     <li><c>--no-incremental</c> via <see cref="DotNetBuildSettings.NoIncremental"/></li>
-        ///     <li><c>--no-restore</c> via <see cref="DotNetBuildSettings.NoRestore"/></li>
-        ///     <li><c>--nologo</c> via <see cref="DotNetBuildSettings.NoLogo"/></li>
-        ///     <li><c>--output</c> via <see cref="DotNetBuildSettings.OutputDirectory"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetBuildSettings.PackageDirectory"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetBuildSettings.Runtime"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetBuildSettings.Sources"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetBuildSettings.UseLockFile"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetBuildSettings.Verbosity"/></li>
-        ///     <li><c>--version-suffix</c> via <see cref="DotNetBuildSettings.VersionSuffix"/></li>
-        ///     <li><c>/logger</c> via <see cref="DotNetBuildSettings.Loggers"/></li>
-        ///     <li><c>/noconsolelogger</c> via <see cref="DotNetBuildSettings.NoConsoleLogger"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetBuildSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetBuild(Configure<DotNetBuildSettings> configurator)
-        {
-            return DotNetBuild(configurator(new DotNetBuildSettings()));
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet build</c> command builds the project and its dependencies into a set of binaries. The binaries include the project's code in Intermediate Language (IL) files with a <em>.dll</em> extension and symbol files used for debugging with a <em>.pdb</em> extension. A dependencies JSON file (<em>*.deps.json</em>) is produced that lists the dependencies of the application. A <em>.runtimeconfig.json</em> file is produced, which specifies the shared runtime and its version for the application.</p><p>If the project has third-party dependencies, such as libraries from NuGet, they're resolved from the NuGet cache and aren't available with the project's built output. With that in mind, the product of <c>dotnet build</c>d isn't ready to be transferred to another machine to run. This is in contrast to the behavior of the .NET Framework in which building an executable project (an application) produces output that's runnable on any machine where the .NET Framework is installed. To have a similar experience with .NET Core, you use the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-publish"><c>dotnet publish</c></a> command. For more information, see <a href="https://docs.microsoft.com/en-us/dotnet/core/deploying/index">.NET Core Application Deployment</a>.</p><p>Building requires the <em>project.assets.json</em> file, which lists the dependencies of your application. The file is created <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-restore"><c>dotnet restore</c></a> is executed. Without the assets file in place, the tooling cannot resolve reference assemblies, which will result in errors. With .NET Core 1.x SDK, you needed to explicitily run the <c>dotnet restore</c> before running <c>dotnet build</c>. Starting with .NET Core 2.0 SDK, <c>dotnet restore</c> runs implicitily when you run <c>dotnet build</c>. If you want to disable implicit restore when running the build command, you can pass the <c>--no-restore</c> option.</p><p><c>dotnet build</c> uses MSBuild to build the project; thus, it supports both parallel and incremental builds. Refer to <a href="https://docs.microsoft.com/visualstudio/msbuild/incremental-builds">Incremental Builds</a> for more information.</p><p>In addition to its options, the <c>dotnet build</c> command accepts MSBuild options, such as <c>/p</c> for setting properties or <c>/l</c> to define a logger. Learn more about these options in the <a href="https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference">MSBuild Command-Line Reference</a>.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;projectFile&gt;</c> via <see cref="DotNetBuildSettings.ProjectFile"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetBuildSettings.Configuration"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetBuildSettings.DisableParallel"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetBuildSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetBuildSettings.ForceEvaluate"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetBuildSettings.Framework"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetBuildSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetBuildSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetBuildSettings.LockedMode"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetBuildSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetBuildSettings.NoDependencies"/></li>
-        ///     <li><c>--no-incremental</c> via <see cref="DotNetBuildSettings.NoIncremental"/></li>
-        ///     <li><c>--no-restore</c> via <see cref="DotNetBuildSettings.NoRestore"/></li>
-        ///     <li><c>--nologo</c> via <see cref="DotNetBuildSettings.NoLogo"/></li>
-        ///     <li><c>--output</c> via <see cref="DotNetBuildSettings.OutputDirectory"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetBuildSettings.PackageDirectory"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetBuildSettings.Runtime"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetBuildSettings.Sources"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetBuildSettings.UseLockFile"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetBuildSettings.Verbosity"/></li>
-        ///     <li><c>--version-suffix</c> via <see cref="DotNetBuildSettings.VersionSuffix"/></li>
-        ///     <li><c>/logger</c> via <see cref="DotNetBuildSettings.Loggers"/></li>
-        ///     <li><c>/noconsolelogger</c> via <see cref="DotNetBuildSettings.NoConsoleLogger"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetBuildSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetBuildSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetBuild(CombinatorialConfigure<DotNetBuildSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetBuild, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
-        /// <summary>
         ///   <p>The <c>dotnet msbuild</c> command allows access to a fully functional MSBuild.<para/>The command has the exact same capabilities as the existing MSBuild command-line client for SDK-style projects only. The options are all the same. For more information about the available options, see the <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference">MSBuild command-line reference</a>.<para/>The <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-build">dotnet build</a> command is equivalent to <c>dotnet msbuild -restore</c>. When you don't want to build the project and you have a specific target you want to run, use <c>dotnet build</c> or <c>dotnet msbuild</c> and specify the target.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
@@ -620,7 +199,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/verbosity</c> via <see cref="DotNetMSBuildSettings.Verbosity"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetMSBuild(DotNetMSBuildSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOutColored> DotNetMSBuild(DotNetMSBuildSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetMSBuildSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -628,58 +207,6 @@ namespace Nuke.Common.Tools.DotNet
             return process.Output;
         }
         /// <summary>
-        ///   <p>The <c>dotnet msbuild</c> command allows access to a fully functional MSBuild.<para/>The command has the exact same capabilities as the existing MSBuild command-line client for SDK-style projects only. The options are all the same. For more information about the available options, see the <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference">MSBuild command-line reference</a>.<para/>The <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-build">dotnet build</a> command is equivalent to <c>dotnet msbuild -restore</c>. When you don't want to build the project and you have a specific target you want to run, use <c>dotnet build</c> or <c>dotnet msbuild</c> and specify the target.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;targetPath&gt;</c> via <see cref="DotNetMSBuildSettings.TargetPath"/></li>
-        ///     <li><c>/detailedsummary</c> via <see cref="DotNetMSBuildSettings.DetailedSummary"/></li>
-        ///     <li><c>/graphBuild</c> via <see cref="DotNetMSBuildSettings.GraphBuild"/></li>
-        ///     <li><c>/logger</c> via <see cref="DotNetMSBuildSettings.Loggers"/></li>
-        ///     <li><c>/maxcpucount</c> via <see cref="DotNetMSBuildSettings.MaxCpuCount"/></li>
-        ///     <li><c>/noconsolelogger</c> via <see cref="DotNetMSBuildSettings.NoConsoleLogger"/></li>
-        ///     <li><c>/nodeReuse</c> via <see cref="DotNetMSBuildSettings.NodeReuse"/></li>
-        ///     <li><c>/nologo</c> via <see cref="DotNetMSBuildSettings.NoLogo"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetMSBuildSettings.Properties"/></li>
-        ///     <li><c>/property:Configuration</c> via <see cref="DotNetMSBuildSettings.Configuration"/></li>
-        ///     <li><c>/restore</c> via <see cref="DotNetMSBuildSettings.Restore"/></li>
-        ///     <li><c>/target</c> via <see cref="DotNetMSBuildSettings.Targets"/></li>
-        ///     <li><c>/verbosity</c> via <see cref="DotNetMSBuildSettings.Verbosity"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetMSBuild(Configure<DotNetMSBuildSettings> configurator)
-        {
-            return DotNetMSBuild(configurator(new DotNetMSBuildSettings()));
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet msbuild</c> command allows access to a fully functional MSBuild.<para/>The command has the exact same capabilities as the existing MSBuild command-line client for SDK-style projects only. The options are all the same. For more information about the available options, see the <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference">MSBuild command-line reference</a>.<para/>The <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-build">dotnet build</a> command is equivalent to <c>dotnet msbuild -restore</c>. When you don't want to build the project and you have a specific target you want to run, use <c>dotnet build</c> or <c>dotnet msbuild</c> and specify the target.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;targetPath&gt;</c> via <see cref="DotNetMSBuildSettings.TargetPath"/></li>
-        ///     <li><c>/detailedsummary</c> via <see cref="DotNetMSBuildSettings.DetailedSummary"/></li>
-        ///     <li><c>/graphBuild</c> via <see cref="DotNetMSBuildSettings.GraphBuild"/></li>
-        ///     <li><c>/logger</c> via <see cref="DotNetMSBuildSettings.Loggers"/></li>
-        ///     <li><c>/maxcpucount</c> via <see cref="DotNetMSBuildSettings.MaxCpuCount"/></li>
-        ///     <li><c>/noconsolelogger</c> via <see cref="DotNetMSBuildSettings.NoConsoleLogger"/></li>
-        ///     <li><c>/nodeReuse</c> via <see cref="DotNetMSBuildSettings.NodeReuse"/></li>
-        ///     <li><c>/nologo</c> via <see cref="DotNetMSBuildSettings.NoLogo"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetMSBuildSettings.Properties"/></li>
-        ///     <li><c>/property:Configuration</c> via <see cref="DotNetMSBuildSettings.Configuration"/></li>
-        ///     <li><c>/restore</c> via <see cref="DotNetMSBuildSettings.Restore"/></li>
-        ///     <li><c>/target</c> via <see cref="DotNetMSBuildSettings.Targets"/></li>
-        ///     <li><c>/verbosity</c> via <see cref="DotNetMSBuildSettings.Verbosity"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetMSBuildSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetMSBuild(CombinatorialConfigure<DotNetMSBuildSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetMSBuild, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
-        /// <summary>
         ///   <p>The <c>dotnet clean</c> command cleans the output of the previous build. It's implemented as an <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-targets">MSBuild target</a>, so the project is evaluated when the command is run. Only the outputs created during the build are cleaned. Both intermediate <em>(obj)</em> and final output <em>(bin)</em> folders are cleaned.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
@@ -696,55 +223,14 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetCleanSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetClean(DotNetCleanSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOutColored> DotNetClean(DotNetCleanSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetCleanSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
             process.AssertZeroExitCode();
             return process.Output;
         }
-        /// <summary>
-        ///   <p>The <c>dotnet clean</c> command cleans the output of the previous build. It's implemented as an <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-targets">MSBuild target</a>, so the project is evaluated when the command is run. Only the outputs created during the build are cleaned. Both intermediate <em>(obj)</em> and final output <em>(bin)</em> folders are cleaned.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;project&gt;</c> via <see cref="DotNetCleanSettings.Project"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetCleanSettings.Configuration"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetCleanSettings.Framework"/></li>
-        ///     <li><c>--nologo</c> via <see cref="DotNetCleanSettings.NoLogo"/></li>
-        ///     <li><c>--output</c> via <see cref="DotNetCleanSettings.Output"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetCleanSettings.Runtime"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetCleanSettings.Verbosity"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetCleanSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetClean(Configure<DotNetCleanSettings> configurator)
-        {
-            return DotNetClean(configurator(new DotNetCleanSettings()));
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet clean</c> command cleans the output of the previous build. It's implemented as an <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-targets">MSBuild target</a>, so the project is evaluated when the command is run. Only the outputs created during the build are cleaned. Both intermediate <em>(obj)</em> and final output <em>(bin)</em> folders are cleaned.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;project&gt;</c> via <see cref="DotNetCleanSettings.Project"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetCleanSettings.Configuration"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetCleanSettings.Framework"/></li>
-        ///     <li><c>--nologo</c> via <see cref="DotNetCleanSettings.NoLogo"/></li>
-        ///     <li><c>--output</c> via <see cref="DotNetCleanSettings.Output"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetCleanSettings.Runtime"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetCleanSettings.Verbosity"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetCleanSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetCleanSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetClean(CombinatorialConfigure<DotNetCleanSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetClean, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
+
         /// <summary>
         ///   <p><c>dotnet publish</c> compiles the application, reads through its dependencies specified in the project file, and publishes the resulting set of files to a directory. The output will contain the following:<para/><ul><li>Intermediate Language (IL) code in an assembly with a <em>dll</em> extension.</li><li><em>.deps.json</em> file that contains all of the dependencies of the project.</li><li><em>.runtime.config.json</em> file that specifies the shared runtime that the application expects, as well as other configuration options for the runtime (for example, garbage collection type).</li><li>The application's dependencies. These are copied from the NuGet cache into the output folder.</li></ul><para/>The <c>dotnet publish</c> command's output is ready for deployment to a hosting system (for example, a server, PC, Mac, laptop) for execution and is the only officially supported way to prepare the application for deployment. Depending on the type of deployment that the project specifies, the hosting system may or may not have the .NET Core shared runtime installed on it. For more information, see <a href="https://docs.microsoft.com/en-us/dotnet/core/deploying/index">.NET Core Application Deployment</a>. For the directory structure of a published application, see <a href="https://docs.microsoft.com/en-us/aspnet/core/hosting/directory-structure">Directory structure</a>.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
@@ -778,7 +264,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetPublishSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetPublish(DotNetPublishSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOutColored> DotNetPublish(DotNetPublishSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetPublishSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -786,80 +272,6 @@ namespace Nuke.Common.Tools.DotNet
             return process.Output;
         }
         /// <summary>
-        ///   <p><c>dotnet publish</c> compiles the application, reads through its dependencies specified in the project file, and publishes the resulting set of files to a directory. The output will contain the following:<para/><ul><li>Intermediate Language (IL) code in an assembly with a <em>dll</em> extension.</li><li><em>.deps.json</em> file that contains all of the dependencies of the project.</li><li><em>.runtime.config.json</em> file that specifies the shared runtime that the application expects, as well as other configuration options for the runtime (for example, garbage collection type).</li><li>The application's dependencies. These are copied from the NuGet cache into the output folder.</li></ul><para/>The <c>dotnet publish</c> command's output is ready for deployment to a hosting system (for example, a server, PC, Mac, laptop) for execution and is the only officially supported way to prepare the application for deployment. Depending on the type of deployment that the project specifies, the hosting system may or may not have the .NET Core shared runtime installed on it. For more information, see <a href="https://docs.microsoft.com/en-us/dotnet/core/deploying/index">.NET Core Application Deployment</a>. For the directory structure of a published application, see <a href="https://docs.microsoft.com/en-us/aspnet/core/hosting/directory-structure">Directory structure</a>.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;project&gt;</c> via <see cref="DotNetPublishSettings.Project"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetPublishSettings.Configuration"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetPublishSettings.DisableParallel"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetPublishSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetPublishSettings.ForceEvaluate"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetPublishSettings.Framework"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetPublishSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetPublishSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetPublishSettings.LockedMode"/></li>
-        ///     <li><c>--manifest</c> via <see cref="DotNetPublishSettings.Manifest"/></li>
-        ///     <li><c>--no-build</c> via <see cref="DotNetPublishSettings.NoBuild"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetPublishSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetPublishSettings.NoDependencies"/></li>
-        ///     <li><c>--no-restore</c> via <see cref="DotNetPublishSettings.NoRestore"/></li>
-        ///     <li><c>--nologo</c> via <see cref="DotNetPublishSettings.NoLogo"/></li>
-        ///     <li><c>--output</c> via <see cref="DotNetPublishSettings.Output"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetPublishSettings.PackageDirectory"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetPublishSettings.Runtime"/></li>
-        ///     <li><c>--self-contained</c> via <see cref="DotNetPublishSettings.SelfContained"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetPublishSettings.Sources"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetPublishSettings.UseLockFile"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetPublishSettings.Verbosity"/></li>
-        ///     <li><c>--version-suffix</c> via <see cref="DotNetPublishSettings.VersionSuffix"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetPublishSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetPublish(Configure<DotNetPublishSettings> configurator)
-        {
-            return DotNetPublish(configurator(new DotNetPublishSettings()));
-        }
-        /// <summary>
-        ///   <p><c>dotnet publish</c> compiles the application, reads through its dependencies specified in the project file, and publishes the resulting set of files to a directory. The output will contain the following:<para/><ul><li>Intermediate Language (IL) code in an assembly with a <em>dll</em> extension.</li><li><em>.deps.json</em> file that contains all of the dependencies of the project.</li><li><em>.runtime.config.json</em> file that specifies the shared runtime that the application expects, as well as other configuration options for the runtime (for example, garbage collection type).</li><li>The application's dependencies. These are copied from the NuGet cache into the output folder.</li></ul><para/>The <c>dotnet publish</c> command's output is ready for deployment to a hosting system (for example, a server, PC, Mac, laptop) for execution and is the only officially supported way to prepare the application for deployment. Depending on the type of deployment that the project specifies, the hosting system may or may not have the .NET Core shared runtime installed on it. For more information, see <a href="https://docs.microsoft.com/en-us/dotnet/core/deploying/index">.NET Core Application Deployment</a>. For the directory structure of a published application, see <a href="https://docs.microsoft.com/en-us/aspnet/core/hosting/directory-structure">Directory structure</a>.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;project&gt;</c> via <see cref="DotNetPublishSettings.Project"/></li>
-        ///     <li><c>--configuration</c> via <see cref="DotNetPublishSettings.Configuration"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetPublishSettings.DisableParallel"/></li>
-        ///     <li><c>--force</c> via <see cref="DotNetPublishSettings.Force"/></li>
-        ///     <li><c>--force-evaluate</c> via <see cref="DotNetPublishSettings.ForceEvaluate"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetPublishSettings.Framework"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetPublishSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--lock-file-path</c> via <see cref="DotNetPublishSettings.LockFilePath"/></li>
-        ///     <li><c>--locked-mode</c> via <see cref="DotNetPublishSettings.LockedMode"/></li>
-        ///     <li><c>--manifest</c> via <see cref="DotNetPublishSettings.Manifest"/></li>
-        ///     <li><c>--no-build</c> via <see cref="DotNetPublishSettings.NoBuild"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetPublishSettings.NoCache"/></li>
-        ///     <li><c>--no-dependencies</c> via <see cref="DotNetPublishSettings.NoDependencies"/></li>
-        ///     <li><c>--no-restore</c> via <see cref="DotNetPublishSettings.NoRestore"/></li>
-        ///     <li><c>--nologo</c> via <see cref="DotNetPublishSettings.NoLogo"/></li>
-        ///     <li><c>--output</c> via <see cref="DotNetPublishSettings.Output"/></li>
-        ///     <li><c>--packages</c> via <see cref="DotNetPublishSettings.PackageDirectory"/></li>
-        ///     <li><c>--runtime</c> via <see cref="DotNetPublishSettings.Runtime"/></li>
-        ///     <li><c>--self-contained</c> via <see cref="DotNetPublishSettings.SelfContained"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetPublishSettings.Sources"/></li>
-        ///     <li><c>--use-lock-file</c> via <see cref="DotNetPublishSettings.UseLockFile"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetPublishSettings.Verbosity"/></li>
-        ///     <li><c>--version-suffix</c> via <see cref="DotNetPublishSettings.VersionSuffix"/></li>
-        ///     <li><c>/property</c> via <see cref="DotNetPublishSettings.Properties"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetPublishSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetPublish(CombinatorialConfigure<DotNetPublishSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetPublish, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
-        /// <summary>
         ///   <p>Pushes a package to the server and publishes it.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
@@ -879,7 +291,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--timeout</c> via <see cref="DotNetNuGetPushSettings.Timeout"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetNuGetPush(DotNetNuGetPushSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOutColored> DotNetNuGetPush(DotNetNuGetPushSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetNuGetPushSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -887,54 +299,6 @@ namespace Nuke.Common.Tools.DotNet
             return process.Output;
         }
         /// <summary>
-        ///   <p>Pushes a package to the server and publishes it.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;targetPath&gt;</c> via <see cref="DotNetNuGetPushSettings.TargetPath"/></li>
-        ///     <li><c>--api-key</c> via <see cref="DotNetNuGetPushSettings.ApiKey"/></li>
-        ///     <li><c>--disable-buffering</c> via <see cref="DotNetNuGetPushSettings.DisableBuffering"/></li>
-        ///     <li><c>--force-english-output</c> via <see cref="DotNetNuGetPushSettings.ForceEnglishOutput"/></li>
-        ///     <li><c>--no-service-endpoint</c> via <see cref="DotNetNuGetPushSettings.NoServiceEndpoint"/></li>
-        ///     <li><c>--no-symbols</c> via <see cref="DotNetNuGetPushSettings.NoSymbols"/></li>
-        ///     <li><c>--skip-duplicate</c> via <see cref="DotNetNuGetPushSettings.SkipDuplicate"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetNuGetPushSettings.Source"/></li>
-        ///     <li><c>--symbol-api-key</c> via <see cref="DotNetNuGetPushSettings.SymbolApiKey"/></li>
-        ///     <li><c>--symbol-source</c> via <see cref="DotNetNuGetPushSettings.SymbolSource"/></li>
-        ///     <li><c>--timeout</c> via <see cref="DotNetNuGetPushSettings.Timeout"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetNuGetPush(Configure<DotNetNuGetPushSettings> configurator)
-        {
-            return DotNetNuGetPush(configurator(new DotNetNuGetPushSettings()));
-        }
-        /// <summary>
-        ///   <p>Pushes a package to the server and publishes it.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;targetPath&gt;</c> via <see cref="DotNetNuGetPushSettings.TargetPath"/></li>
-        ///     <li><c>--api-key</c> via <see cref="DotNetNuGetPushSettings.ApiKey"/></li>
-        ///     <li><c>--disable-buffering</c> via <see cref="DotNetNuGetPushSettings.DisableBuffering"/></li>
-        ///     <li><c>--force-english-output</c> via <see cref="DotNetNuGetPushSettings.ForceEnglishOutput"/></li>
-        ///     <li><c>--no-service-endpoint</c> via <see cref="DotNetNuGetPushSettings.NoServiceEndpoint"/></li>
-        ///     <li><c>--no-symbols</c> via <see cref="DotNetNuGetPushSettings.NoSymbols"/></li>
-        ///     <li><c>--skip-duplicate</c> via <see cref="DotNetNuGetPushSettings.SkipDuplicate"/></li>
-        ///     <li><c>--source</c> via <see cref="DotNetNuGetPushSettings.Source"/></li>
-        ///     <li><c>--symbol-api-key</c> via <see cref="DotNetNuGetPushSettings.SymbolApiKey"/></li>
-        ///     <li><c>--symbol-source</c> via <see cref="DotNetNuGetPushSettings.SymbolSource"/></li>
-        ///     <li><c>--timeout</c> via <see cref="DotNetNuGetPushSettings.Timeout"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetNuGetPushSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetNuGetPush(CombinatorialConfigure<DotNetNuGetPushSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetNuGetPush, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
-        /// <summary>
         ///   <p>Adds a NuGet source.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
@@ -949,7 +313,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--valid-authentication-types</c> via <see cref="DotNetNuGetAddSourceSettings.ValidAuthenticationTypes"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetNuGetAddSource(DotNetNuGetAddSourceSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOutColored> DotNetNuGetAddSource(DotNetNuGetAddSourceSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetNuGetAddSourceSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -957,44 +321,6 @@ namespace Nuke.Common.Tools.DotNet
             return process.Output;
         }
         /// <summary>
-        ///   <p>Adds a NuGet source.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;source&gt;</c> via <see cref="DotNetNuGetAddSourceSettings.Source"/></li>
-        ///     <li><c>--name</c> via <see cref="DotNetNuGetAddSourceSettings.Name"/></li>
-        ///     <li><c>--password</c> via <see cref="DotNetNuGetAddSourceSettings.Password"/></li>
-        ///     <li><c>--store-password-in-clear-text</c> via <see cref="DotNetNuGetAddSourceSettings.StorePasswordInClearText"/></li>
-        ///     <li><c>--username</c> via <see cref="DotNetNuGetAddSourceSettings.Username"/></li>
-        ///     <li><c>--valid-authentication-types</c> via <see cref="DotNetNuGetAddSourceSettings.ValidAuthenticationTypes"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetNuGetAddSource(Configure<DotNetNuGetAddSourceSettings> configurator)
-        {
-            return DotNetNuGetAddSource(configurator(new DotNetNuGetAddSourceSettings()));
-        }
-        /// <summary>
-        ///   <p>Adds a NuGet source.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;source&gt;</c> via <see cref="DotNetNuGetAddSourceSettings.Source"/></li>
-        ///     <li><c>--name</c> via <see cref="DotNetNuGetAddSourceSettings.Name"/></li>
-        ///     <li><c>--password</c> via <see cref="DotNetNuGetAddSourceSettings.Password"/></li>
-        ///     <li><c>--store-password-in-clear-text</c> via <see cref="DotNetNuGetAddSourceSettings.StorePasswordInClearText"/></li>
-        ///     <li><c>--username</c> via <see cref="DotNetNuGetAddSourceSettings.Username"/></li>
-        ///     <li><c>--valid-authentication-types</c> via <see cref="DotNetNuGetAddSourceSettings.ValidAuthenticationTypes"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetNuGetAddSourceSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetNuGetAddSource(CombinatorialConfigure<DotNetNuGetAddSourceSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetNuGetAddSource, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
-        /// <summary>
         ///   <p>The <c>dotnet tool install</c> command provides a way for you to install .NET Core Global Tools on your machine. To use the command, you either have to specify that you want a user-wide installation using the <c>--global</c> option or you specify a path to install it using the <c>--tool-path</c> option.<para/>Global Tools are installed in the following directories by default when you specify the <c>-g</c> (or <c>--global</c>) option:<ul><li>Linux/macOS: <c>$HOME/.dotnet/tools</c></li><li>Windows: <c>%USERPROFILE%\.dotnet\tools</c></li></ul></p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
@@ -1011,7 +337,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--version</c> via <see cref="DotNetToolInstallSettings.Version"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetToolInstall(DotNetToolInstallSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOutColored> DotNetToolInstall(DotNetToolInstallSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetToolInstallSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -1019,48 +345,6 @@ namespace Nuke.Common.Tools.DotNet
             return process.Output;
         }
         /// <summary>
-        ///   <p>The <c>dotnet tool install</c> command provides a way for you to install .NET Core Global Tools on your machine. To use the command, you either have to specify that you want a user-wide installation using the <c>--global</c> option or you specify a path to install it using the <c>--tool-path</c> option.<para/>Global Tools are installed in the following directories by default when you specify the <c>-g</c> (or <c>--global</c>) option:<ul><li>Linux/macOS: <c>$HOME/.dotnet/tools</c></li><li>Windows: <c>%USERPROFILE%\.dotnet\tools</c></li></ul></p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;packageName&gt;</c> via <see cref="DotNetToolInstallSettings.PackageName"/></li>
-        ///     <li><c>--add-source</c> via <see cref="DotNetToolInstallSettings.Sources"/></li>
-        ///     <li><c>--configfile</c> via <see cref="DotNetToolInstallSettings.ConfigFile"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetToolInstallSettings.Framework"/></li>
-        ///     <li><c>--global</c> via <see cref="DotNetToolInstallSettings.Global"/></li>
-        ///     <li><c>--tool-path</c> via <see cref="DotNetToolInstallSettings.ToolInstallationPath"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetToolInstallSettings.Verbosity"/></li>
-        ///     <li><c>--version</c> via <see cref="DotNetToolInstallSettings.Version"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetToolInstall(Configure<DotNetToolInstallSettings> configurator)
-        {
-            return DotNetToolInstall(configurator(new DotNetToolInstallSettings()));
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet tool install</c> command provides a way for you to install .NET Core Global Tools on your machine. To use the command, you either have to specify that you want a user-wide installation using the <c>--global</c> option or you specify a path to install it using the <c>--tool-path</c> option.<para/>Global Tools are installed in the following directories by default when you specify the <c>-g</c> (or <c>--global</c>) option:<ul><li>Linux/macOS: <c>$HOME/.dotnet/tools</c></li><li>Windows: <c>%USERPROFILE%\.dotnet\tools</c></li></ul></p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;packageName&gt;</c> via <see cref="DotNetToolInstallSettings.PackageName"/></li>
-        ///     <li><c>--add-source</c> via <see cref="DotNetToolInstallSettings.Sources"/></li>
-        ///     <li><c>--configfile</c> via <see cref="DotNetToolInstallSettings.ConfigFile"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetToolInstallSettings.Framework"/></li>
-        ///     <li><c>--global</c> via <see cref="DotNetToolInstallSettings.Global"/></li>
-        ///     <li><c>--tool-path</c> via <see cref="DotNetToolInstallSettings.ToolInstallationPath"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetToolInstallSettings.Verbosity"/></li>
-        ///     <li><c>--version</c> via <see cref="DotNetToolInstallSettings.Version"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetToolInstallSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetToolInstall(CombinatorialConfigure<DotNetToolInstallSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetToolInstall, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
-        /// <summary>
         ///   <p>The <c>dotnet tool restore</c> command finds the tool manifest file that is in scope for the current directory and installs the tools that are listed in it.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
@@ -1076,7 +360,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--tool-manifest</c> via <see cref="DotNetToolRestoreSettings.ToolManifest"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetToolRestore(DotNetToolRestoreSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOutColored> DotNetToolRestore(DotNetToolRestoreSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetToolRestoreSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -1084,46 +368,6 @@ namespace Nuke.Common.Tools.DotNet
             return process.Output;
         }
         /// <summary>
-        ///   <p>The <c>dotnet tool restore</c> command finds the tool manifest file that is in scope for the current directory and installs the tools that are listed in it.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>--add-source</c> via <see cref="DotNetToolRestoreSettings.Sources"/></li>
-        ///     <li><c>--configfile</c> via <see cref="DotNetToolRestoreSettings.ConfigFile"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetToolRestoreSettings.DisableParallel"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetToolRestoreSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--interactive</c> via <see cref="DotNetToolRestoreSettings.Interactive"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetToolRestoreSettings.NoCache"/></li>
-        ///     <li><c>--tool-manifest</c> via <see cref="DotNetToolRestoreSettings.ToolManifest"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetToolRestore(Configure<DotNetToolRestoreSettings> configurator)
-        {
-            return DotNetToolRestore(configurator(new DotNetToolRestoreSettings()));
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet tool restore</c> command finds the tool manifest file that is in scope for the current directory and installs the tools that are listed in it.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>--add-source</c> via <see cref="DotNetToolRestoreSettings.Sources"/></li>
-        ///     <li><c>--configfile</c> via <see cref="DotNetToolRestoreSettings.ConfigFile"/></li>
-        ///     <li><c>--disable-parallel</c> via <see cref="DotNetToolRestoreSettings.DisableParallel"/></li>
-        ///     <li><c>--ignore-failed-sources</c> via <see cref="DotNetToolRestoreSettings.IgnoreFailedSources"/></li>
-        ///     <li><c>--interactive</c> via <see cref="DotNetToolRestoreSettings.Interactive"/></li>
-        ///     <li><c>--no-cache</c> via <see cref="DotNetToolRestoreSettings.NoCache"/></li>
-        ///     <li><c>--tool-manifest</c> via <see cref="DotNetToolRestoreSettings.ToolManifest"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetToolRestoreSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetToolRestore(CombinatorialConfigure<DotNetToolRestoreSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetToolRestore, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
-        /// <summary>
         ///   <p>The <c>dotnet tool uninstall</c> command provides a way for you to uninstall .NET Core Global Tools from your machine. To use the command, you either have to specify that you want to remove a user-wide tool using the <c>--global</c> option or specify a path to where the tool is installed using the <c>--tool-path</c> option.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
@@ -1136,7 +380,7 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--verbosity</c> via <see cref="DotNetToolUninstallSettings.Verbosity"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetToolUninstall(DotNetToolUninstallSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOutColored> DotNetToolUninstall(DotNetToolUninstallSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetToolUninstallSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
@@ -1144,40 +388,6 @@ namespace Nuke.Common.Tools.DotNet
             return process.Output;
         }
         /// <summary>
-        ///   <p>The <c>dotnet tool uninstall</c> command provides a way for you to uninstall .NET Core Global Tools from your machine. To use the command, you either have to specify that you want to remove a user-wide tool using the <c>--global</c> option or specify a path to where the tool is installed using the <c>--tool-path</c> option.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;packageName&gt;</c> via <see cref="DotNetToolUninstallSettings.PackageName"/></li>
-        ///     <li><c>--global</c> via <see cref="DotNetToolUninstallSettings.Global"/></li>
-        ///     <li><c>--tool-path</c> via <see cref="DotNetToolUninstallSettings.ToolInstallationPath"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetToolUninstallSettings.Verbosity"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetToolUninstall(Configure<DotNetToolUninstallSettings> configurator)
-        {
-            return DotNetToolUninstall(configurator(new DotNetToolUninstallSettings()));
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet tool uninstall</c> command provides a way for you to uninstall .NET Core Global Tools from your machine. To use the command, you either have to specify that you want to remove a user-wide tool using the <c>--global</c> option or specify a path to where the tool is installed using the <c>--tool-path</c> option.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;packageName&gt;</c> via <see cref="DotNetToolUninstallSettings.PackageName"/></li>
-        ///     <li><c>--global</c> via <see cref="DotNetToolUninstallSettings.Global"/></li>
-        ///     <li><c>--tool-path</c> via <see cref="DotNetToolUninstallSettings.ToolInstallationPath"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetToolUninstallSettings.Verbosity"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetToolUninstallSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetToolUninstall(CombinatorialConfigure<DotNetToolUninstallSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetToolUninstall, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
-        /// <summary>
         ///   <p>The <c>dotnet tool update</c> command provides a way for you to update .NET Core Global Tools on your machine to the latest stable version of the package. The command uninstalls and re-installs a tool, effectively updating it. To use the command, you either have to specify that you want to update a tool from a user-wide installation using the <c>--global</c> option or specify a path to where the tool is installed using the <c>--tool-path</c> option.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
@@ -1194,55 +404,14 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>--version</c> via <see cref="DotNetToolUpdateSettings.Version"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetToolUpdate(DotNetToolUpdateSettings toolSettings = null)
+        public static IReadOnlyCollection<LineOutColored> DotNetToolUpdate(DotNetToolUpdateSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetToolUpdateSettings();
             using var process = ProcessTasks.StartProcess(toolSettings);
             process.AssertZeroExitCode();
             return process.Output;
         }
-        /// <summary>
-        ///   <p>The <c>dotnet tool update</c> command provides a way for you to update .NET Core Global Tools on your machine to the latest stable version of the package. The command uninstalls and re-installs a tool, effectively updating it. To use the command, you either have to specify that you want to update a tool from a user-wide installation using the <c>--global</c> option or specify a path to where the tool is installed using the <c>--tool-path</c> option.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;packageName&gt;</c> via <see cref="DotNetToolUpdateSettings.PackageName"/></li>
-        ///     <li><c>--add-source</c> via <see cref="DotNetToolUpdateSettings.Sources"/></li>
-        ///     <li><c>--configfile</c> via <see cref="DotNetToolUpdateSettings.ConfigFile"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetToolUpdateSettings.Framework"/></li>
-        ///     <li><c>--global</c> via <see cref="DotNetToolUpdateSettings.Global"/></li>
-        ///     <li><c>--tool-path</c> via <see cref="DotNetToolUpdateSettings.ToolInstallationPath"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetToolUpdateSettings.Verbosity"/></li>
-        ///     <li><c>--version</c> via <see cref="DotNetToolUpdateSettings.Version"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IReadOnlyCollection<LineOut> DotNetToolUpdate(Configure<DotNetToolUpdateSettings> configurator)
-        {
-            return DotNetToolUpdate(configurator(new DotNetToolUpdateSettings()));
-        }
-        /// <summary>
-        ///   <p>The <c>dotnet tool update</c> command provides a way for you to update .NET Core Global Tools on your machine to the latest stable version of the package. The command uninstalls and re-installs a tool, effectively updating it. To use the command, you either have to specify that you want to update a tool from a user-wide installation using the <c>--global</c> option or specify a path to where the tool is installed using the <c>--tool-path</c> option.</p>
-        ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
-        /// </summary>
-        /// <remarks>
-        ///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
-        ///   <ul>
-        ///     <li><c>&lt;packageName&gt;</c> via <see cref="DotNetToolUpdateSettings.PackageName"/></li>
-        ///     <li><c>--add-source</c> via <see cref="DotNetToolUpdateSettings.Sources"/></li>
-        ///     <li><c>--configfile</c> via <see cref="DotNetToolUpdateSettings.ConfigFile"/></li>
-        ///     <li><c>--framework</c> via <see cref="DotNetToolUpdateSettings.Framework"/></li>
-        ///     <li><c>--global</c> via <see cref="DotNetToolUpdateSettings.Global"/></li>
-        ///     <li><c>--tool-path</c> via <see cref="DotNetToolUpdateSettings.ToolInstallationPath"/></li>
-        ///     <li><c>--verbosity</c> via <see cref="DotNetToolUpdateSettings.Verbosity"/></li>
-        ///     <li><c>--version</c> via <see cref="DotNetToolUpdateSettings.Version"/></li>
-        ///   </ul>
-        /// </remarks>
-        public static IEnumerable<(DotNetToolUpdateSettings Settings, IReadOnlyCollection<LineOut> Output)> DotNetToolUpdate(CombinatorialConfigure<DotNetToolUpdateSettings> configurator, int degreeOfParallelism = 1, bool completeOnFailure = false)
-        {
-            return configurator.Invoke(DotNetToolUpdate, DotNetLogger, degreeOfParallelism, completeOnFailure);
-        }
+        
     }
     #region DotNetTestSettings
     /// <summary>

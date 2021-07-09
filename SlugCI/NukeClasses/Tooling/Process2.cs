@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using CmdProcessor;
 using Slug.CI;
 
 namespace Nuke.Common.Tooling
@@ -18,7 +19,7 @@ namespace Nuke.Common.Tooling
         private readonly int? _timeout;
         private readonly StreamWriter _logStream;
 
-        public Process2(Process process, Func<string, string> outputFilter, int? timeout, StreamWriter logStream, IReadOnlyCollection<LineOut> output)
+        public Process2(Process process, Func<string, string> outputFilter, int? timeout, StreamWriter logStream, IReadOnlyCollection<LineOutColored> output)
         {
             _process = process;
             _outputFilter = outputFilter;
@@ -33,7 +34,7 @@ namespace Nuke.Common.Tooling
 
         public string WorkingDirectory => _process.StartInfo.WorkingDirectory;
 
-        public IReadOnlyCollection<LineOut> Output { get; private set; }
+        public IReadOnlyCollection<LineOutColored> Output { get; private set; }
 
         public int ExitCode => _process.ExitCode;
 

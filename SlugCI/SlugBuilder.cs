@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using CmdProcessor;
 using Nuke.Common.Tooling;
 using Semver;
 using Console = Colorful.Console;
@@ -199,7 +200,7 @@ namespace Slug.CI
 					Console.WriteLine();
 					Misc.WriteSubHeader(stage.Name, new List<string>() {"Detailed Output"});
 					Color lineColor = Color.WhiteSmoke;
-					foreach ( LineOut output in stage.StageOutput ) {
+					foreach ( LineOutColored output in stage.StageOutput ) {
 						output.WriteToConsole();
 					}
 

@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using CmdProcessor;
 using Nuke.Common.Tooling;
 using Semver;
 using Slug.CI.SlugBuildStages;
@@ -47,7 +48,7 @@ namespace Slug.CI
 		/// <summary>
 		/// Output produced during the startup sequence
 		/// </summary>
-		private List<LineOut> LineOutput { get; set; } = new List<LineOut>();
+		private List<LineOutColored> LineOutput { get; set; } = new List<LineOutColored>();
 		
 		private LineOut NewLine { get; set; }
 
@@ -56,8 +57,7 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="ciSession">The SlugCI Session object</param>
 		public SlugCI (CISession ciSession) {
-			NewLine = LineOut.NewLine();
-			LineOutput.Add(NewLine);
+			LineOutput.Add(LineOutColored.NewLine());
 			Color lineColor = Color.WhiteSmoke;
 
 			CISession = ciSession;
@@ -179,7 +179,7 @@ namespace Slug.CI
 			Task gbiTask = GetBranchInfoAsync();
 			gbiTask.Wait();
 
-			LineOutput.Add(new LineOut(OutputType.Std,"Git Command Version:  " + CISession.GitProcessor.GitCommandVersion,Color.Yellow));
+			LineOutput.Add(new LineOutColored(EnumProcessOutputType.Std,"Git Command Version:  " + CISession.GitProcessor.GitCommandVersion,Color.Yellow));
 
 			IsReady = true;
 		}
@@ -230,7 +230,7 @@ namespace Slug.CI
 		{
 			Misc.WriteMainHeader("SlugCI Initialization of Repository");
 			
-			foreach ( LineOut lineOut in LineOutput ) {
+			foreach ( LineOutColored lineOut in LineOutput ) {
 				lineOut.WriteToConsole();
 			}
 		}

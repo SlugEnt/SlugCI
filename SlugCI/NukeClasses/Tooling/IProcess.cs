@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using CmdProcessor;
 using JetBrains.Annotations;
 using Slug.CI;
 
@@ -35,7 +36,7 @@ namespace Nuke.Common.Tooling
         /// <summary>
         /// Contains the output of the process execution.
         /// </summary>
-        IReadOnlyCollection<LineOut> Output { get; }
+        IReadOnlyCollection<LineOutColored> Output { get; }
 
         /// <summary>
         /// Returns <see cref="Process.ExitCode"/>.

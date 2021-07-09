@@ -6,6 +6,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using CmdProcessor;
 using JetBrains.Annotations;
 using Nuke.Common.Utilities.Collections;
 using Slug.CI;
@@ -30,7 +31,7 @@ namespace Nuke.Common.Tooling
         public static IReadOnlyCollection<(TSettings Settings, IReadOnlyCollection<LineOut> Output)> Invoke<TSettings>(
             this CombinatorialConfigure<TSettings> configurator,
             Func<TSettings, IReadOnlyCollection<LineOut>> executor,
-            Action<OutputType, string> logger,
+            Action<EnumProcessOutputType, string> logger,
             int degreeOfParallelism,
             bool completeOnFailure)
             where TSettings : ToolSettings, new()
@@ -47,7 +48,7 @@ namespace Nuke.Common.Tooling
         public static IReadOnlyCollection<(TSettings Settings, TResult Result, IReadOnlyCollection<LineOut> Output)> Invoke<TSettings, TResult>(
             this CombinatorialConfigure<TSettings> configurator,
             Func<TSettings, (TResult Result, IReadOnlyCollection<LineOut> Output)> executor,
-            Action<OutputType, string> logger,
+            Action<EnumProcessOutputType, string> logger,
             int degreeOfParallelism,
             bool completeOnFailure)
             where TSettings : ToolSettings, new()
@@ -66,7 +67,7 @@ namespace Nuke.Common.Tooling
             CombinatorialConfigure<TSettings> configurator,
             Func<TSettings, TResult> executor,
             Func<TResult, IReadOnlyCollection<LineOut>> outputSelector,
-            Action<OutputType, string> logger,
+            Action<EnumProcessOutputType, string> logger,
             int degreeOfParallelism,
             bool completeOnFailure)
             where TSettings : ToolSettings, new()
@@ -110,9 +111,10 @@ namespace Nuke.Common.Tooling
                             !(x.Exception is ProcessException processException)
                                 ? outputSelector(x.Result)
                                 : processException.Process.Output)
-                        .ForEach(x => logger(x.OutputType, x.Text));
+                        .ForEach(x => logger(x.EnumProcessOutputType, x.Text));
                 }
             }
         }
-    }
-}
+    }}
+
+
