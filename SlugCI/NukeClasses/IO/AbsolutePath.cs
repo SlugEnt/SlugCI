@@ -100,5 +100,12 @@ namespace Nuke.Common.IO
         {
 	        return _path;
         }
+
+        /// <summary>
+        /// Returns the length of the actual path as in string.length
+        /// </summary>
+        public int Length {
+	        get { return _path.Length; }
+        }
     }
 }

@@ -56,7 +56,11 @@
     },
     "GenericTest": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\slugent\\slugcisample --deployto alpha --faststart false --skipangular --skipnuget"
+      "commandLineArgs": "--rootdir C:\\A_Dev\\slugent\\SlugCISample --deployto alpha --faststart false --skipangular --skipnuget"
+    },
+    "Setup": {
+      "commandName": "Project",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\slugent\\SlugCISample\\src --setup"
     }
   }
 }

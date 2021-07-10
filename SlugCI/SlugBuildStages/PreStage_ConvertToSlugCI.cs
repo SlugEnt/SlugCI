@@ -46,9 +46,8 @@ namespace Slug.CI.SlugBuildStages
 		/// Perform The Conversion
 		/// </summary>
 		/// <returns></returns>
-		protected override StageCompletionStatusEnum ExecuteProcess()
-		{
-			PreCheck();
+		protected override StageCompletionStatusEnum ExecuteProcess() {
+			if ( !PreCheck() ) return StageCompletionStatusEnum.Aborted;
 
 			// Load Config file
 			SlugCIConfig slugCiConfig = GetSlugCIConfig();
@@ -115,10 +114,7 @@ namespace Slug.CI.SlugBuildStages
 			}
 
 
-			// Check for new SlugCI
-			if (!FileSystemTasks.DirectoryExists(CISession.SlugCIPath))
-				AOT_Warning(".SlugCI directory does not exist.  Proceeding with converting solution to .SlugCI format specifications");
-			
+
 
 			// Convert the project
 			bool success = Converter();
@@ -579,7 +575,7 @@ namespace Slug.CI.SlugBuildStages
 		private bool MoveProjectStepA(VisualStudioProject project)
 		{
 			// Move project to new location
-			if (project.OriginalPath.ToString() != project.NewPath.ToString())
+			if (project.OriginalPath.ToString().ToLower() != project.NewPath.ToString().ToLower())
 				Directory.Move(project.OriginalPath, project.NewPath);
 
 			// Remove from Solution

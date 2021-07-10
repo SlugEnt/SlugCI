@@ -55,7 +55,7 @@ namespace Slug.CI
 		/// <summary>
 		/// All recorded output from the stage.  Note: How much is output is determined by the Verbosity setting for the stage.
 		/// </summary>
-		public List<LineOutColored> StageOutput { get; private set; } = new List<LineOutColored>();
+		public List<ILineOut> StageOutput { get; private set; } = new List<ILineOut>();
 
 
 		/// <summary>
@@ -369,7 +369,8 @@ namespace Slug.CI
 			int count = endLine - startLine;
 			if ( startLine > StageOutput.Count ) return;
 			for (int i = startLine; i < endLine; i++) 
-				Console.WriteLine(StageOutput[i].Text,StageOutput[i].FGColor);
+				StageOutput[i].WriteToConsole();
+				//Console.WriteLine(StageOutput[i].Text,StageOutput[i].FGColor);
 		}
 	}
 }

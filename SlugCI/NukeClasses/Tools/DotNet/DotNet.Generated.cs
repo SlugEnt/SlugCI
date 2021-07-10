@@ -10,9 +10,11 @@ using Nuke.Common.Tools;
 using Nuke.Common.Utilities.Collections;
 using Slug.CI;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -34,6 +36,7 @@ namespace Nuke.Common.Tools.DotNet
             ToolPathResolver.TryGetEnvironmentExecutable("DOTNET_EXE") ??
             ToolPathResolver.GetPathExecutable("dotnet");
         public static Action<OutputType, string> DotNetLogger { get; set; } = CustomLogger;
+
         /// <summary>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
         /// </summary>
@@ -90,13 +93,44 @@ namespace Nuke.Common.Tools.DotNet
             process.WaitForExit();
             return (process.Output,process.ExitCode);
         }
-        public static IReadOnlyCollection<LineOutColored> DotNetRestore(DotNetRestoreSettings toolSettings = null)
+
+
+        public static (BlockingCollection<ILineOut>,int)  DotNetRestore(DotNetRestoreSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetRestoreSettings();
-            using var process = ProcessTasks.StartProcess(toolSettings);
+            ProcessStartInfo processStartInfo = SlugCmdProcess.GetDefaultProcessSettings();
+            ToolSettingsToProcessInfoConverter.Convert(toolSettings, processStartInfo);
+            SlugCmdProcess slugCmdProcess = new SlugCmdProcess("Dot Net Restore",processStartInfo);
+            slugCmdProcess.Execute(DotNetRestore_OutputProcessor);
+            
+            return (slugCmdProcess.Output,slugCmdProcess.ExitCode);
+
+
+/*            using var process = ProcessTasks.StartProcess(toolSettings);
             process.AssertZeroExitCode();
-            return process.Output;
+            process.Output;
+*/
         }
+
+
+        [CanBeNull]
+        private static LineOutColored? DotNetRestore_OutputProcessor(EnumProcessOutputType type, string text)
+        {
+	        if (text == null) return null;
+
+	        EnumProcessOutputType processType = type;
+
+	        LineOutColored lineOutColored;
+	        
+
+
+            if (type == EnumProcessOutputType.ProcessErr) return LineOutColored.Error(text);
+	        if (text.StartsWith("  Restored"))
+		        return LineOutColored.Success(text);
+	        if (text.Contains("up-to-date:")) return LineOutColored.Success(text);
+	        return LineOutColored.Normal(text);
+        }
+
         /// <summary>
         ///   <p>The <c>dotnet pack</c> command builds the project and creates NuGet packages. The result of this command is a NuGet package. If the <c>--include-symbols</c> option is present, another package containing the debug symbols is created.</p><p>NuGet dependencies of the packed project are added to the <em>.nuspec</em> file, so they're properly resolved when the package is installed. Project-to-project references aren't packaged inside the project. Currently, you must have a package per project if you have project-to-project dependencies.</p><p>By default, <c>dotnet pack</c> builds the project first. If you wish to avoid this behavior, pass the <c>--no-build</c> option. This is often useful in Continuous Integration (CI) build scenarios where you know the code was previously built.</p><p>You can provide MSBuild properties to the <c>dotnet pack</c> command for the packing process. For more information, see <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/csproj#nuget-metadata-properties">NuGet metadata properties</a> and the <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference">MSBuild Command-Line Reference</a>.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
@@ -170,13 +204,42 @@ namespace Nuke.Common.Tools.DotNet
         ///     <li><c>/property</c> via <see cref="DotNetBuildSettings.Properties"/></li>
         ///   </ul>
         /// </remarks>
-        public static IReadOnlyCollection<LineOutColored> DotNetBuild(DotNetBuildSettings toolSettings = null)
+        public static (BlockingCollection<ILineOut>, int) DotNetBuild(DotNetBuildSettings toolSettings = null)
         {
             toolSettings = toolSettings ?? new DotNetBuildSettings();
+
+
+            ProcessStartInfo processStartInfo = SlugCmdProcess.GetDefaultProcessSettings();
+            ToolSettingsToProcessInfoConverter.Convert(toolSettings, processStartInfo);
+            SlugCmdProcess slugCmdProcess = new SlugCmdProcess("Dot Net Build", processStartInfo);
+            slugCmdProcess.Execute(DotNetBuild_OutputProcessor);
+
+            return (slugCmdProcess.Output, slugCmdProcess.ExitCode);
+
+
+
+            /*
             using var process = ProcessTasks.StartProcess(toolSettings);
             process.AssertZeroExitCode();
             return process.Output;
+            */
         }
+
+
+        [CanBeNull]
+        private static LineOutColored? DotNetBuild_OutputProcessor(EnumProcessOutputType type, string text)
+        {
+	        if (text == null) return null;
+	        EnumProcessOutputType processType = type;
+	        LineOutColored lineOutColored;
+
+	        if (type == EnumProcessOutputType.ProcessErr) return LineOutColored.Error(text);
+	        if (text.StartsWith("  Restored"))
+		        return LineOutColored.Success(text);
+	        if (text.Contains("up-to-date:")) return LineOutColored.Success(text);
+	        return LineOutColored.Normal(text);
+        }
+
         /// <summary>
         ///   <p>The <c>dotnet msbuild</c> command allows access to a fully functional MSBuild.<para/>The command has the exact same capabilities as the existing MSBuild command-line client for SDK-style projects only. The options are all the same. For more information about the available options, see the <a href="https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference">MSBuild command-line reference</a>.<para/>The <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-build">dotnet build</a> command is equivalent to <c>dotnet msbuild -restore</c>. When you don't want to build the project and you have a specific target you want to run, use <c>dotnet build</c> or <c>dotnet msbuild</c> and specify the target.</p>
         ///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
