@@ -7,13 +7,13 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
-using CmdProcessor;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
+using SlugEnt.CmdProcessor;
 
 namespace Nuke.Common.Tooling
 {
-    [Serializable]
+	[Serializable]
     public class ProcessException : Exception
     {
         private static string FormatMessage(IProcess process)

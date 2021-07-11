@@ -1,7 +1,6 @@
 ﻿using System.Drawing;
 using Nuke.Common;
 using Semver;
-using Console = Colorful.Console;
 
 namespace Slug.CI
 {

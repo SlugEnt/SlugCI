@@ -3,13 +3,12 @@
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
 using System;
-using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 
 namespace Nuke.Common.ValueInjection
 {
-    [PublicAPI]
+	[PublicAPI]
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     [MeansImplicitUse(ImplicitUseKindFlags.Assign)]
     public abstract class ValueInjectionAttributeBase : Attribute

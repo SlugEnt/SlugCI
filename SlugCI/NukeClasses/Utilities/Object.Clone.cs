@@ -2,16 +2,14 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
 using JetBrains.Annotations;
 
 namespace Nuke.Common.Utilities
 {
-    [PublicAPI]
+	[PublicAPI]
     [DebuggerNonUserCode]
     [DebuggerStepThrough]
     public static class ObjectExtensions

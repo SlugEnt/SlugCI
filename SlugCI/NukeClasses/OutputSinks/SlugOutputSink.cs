@@ -4,12 +4,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Globalization;
-using System.Linq;
-using System.Reflection;
 using JetBrains.Annotations;
-using Microsoft.Build.Tasks;
 /*using Nuke.Common.CI;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
@@ -18,14 +13,13 @@ using Nuke.Common.Tools.GitHub;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
 using Slug.CI;
-using Slug.CI.NukeClasses;
 using Console = Colorful.Console;
 
 // MODIFIED:  Significant Modifications to this code.
 
 namespace Nuke.Common.OutputSinks
 {
-    [PublicAPI]
+	[PublicAPI]
     public abstract class SlugOutputSink {
 	    private const string ERR_LINE = "********************************** ERROR ****************************************";
 

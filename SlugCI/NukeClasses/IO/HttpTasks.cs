@@ -3,7 +3,6 @@
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
 using System;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -11,7 +10,7 @@ using Nuke.Common.Tooling;
 
 namespace Nuke.Common.IO
 {
-    [PublicAPI]
+	[PublicAPI]
     public static class HttpTasks
     {
         [Pure]

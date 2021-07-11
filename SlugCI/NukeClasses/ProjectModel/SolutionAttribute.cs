@@ -3,31 +3,28 @@
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
 using System;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 using Nuke.Common.IO;
 using Nuke.Common.Utilities;
-using Nuke.Common.ValueInjection;
 
 namespace Nuke.Common.ProjectModel
 {
-    /// <summary>
-    ///     Injects an instance of <see cref="Solution"/>. The solution path is resolved in the following order:
-    ///     <ul>
-    ///         <li>From the constructor argument</li>
-    ///         <li>From command-line arguments (e.g., <c>-[MemberName] path/to/solution.sln</c>)</li>
-    ///         <li>From environment variables (e.g., <c>[MemberName]=path/to/solution.sln</c>)</li>
-    ///         <li>From the <c>.nuke</c> configuration file</li>
-    ///     </ul>
-    /// </summary>
-    /// <example>
-    ///     <code>
-    /// [Solution("common.sln")] readonly Solution Solution;
-    ///     </code>
-    /// </example>
-    [PublicAPI]
+	/// <summary>
+	///     Injects an instance of <see cref="Solution"/>. The solution path is resolved in the following order:
+	///     <ul>
+	///         <li>From the constructor argument</li>
+	///         <li>From command-line arguments (e.g., <c>-[MemberName] path/to/solution.sln</c>)</li>
+	///         <li>From environment variables (e.g., <c>[MemberName]=path/to/solution.sln</c>)</li>
+	///         <li>From the <c>.nuke</c> configuration file</li>
+	///     </ul>
+	/// </summary>
+	/// <example>
+	///     <code>
+	/// [Solution("common.sln")] readonly Solution Solution;
+	///     </code>
+	/// </example>
+	[PublicAPI]
     [UsedImplicitly(ImplicitUseKindFlags.Assign)]
     public class SolutionAttribute : ParameterAttribute
     {

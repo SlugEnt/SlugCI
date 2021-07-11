@@ -2,13 +2,11 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
-using System.Linq;
 using System.Xml.Linq;
 
 namespace Nuke.Common.Utilities
 {
-    public static partial class XElementExtensions
+	public static partial class XElementExtensions
     {
         public static string GetAttributeValue(this XElement element, string name)
         {

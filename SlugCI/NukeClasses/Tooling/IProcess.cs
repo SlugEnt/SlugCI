@@ -5,17 +5,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using CmdProcessor;
 using JetBrains.Annotations;
-using Slug.CI;
+using SlugEnt.CmdProcessor;
 
 namespace Nuke.Common.Tooling
 {
-    /// <summary>
-    /// Abstraction for <see cref="Process"/>.
-    /// </summary>
-    [PublicAPI]
+	/// <summary>
+	/// Abstraction for <see cref="Process"/>.
+	/// </summary>
+	[PublicAPI]
     public interface IProcess : IDisposable
     {
         /// <summary>

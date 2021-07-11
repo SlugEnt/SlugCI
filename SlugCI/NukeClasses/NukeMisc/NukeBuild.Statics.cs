@@ -2,7 +2,6 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -15,7 +14,7 @@ using static Nuke.Common.Constants;
 
 namespace Nuke.Common
 {
-    public abstract partial class NukeBuild
+	public abstract partial class NukeBuild
     {
         static NukeBuild()
         {

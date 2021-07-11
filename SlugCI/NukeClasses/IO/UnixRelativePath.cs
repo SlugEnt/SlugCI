@@ -3,13 +3,12 @@
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
 using System;
-using System.Linq;
 using JetBrains.Annotations;
 using static Nuke.Common.IO.PathConstruction;
 
 namespace Nuke.Common.IO
 {
-    [PublicAPI]
+	[PublicAPI]
     [Serializable]
     public class UnixRelativePath : RelativePath
     {

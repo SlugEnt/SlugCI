@@ -3,13 +3,12 @@
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
 using System;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace Nuke.Common.Utilities
 {
-    public static partial class StringExtensions
+	public static partial class StringExtensions
     {
         public static string GetMD5Hash(this string str)
         {

@@ -2,13 +2,11 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace Nuke.Common.Utilities
 {
-    public static partial class StringExtensions
+	public static partial class StringExtensions
     {
         [Pure]
         public static string Prepend(this string str, string prependText)

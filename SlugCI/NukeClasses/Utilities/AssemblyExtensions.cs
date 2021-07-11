@@ -2,13 +2,11 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
-using System.Linq;
 using System.Reflection;
 
 namespace Nuke.Common.Utilities
 {
-    public static class AssemblyExtensions
+	public static class AssemblyExtensions
     {
         public static string GetInformationalText(this Assembly assembly)
         {

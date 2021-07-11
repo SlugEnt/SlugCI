@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using Microsoft.VisualBasic;
-using Nuke.Common;
+﻿using System.Drawing;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
 using Slug.CI.NukeClasses;

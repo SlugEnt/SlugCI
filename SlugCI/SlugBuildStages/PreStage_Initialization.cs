@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Nuke.Common;
 using Nuke.Common.IO;
-using Nuke.Common.Tooling;
-using Semver;
 using Slug.CI.NukeClasses;
 
 

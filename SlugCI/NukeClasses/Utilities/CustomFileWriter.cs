@@ -4,11 +4,10 @@
 
 using System;
 using System.IO;
-using System.Linq;
 
 namespace Nuke.Common.Utilities
 {
-    public class CustomFileWriter
+	public class CustomFileWriter
     {
         private readonly StreamWriter _streamWriter;
         private readonly int _indentationFactor;

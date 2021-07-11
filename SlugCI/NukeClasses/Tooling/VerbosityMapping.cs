@@ -3,11 +3,10 @@
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
 using System;
-using System.Linq;
 
 namespace Nuke.Common.Tooling
 {
-    public static class VerbosityMapping
+	public static class VerbosityMapping
     {
         public static readonly LookupTable<Type, (Verbosity Verbosity, object MappedVerbosity)> Mappings
             = new LookupTable<Type, (Verbosity Verbosity, object MappedVerbosity)>();

@@ -6,9 +6,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
-using CmdProcessor;
-using Nuke.Common.Tooling;
-using Semver;
+using SlugEnt.CmdProcessor;
 using Console = Colorful.Console;
 
 namespace Slug.CI

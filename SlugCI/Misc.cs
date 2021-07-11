@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Tasks;
-using Nuke.Common;
-using Nuke.Common.Tooling;
 using Slug.CI.NukeClasses;
 using Console = Colorful.Console;
 

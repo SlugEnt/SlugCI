@@ -2,9 +2,7 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -12,7 +10,7 @@ using Nuke.Common.Utilities;
 
 namespace Nuke.Common
 {
-    public enum PlatformFamily
+	public enum PlatformFamily
     {
         Unknown,
         Windows,

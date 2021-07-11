@@ -6,13 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using CmdProcessor;
-using Slug.CI;
+using SlugEnt.CmdProcessor;
 
 namespace Nuke.Common.Tooling
 {
-    public class Process2 : IProcess
+	public class Process2 : IProcess
     {
         private readonly Process _process;
         private readonly Func<string, string> _outputFilter;

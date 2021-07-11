@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using Nuke.Common;
 using Nuke.Common.IO;
-using Nuke.Common.Tooling;
-using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.ReportGenerator;
 using Slug.CI.NukeClasses;
-using Slug.CI.SlugBuildStages;
 
 namespace Slug.CI.SlugBuildStages
 {

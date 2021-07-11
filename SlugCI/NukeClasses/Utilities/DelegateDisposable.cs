@@ -3,12 +3,11 @@
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
 using System;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace Nuke.Common.Utilities
 {
-    public class DelegateDisposable : IDisposable
+	public class DelegateDisposable : IDisposable
     {
         public static IDisposable CreateBracket([InstantHandle] Action setup = null, [InstantHandle] Action cleanup = null)
         {

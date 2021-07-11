@@ -4,13 +4,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
 using Nuke.Common.IO;
 
 namespace Nuke.Common.ProjectModel
 {
-    [PublicAPI]
+	[PublicAPI]
     public class Project : PrimitiveProject
     {
         internal Project(

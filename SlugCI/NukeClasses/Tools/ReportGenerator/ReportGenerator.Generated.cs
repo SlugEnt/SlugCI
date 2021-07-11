@@ -7,6 +7,7 @@ using Nuke.Common;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools;
 using Nuke.Common.Utilities.Collections;
+using SlugEnt.CmdProcessor;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,9 +15,6 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Text;
-using Slug.CI;
-using CmdProcessor;
 
 namespace Nuke.Common.Tools.ReportGenerator
 {

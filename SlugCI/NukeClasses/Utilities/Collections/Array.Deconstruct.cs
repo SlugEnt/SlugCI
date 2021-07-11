@@ -2,13 +2,12 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
 using System.Linq;
 using JetBrains.Annotations;
 
 namespace Nuke.Common.Utilities.Collections
 {
-    [PublicAPI]
+	[PublicAPI]
     public static class ArrayExtensions
     {
         public static void Deconstruct<T>(this T[] items, out T t0)

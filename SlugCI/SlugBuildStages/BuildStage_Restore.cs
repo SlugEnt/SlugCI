@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Text;
-using CmdProcessor;
 using JetBrains.Annotations;
 using Nuke.Common;
-using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Slug.CI.NukeClasses;
+using SlugEnt.CmdProcessor;
 
 namespace Slug.CI.SlugBuildStages
 {

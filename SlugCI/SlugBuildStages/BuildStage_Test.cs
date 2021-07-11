@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using CmdProcessor;
-using Nuke.Common;
+﻿using System.Collections.Generic;
 using Nuke.Common.IO;
-using Nuke.Common.ProjectModel;
-using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Slug.CI.NukeClasses;
-using Slug.CI.SlugBuildStages;
+using SlugEnt.CmdProcessor;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 namespace Slug.CI.SlugBuildStages

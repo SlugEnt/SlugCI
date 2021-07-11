@@ -2,7 +2,6 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
@@ -10,7 +9,7 @@ using static Nuke.Common.Utilities.ReflectionUtility;
 
 namespace Nuke.Common.ProjectModel
 {
-    [PublicAPI]
+	[PublicAPI]
     public static class ProjectExtensions
     {
         public static Microsoft.Build.Evaluation.Project GetMSBuildProject(

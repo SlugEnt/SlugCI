@@ -2,15 +2,13 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace Nuke.Common.Tooling
 {
-    [PublicAPI]
+	[PublicAPI]
     [DebuggerStepThrough]
     [DebuggerNonUserCode]
     public static class ProcessExtensions

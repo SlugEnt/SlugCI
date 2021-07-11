@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using CmdProcessor;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities.Collections;
 using Slug.CI.NukeClasses;
+using SlugEnt.CmdProcessor;
 using static Nuke.Common.IO.FileSystemTasks;
 
 namespace Slug.CI.SlugBuildStages

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Nuke.Common.IO;
-using Slug.CI.NukeClasses;
+﻿using Slug.CI.NukeClasses;
 
 namespace Slug.CI.SlugBuildStages
 {

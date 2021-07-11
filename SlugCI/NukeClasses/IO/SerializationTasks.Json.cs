@@ -2,16 +2,14 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
 using System.IO;
-using System.Linq;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Nuke.Common.Tooling;
 
 namespace Nuke.Common.IO
 {
-    [PublicAPI]
+	[PublicAPI]
     public static partial class SerializationTasks
     {
         public static void JsonSerializeToFile(object obj, string path)

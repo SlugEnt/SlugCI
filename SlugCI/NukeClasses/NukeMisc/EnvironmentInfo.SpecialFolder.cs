@@ -3,12 +3,11 @@
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
 using System;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace Nuke.Common
 {
-    [PublicAPI]
+	[PublicAPI]
     public enum SpecialFolders
     {
         ProgramFiles = Environment.SpecialFolder.ProgramFiles,

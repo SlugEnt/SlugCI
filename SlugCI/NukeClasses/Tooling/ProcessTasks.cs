@@ -9,15 +9,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using CmdProcessor;
 using JetBrains.Annotations;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
-using Slug.CI;
+using SlugEnt.CmdProcessor;
 
 namespace Nuke.Common.Tooling
 {
-    [PublicAPI]
+	[PublicAPI]
     public static class ProcessTasks
     {
         public static bool DefaultLogOutput = true;

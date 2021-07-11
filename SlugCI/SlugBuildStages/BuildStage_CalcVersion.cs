@@ -2,9 +2,6 @@
 using Semver;
 using Slug.CI.NukeClasses;
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using Console = Colorful.Console;
 
 namespace Slug.CI.SlugBuildStages
 {

@@ -4,12 +4,11 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace Nuke.Common.OutputSinks
 {
-    [UsedImplicitly]
+	[UsedImplicitly]
     [ExcludeFromCodeCoverage]
     internal class AnsiColorOutputSink : SlugOutputSink
     {

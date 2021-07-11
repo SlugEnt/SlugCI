@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using CmdProcessor;
 using Nuke.Common;
 using Nuke.Common.Tooling;
 using Slug.CI.NukeClasses;
+using SlugEnt.CmdProcessor;
 using Console = Colorful.Console;
 
 

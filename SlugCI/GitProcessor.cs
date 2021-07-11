@@ -4,11 +4,11 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using CmdProcessor;
 using Nuke.Common;
 using Nuke.Common.Tooling;
 using Semver;
 using Slug.CI.NukeClasses;
+using SlugEnt.CmdProcessor;
 using Console = Colorful.Console;
 
 [assembly: InternalsVisibleTo("Test_SlugCI")]

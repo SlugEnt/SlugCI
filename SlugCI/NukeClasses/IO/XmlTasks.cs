@@ -2,7 +2,6 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +13,7 @@ using JetBrains.Annotations;
 
 namespace Nuke.Common.IO
 {
-    [PublicAPI]
+	[PublicAPI]
     public static class XmlTasks
     {
         public static IEnumerable<string> XmlPeek(string path, string xpath, params (string prefix, string uri)[] namespaces)

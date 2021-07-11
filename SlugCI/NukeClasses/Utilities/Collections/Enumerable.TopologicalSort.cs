@@ -4,11 +4,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Nuke.Common.Utilities.Collections
 {
-    public static partial class EnumerableExtensions
+	public static partial class EnumerableExtensions
     {
         public static IEnumerable<T> TSort<T>(this IEnumerable<T> source, Func<T, IEnumerable<T>> dependencies, bool throwOnCycle = false)
         {

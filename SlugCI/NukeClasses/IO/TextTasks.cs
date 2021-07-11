@@ -2,7 +2,6 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +10,7 @@ using JetBrains.Annotations;
 
 namespace Nuke.Common.IO
 {
-    [PublicAPI]
+	[PublicAPI]
     public static class TextTasks
     {
         public static UTF8Encoding UTF8NoBom => new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);

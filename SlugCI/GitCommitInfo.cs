@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using CmdProcessor;
 using Nuke.Common;
-using Nuke.Common.Tooling;
 using Semver;
+using SlugEnt.CmdProcessor;
 
 namespace Slug.CI
 {

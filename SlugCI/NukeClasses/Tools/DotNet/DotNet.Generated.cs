@@ -1,24 +1,18 @@
 // Generated from https://github.com/nuke-build/nuke/blob/master/build/specifications/DotNet.json
 
-using CmdProcessor;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
-using Nuke.Common;
-//using Nuke.Common.Execution;
 using Nuke.Common.Tooling;
-using Nuke.Common.Tools;
 using Nuke.Common.Utilities.Collections;
 using Slug.CI;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
-using System.Text;
+
+using SlugEnt.CmdProcessor;
 
 namespace Nuke.Common.Tools.DotNet
 {

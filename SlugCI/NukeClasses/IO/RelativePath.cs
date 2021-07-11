@@ -1,12 +1,11 @@
 using System;
 using System.Diagnostics;
-using System.Linq;
 using JetBrains.Annotations;
 using static Nuke.Common.IO.PathConstruction;
 
 namespace Nuke.Common.IO
 {
-    [PublicAPI]
+	[PublicAPI]
     [Serializable]
     [DebuggerDisplay("{" + nameof(_path) + "}")]
     public class RelativePath

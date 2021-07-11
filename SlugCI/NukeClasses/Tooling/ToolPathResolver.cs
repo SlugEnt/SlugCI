@@ -7,13 +7,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
-using Nuke.Common.IO;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
 
 namespace Nuke.Common.Tooling
 {
-    [PublicAPI]
+	[PublicAPI]
     public static class ToolPathResolver
     {
         public static string EmbeddedPackagesDirectory;

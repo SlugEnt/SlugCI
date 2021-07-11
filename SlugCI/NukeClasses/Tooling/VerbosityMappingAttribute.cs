@@ -3,14 +3,12 @@
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using JetBrains.Annotations;
 //using Nuke.Common.Execution;
 
 namespace Nuke.Common.Tooling
 {
-    [PublicAPI]
+	[PublicAPI]
     public class VerbosityMappingAttribute //: BuildExtensionAttributeBase, IOnBuildInitialized
     {
         private readonly Type _targetType;

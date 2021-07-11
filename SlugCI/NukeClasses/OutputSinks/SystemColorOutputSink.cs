@@ -4,14 +4,13 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using Nuke.Common.Utilities;
 
 namespace Nuke.Common.OutputSinks
 {
-    [UsedImplicitly]
+	[UsedImplicitly]
     [ExcludeFromCodeCoverage]
     internal class SystemColorOutputSink : SlugOutputSink
     {

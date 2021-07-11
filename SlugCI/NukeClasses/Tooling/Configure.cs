@@ -6,14 +6,13 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using CmdProcessor;
 using JetBrains.Annotations;
 using Nuke.Common.Utilities.Collections;
-using Slug.CI;
+using SlugEnt.CmdProcessor;
 
 namespace Nuke.Common.Tooling
 {
-    public delegate T Configure<T>(T settings);
+	public delegate T Configure<T>(T settings);
 
     public delegate TSettings Configure<TSettings, in TValue>(TSettings settings, TValue value)
         where TSettings : new();

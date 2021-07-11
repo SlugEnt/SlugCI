@@ -1,11 +1,9 @@
 ﻿using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
-using Semver;
 using Slug.CI.NukeClasses;
 using static Nuke.Common.IO.FileSystemTasks;
 

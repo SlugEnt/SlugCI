@@ -2,14 +2,12 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
-using System.Linq;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 
 namespace Nuke.Common.Utilities
 {
-    public static class JsonExtensions
+	public static class JsonExtensions
     {
         [CanBeNull]
         public static T GetPropertyValueOrNull<T>(this JObject jobject, string name)

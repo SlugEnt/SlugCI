@@ -6,13 +6,12 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using JetBrains.Annotations;
 using static Nuke.Common.IO.PathConstruction;
 
 namespace Nuke.Common.IO
 {
-    [PublicAPI]
+	[PublicAPI]
     [Serializable]
     [TypeConverter(typeof(TypeConverter))]
     [DebuggerDisplay("{" + nameof(_path) + "}")]

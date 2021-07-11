@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using CmdProcessor;
+using SlugEnt.CmdProcessor;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 
 namespace Slug.CI.SlugBuildStages

@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Drawing;
-using System.Linq;
 using System.Text.Json;
-using System.Xml.Linq;
-using System.Xml.XPath;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;

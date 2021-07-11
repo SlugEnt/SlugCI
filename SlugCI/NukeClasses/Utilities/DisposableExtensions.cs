@@ -3,12 +3,11 @@
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
 using System;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace Nuke.Common.Utilities
 {
-    public static class DisposableExtensions
+	public static class DisposableExtensions
     {
         public static IDisposable CombineWith(this IDisposable disposable, [InstantHandle] Action setup = null, [InstantHandle] Action cleanup = null)
         {

@@ -4,12 +4,11 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using JetBrains.Annotations;
 
 namespace Nuke.Common.Tooling
 {
-    [PublicAPI]
+	[PublicAPI]
     [ExcludeFromCodeCoverage]
     public static partial class ToolSettingsExtensions
     {

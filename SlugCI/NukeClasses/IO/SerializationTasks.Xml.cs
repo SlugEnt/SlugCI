@@ -2,15 +2,13 @@
 // Distributed under the MIT License.
 // https://github.com/nuke-build/nuke/blob/master/LICENSE
 
-using System;
 using System.IO;
-using System.Linq;
 using System.Xml.Serialization;
 using JetBrains.Annotations;
 
 namespace Nuke.Common.IO
 {
-    public static partial class SerializationTasks
+	public static partial class SerializationTasks
     {
         public static void XmlSerializeToFile(object obj, string path)
         {
