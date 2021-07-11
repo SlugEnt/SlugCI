@@ -4,6 +4,7 @@ using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.ReportGenerator;
 using Slug.CI.NukeClasses;
+using SlugEnt.CmdProcessor;
 
 namespace Slug.CI.SlugBuildStages
 {
@@ -24,7 +25,7 @@ namespace Slug.CI.SlugBuildStages
 
 
 		/// <summary>
-		/// Run Compile process
+		/// Run the coverage tool
 		/// </summary>
 		/// <returns></returns>
 		protected override StageCompletionStatusEnum ExecuteProcess()
@@ -49,6 +50,7 @@ namespace Slug.CI.SlugBuildStages
 			};
 
 			AbsolutePath coverageFile = CISession.CoveragePath / "index.html";
+			SlugCmdProcess slugCmdProcess = new SlugCmdProcess("Code Coverage",SlugCmdProcess.GetDefaultProcessSettings());
 			Process.Start(@"cmd.exe ", @"/c " + coverageFile);
 
 			// TODO Await completion

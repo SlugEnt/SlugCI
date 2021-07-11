@@ -135,13 +135,13 @@ namespace Nuke.Common.Utilities
                         : "Enter a minimum 10 character password:");
 
                 var password = ConsoleUtility.ReadSecret();
-                if (password.IsNullOrEmpty() && EnvironmentInfo.IsOsx)
+                if (String.IsNullOrEmpty(password) && EnvironmentInfo.IsOsx)
                 {
                     generated = true;
                     return GetGeneratedPassword();
                 }
 
-                if (!password.IsNullOrEmpty() && password.Length >= 10)
+                if (!String.IsNullOrEmpty(password) && password.Length >= 10)
                 {
                     generated = false;
                     return password;

@@ -1,4 +1,6 @@
-﻿using Nuke.Common;
+﻿using System;
+using System.Collections.Concurrent;
+using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
@@ -10,6 +12,9 @@ using System.Linq;
 using System.Text.Json;
 using SlugEnt.CmdProcessor;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using System.Diagnostics;
+using JetBrains.Annotations;
+using StringExtensions;
 
 namespace Slug.CI.SlugBuildStages
 {
@@ -216,8 +221,9 @@ namespace Slug.CI.SlugBuildStages
 				try
 				{
 					settings.TargetPath = nugetPackage;
-					IReadOnlyCollection<LineOutColored> nugetOutput = DotNetNuGetPush(settings);
+					(BlockingCollection<ILineOut> nugetOutput, int exitCode) = DotNetNuGetPush(settings);
 					StageOutput.AddRange(nugetOutput);
+					ControlFlow.Assert(exitCode == 0, "Process DotNetBuild failed");
 					if (nugetOutput.Count > 0)
 					{
 						// Look for skipped message.
@@ -279,5 +285,50 @@ namespace Slug.CI.SlugBuildStages
 
 			
 		}
+
+		/// <summary>
+		///   <p>Pushes a package to the server and publishes it.</p>
+		///   <p>For more details, visit the <a href="https://docs.microsoft.com/en-us/dotnet/core/tools/">official website</a>.</p>
+		/// </summary>
+		/// <remarks>
+		///   <p>This is a <a href="http://www.nuke.build/docs/authoring-builds/cli-tools.html#fluent-apis">CLI wrapper with fluent API</a> that allows to modify the following arguments:</p>
+		///   <ul>
+		///     <li><c>&lt;targetPath&gt;</c> via <see cref="DotNetNuGetPushSettings.TargetPath"/></li>
+		///     <li><c>--api-key</c> via <see cref="DotNetNuGetPushSettings.ApiKey"/></li>
+		///     <li><c>--disable-buffering</c> via <see cref="DotNetNuGetPushSettings.DisableBuffering"/></li>
+		///     <li><c>--force-english-output</c> via <see cref="DotNetNuGetPushSettings.ForceEnglishOutput"/></li>
+		///     <li><c>--no-service-endpoint</c> via <see cref="DotNetNuGetPushSettings.NoServiceEndpoint"/></li>
+		///     <li><c>--no-symbols</c> via <see cref="DotNetNuGetPushSettings.NoSymbols"/></li>
+		///     <li><c>--skip-duplicate</c> via <see cref="DotNetNuGetPushSettings.SkipDuplicate"/></li>
+		///     <li><c>--source</c> via <see cref="DotNetNuGetPushSettings.Source"/></li>
+		///     <li><c>--symbol-api-key</c> via <see cref="DotNetNuGetPushSettings.SymbolApiKey"/></li>
+		///     <li><c>--symbol-source</c> via <see cref="DotNetNuGetPushSettings.SymbolSource"/></li>
+		///     <li><c>--timeout</c> via <see cref="DotNetNuGetPushSettings.Timeout"/></li>
+		///   </ul>
+		/// </remarks>
+		private (BlockingCollection<ILineOut>, int) DotNetNuGetPush(DotNetNuGetPushSettings toolSettings = null)
+		{
+			toolSettings = toolSettings ?? new DotNetNuGetPushSettings();
+			ProcessStartInfo processStartInfo = SlugCmdProcess.GetDefaultProcessSettings();
+			ToolSettingsToProcessInfoConverter.Convert(toolSettings, processStartInfo);
+			SlugCmdProcess slugCmdProcess = new SlugCmdProcess("Dot Net Nuget Push", processStartInfo);
+			slugCmdProcess.Execute(DotNetNugetPush_OutputProcessor);
+			return (slugCmdProcess.Output, slugCmdProcess.ExitCode);
+		}
+
+
+		[CanBeNull]
+		private LineOutColored? DotNetNugetPush_OutputProcessor(EnumProcessOutputType type, string text)
+		{
+			if (text == null) return null;
+			EnumProcessOutputType processType = type;
+			LineOutColored lineOutColored;
+			ReadOnlySpan<char> textSpan = text;
+
+			if (type == EnumProcessOutputType.ProcessErr) return LineOutColored.Error(text);
+
+			return LineOutColored.Normal(text);
+		}
+
 	}
 }

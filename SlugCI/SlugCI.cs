@@ -379,7 +379,7 @@ namespace Slug.CI
 				slugCIProject.AssemblyName = x.GetProperty("AssemblyName");
 				slugCIProject.PackageId = x.GetProperty("PackageId");
 
-				ControlFlow.Assert(!slugCIProject.AssemblyName.IsNullOrEmpty(),
+				ControlFlow.Assert(!String.IsNullOrEmpty(slugCIProject.AssemblyName),
 				                   "Unable to locate the Assembly name from the .csproj for project [" + slugCIProject.Name + "]");
 			}
 

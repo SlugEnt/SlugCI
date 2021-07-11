@@ -101,25 +101,15 @@ namespace Slug.CI.SlugBuildStages
 		///     <li><c>/property</c> via <see cref="DotNetBuildSettings.Properties"/></li>
 		///   </ul>
 		/// </remarks>
-		public (BlockingCollection<ILineOut>, int) DotNetBuild(DotNetBuildSettings toolSettings = null)
+		private (BlockingCollection<ILineOut>, int) DotNetBuild(DotNetBuildSettings toolSettings = null)
 		{
 			toolSettings = toolSettings ?? new DotNetBuildSettings();
-
-
 			ProcessStartInfo processStartInfo = SlugCmdProcess.GetDefaultProcessSettings();
 			ToolSettingsToProcessInfoConverter.Convert(toolSettings, processStartInfo);
 			SlugCmdProcess slugCmdProcess = new SlugCmdProcess("Dot Net Build", processStartInfo);
 			slugCmdProcess.Execute(DotNetBuild_OutputProcessor);
 
 			return (slugCmdProcess.Output, slugCmdProcess.ExitCode);
-
-
-
-			/*
-            using var process = ProcessTasks.StartProcess(toolSettings);
-            process.AssertZeroExitCode();
-            return process.Output;
-            */
 		}
 
 
@@ -145,8 +135,5 @@ namespace Slug.CI.SlugBuildStages
 			}
 		return LineOutColored.Normal(text);
 		}
-
-
-
 	}
 }

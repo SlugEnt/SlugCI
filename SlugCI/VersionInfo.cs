@@ -1,4 +1,5 @@
-﻿using Nuke.Common.Utilities;
+﻿using System;
+using Nuke.Common.Utilities;
 using Semver;
 
 namespace Slug.CI
@@ -41,7 +42,7 @@ namespace Slug.CI
 			AssemblyVersion = prefix + "0";
 
 			// File Version
-			if ( !semVersion.Prerelease.IsNullOrEmpty() ) {
+			if ( ! String.IsNullOrEmpty(semVersion.Prerelease) ) {
 				PreRelease = new SemVersionPreRelease(semVersion.Prerelease);
 				int fileNum = 1;
 				if ( PreRelease.ReleaseType == "alpha" )

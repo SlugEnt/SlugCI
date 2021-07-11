@@ -147,7 +147,7 @@ namespace Slug.CI
 				
 				Console.ForegroundColor = Color.WhiteSmoke;
 
-				Misc.WriteMainHeader("ConvertToSlugCI::  " + Name);
+				Misc.WriteMainHeader("SlugCI::  " + Name);
 
 
 				// Set log level to std.  Let the process override if necessary.

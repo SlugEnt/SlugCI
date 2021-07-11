@@ -471,7 +471,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		private static ConsoleKey PromptAndGetResponse (ConsoleKey defaultKey,List<ConsoleKey> validKeys, string prompt = "") {
 			Console.WriteLine();
-			if (prompt.IsNullOrEmpty())
+			if (String.IsNullOrEmpty(prompt))
 				Console.Write("Press the letter of your choice, or Enter to accept current value.",Color.Magenta);
 			else Console.Write(prompt,Color.Magenta);
 			Console.WriteLine("",Color.WhiteSmoke);
@@ -508,7 +508,7 @@ namespace Slug.CI
 		/// <param name="verbosity"></param>
 		/// <param name="ciSession"></param>
 		private static void SetVerbosity (string verbosity, CISession ciSession) {
-			if ( verbosity.IsNullOrEmpty() ) return;
+			if ( String.IsNullOrEmpty(verbosity) ) return;
 			List<string> methods = verbosity.Split('|').ToList();
 			foreach ( string method in methods ) {
 				string [] splits = method.Split(':');
