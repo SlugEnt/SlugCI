@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using CmdProcessor;
 using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
@@ -55,7 +56,7 @@ namespace Slug.CI.SlugBuildStages
 
 			};
 
-			(IReadOnlyCollection<LineOut> testOutput, int processExitCode) =  DotNetTest(settings);
+			(IReadOnlyCollection<LineOutColored> testOutput, int processExitCode) =  DotNetTest(settings);
 			StageOutput.AddRange(testOutput);
 
 			if ( processExitCode != 0 ) return StageCompletionStatusEnum.Failure;

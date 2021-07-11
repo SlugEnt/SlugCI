@@ -40,11 +40,18 @@ namespace Slug.CI.SlugBuildStages
 			}
 
 			FileSystemTasks.EnsureExistingDirectory(CISession.CoveragePath);
-			ReportGeneratorTasks.ReportGenerator(r => r.SetTargetDirectory(CISession.CoveragePath)
-			                                           .SetProcessWorkingDirectory(CISession.CoveragePath)
-			                                           .SetReportTypes(ReportTypes.HtmlInline, ReportTypes.Badges)
-			                                           .SetReports("coverage.cobertura.xml")
-			                                           .SetProcessToolPath("reportgenerator"));
+			ReportGeneratorSettings settings = new ReportGeneratorSettings()
+			{
+				ProcessWorkingDirectory = CISession.CoveragePath,
+				TargetDirectory = CISession.CoveragePath,
+				ProcessToolPath = "reportgenerator",
+				ReportsInternal = new List<string>() {"coverage.cobertura.xml"},
+				ReportTypesInternal = new List<ReportTypes>()
+				{
+					ReportTypes.Badges,
+					ReportTypes.HtmlInline
+				},
+			};
 
 			AbsolutePath coverageFile = CISession.CoveragePath / "index.html";
 			Process.Start(@"cmd.exe ", @"/c " + coverageFile);

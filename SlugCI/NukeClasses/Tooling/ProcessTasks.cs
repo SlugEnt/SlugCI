@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CmdProcessor;
 using JetBrains.Annotations;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
@@ -189,14 +190,14 @@ namespace Nuke.Common.Tooling
                 startInfo.Environment[key] = value;
         }
 
-        private static BlockingCollection<LineOut> GetOutputCollection(
+        private static BlockingCollection<LineOutColored> GetOutputCollection(
             Process process,
             bool logTimestamp,
             [CanBeNull] Action<OutputType, string> logger,
             [CanBeNull] StreamWriter logFile,
             Func<string, string> outputFilter)
         {
-            var output = new BlockingCollection<LineOut>();
+            var output = new BlockingCollection<LineOutColored>();
 
             string GetProcessedOutput(string data)
                 => logTimestamp
@@ -210,7 +211,7 @@ namespace Nuke.Common.Tooling
                 if (e.Data == null)
                     return;
 
-                output.Add(LineOut.Normal(e.Data));
+                output.Add(LineOutColored.Normal(e.Data));
 
                 var processedOutput = GetProcessedOutput(e.Data);
                 logFile?.WriteLine($"[STD] {processedOutput}");
@@ -224,7 +225,7 @@ namespace Nuke.Common.Tooling
                 if (e.Data == null)
                     return;
 
-                output.Add(LineOut.Error(e.Data));
+                output.Add(LineOutColored.Error(e.Data));
 
                 var processedOutput = GetProcessedOutput(e.Data);
                 logFile?.WriteLine($"[ERR] {processedOutput}");

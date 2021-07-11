@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CmdProcessor;
 using Nuke.Common;
 using Nuke.Common.Tooling;
 using Semver;
@@ -172,12 +173,12 @@ namespace Slug.CI
 		/// Constructor - From the output of a git show with full information
 		/// </summary>
 		/// <param name="outputLines">The output of the ShowCommitNoDiff command</param>
-		public GitCommitInfo (List<LineOut> outputLines) {
+		public GitCommitInfo (List<LineOutColored> outputLines) {
 			// First, confirm we have the right output/
 			ControlFlow.Assert(outputLines[0].Text.StartsWith(GitProcessor.GIT_SHOW_SLUGCI), "The output provided is not a SlugCI Commit Output structure!");
 			outputLines.RemoveAt(0);
 
-			foreach ( LineOut line in outputLines ) {
+			foreach ( LineOutColored line in outputLines ) {
 				string lineOut = line.Text;
 				if ( line.Text.StartsWith(GitProcessor.GIT_SHOW_COMMIT) ) CommitHash = line.Text.Substring(GitProcessor.GIT_SHOW_COMMIT.Length+1);
 				else if ( line.Text.StartsWith(GitProcessor.GIT_SHOW_PARENTS) ) {

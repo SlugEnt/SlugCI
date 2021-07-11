@@ -5,7 +5,7 @@
 
     <IsPackable>false</IsPackable>
 
-    <AssemblyVersion>1.0.0.69</AssemblyVersion>
+    <AssemblyVersion>1.0.0.87</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +16,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SlugCI\SlugCI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="CmdProcessor">
+      <HintPath>..\..\..\Practice\CmdProcessor\CmdProcessor\bin\Debug\net5.0\CmdProcessor.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

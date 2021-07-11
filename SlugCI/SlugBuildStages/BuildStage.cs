@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using CmdProcessor;
 using Nuke.Common;
 using Nuke.Common.Tooling;
 using Slug.CI.NukeClasses;
@@ -54,7 +55,7 @@ namespace Slug.CI
 		/// <summary>
 		/// All recorded output from the stage.  Note: How much is output is determined by the Verbosity setting for the stage.
 		/// </summary>
-		public List<LineOut> StageOutput { get; private set; } = new List<LineOut>();
+		public List<ILineOut> StageOutput { get; private set; } = new List<ILineOut>();
 
 
 		/// <summary>
@@ -267,7 +268,7 @@ namespace Slug.CI
 		/// </summary>
 		/// <param name="text"></param>
 		public void AOT_Success (string text) {
-			StageOutput.Add(LineOut.Success(text));
+			StageOutput.Add(LineOutColored.Success(text));
 			if (ShouldLogToConsoleRealTime) Console.WriteLine(text,Color.Green);
 		}
 
@@ -279,12 +280,12 @@ namespace Slug.CI
 		protected void AOT_Error(Exception exception) {
 			string exceptionSeparator = "************************  [ Exception Encountered ] ************************";
 			int start = StageOutput.Count;
-			StageOutput.Add(LineOut.Error(exceptionSeparator));
-			StageOutput.Add(LineOut.Error(exception.Message));
-			StageOutput.Add(LineOut.Error(exceptionSeparator));
-			StageOutput.Add(LineOut.NewLine());
-			StageOutput.Add(LineOut.Error(exception.ToString()));
-			StageOutput.Add(LineOut.NewLine());
+			StageOutput.Add(LineOutColored.Error(exceptionSeparator));
+			StageOutput.Add(LineOutColored.Error(exception.Message));
+			StageOutput.Add(LineOutColored.Error(exceptionSeparator));
+			StageOutput.Add(LineOutColored.NewLine());
+			StageOutput.Add(LineOutColored.Error(exception.ToString()));
+			StageOutput.Add(LineOutColored.NewLine());
 
 			
 			if (ShouldLogToConsoleRealTime) Print_StageOutput(start);
@@ -298,7 +299,7 @@ namespace Slug.CI
 		/// <param name="text"></param>
 		protected void AOT_Error (string text)
 		{
-			StageOutput.Add(LineOut.Error(text));
+			StageOutput.Add(LineOutColored.Error(text));
 			if (ShouldLogToConsoleRealTime) Console.WriteLine(text,Color.Red);
 		}
 
@@ -309,7 +310,7 @@ namespace Slug.CI
 		/// <param name="text"></param>
 		protected void AOT_Warning(string text)
 		{
-			StageOutput.Add(LineOut.Warning(text));
+			StageOutput.Add(LineOutColored.Warning(text));
 			if (ShouldLogToConsoleRealTime) Console.WriteLine(text, Color.Yellow);
 		}
 
@@ -320,7 +321,7 @@ namespace Slug.CI
 		/// <param name="text"></param>
 		protected void AOT_Info(string text)
 		{
-			StageOutput.Add(LineOut.Info(text));
+			StageOutput.Add(LineOutColored.Info(text));
 			if (ShouldLogToConsoleRealTime) Console.WriteLine(text, Color.Cyan);
 		}
 
@@ -331,7 +332,7 @@ namespace Slug.CI
 		/// <param name="text"></param>
 		protected void AOT_Normal(string text)
 		{
-			StageOutput.Add(LineOut.Normal(text));
+			StageOutput.Add(LineOutColored.Normal(text));
 			if (ShouldLogToConsoleRealTime) Console.WriteLine(text, Color.WhiteSmoke);
 		}
 
@@ -342,7 +343,7 @@ namespace Slug.CI
 		/// <param name="text"></param>
 		protected void AOT_Normal(string text, Color textColor)
 		{
-			StageOutput.Add(LineOut.Normal(text,textColor));
+			StageOutput.Add(LineOutColored.Normal(text,textColor));
 			if (ShouldLogToConsoleRealTime) Console.WriteLine(text, textColor);
 		}
 
@@ -351,7 +352,7 @@ namespace Slug.CI
 		/// Writes a new blank line
 		/// </summary>
 		protected void AOT_NewLine () {
-			StageOutput.Add(LineOut.NewLine());
+			StageOutput.Add(LineOutColored.NewLine());
 			if (ShouldLogToConsoleRealTime) Console.WriteLine();
 		}
 
@@ -368,7 +369,8 @@ namespace Slug.CI
 			int count = endLine - startLine;
 			if ( startLine > StageOutput.Count ) return;
 			for (int i = startLine; i < endLine; i++) 
-				Console.WriteLine(StageOutput[i].Text,StageOutput[i].FGColor);
+				StageOutput[i].WriteToConsole();
+				//Console.WriteLine(StageOutput[i].Text,StageOutput[i].FGColor);
 		}
 	}
 }

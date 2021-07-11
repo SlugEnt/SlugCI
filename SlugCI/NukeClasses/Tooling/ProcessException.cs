@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using CmdProcessor;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
 
@@ -24,7 +25,7 @@ namespace Nuke.Common.Tooling
                 .AppendLine($"{indentation}> {process.FileName.DoubleQuoteIfNeeded()} {process.Arguments}")
                 .AppendLine($"{indentation}@ {process.WorkingDirectory}");
 
-            var errorOutput = process.Output.Where(x => x.OutputType == OutputType.Err).ToList();
+            var errorOutput = process.Output.Where(x => x.EnumProcessOutputType == EnumProcessOutputType.ProcessErr).ToList();
             if (errorOutput.Count > 0)
             {
                 messageBuilder.AppendLine("Error output:");

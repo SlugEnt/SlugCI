@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyVersion>0.28.0.201</AssemblyVersion>
+    <AssemblyVersion>0.28.0.246</AssemblyVersion>
     <RootNamespace>Slug.CI</RootNamespace>
     <Authors>Scott Herrmann</Authors>
     <Company>SlugEnt</Company>
@@ -61,7 +61,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="DotNet\" />
     <Folder Include="NukeClasses\NukeMisc\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="CmdProcessor">
+      <HintPath>..\..\..\Practice\CmdProcessor\CmdProcessor\bin\Debug\net5.0\CmdProcessor.dll</HintPath>
+    </Reference>
+    <Reference Include="StringExtensions">
+      <HintPath>..\..\StringExtensions\Src\StringExtensions\bin\Debug\net5.0\StringExtensions.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

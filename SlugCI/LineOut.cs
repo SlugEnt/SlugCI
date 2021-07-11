@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using Nuke.Common.Tooling;
 using Console = Colorful.Console;
-
+/*
 namespace Slug.CI
 {
 	/// <summary>
@@ -165,3 +165,4 @@ namespace Slug.CI
 		}
 	}
 }
+*/
