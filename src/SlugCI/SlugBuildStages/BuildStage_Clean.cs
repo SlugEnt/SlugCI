@@ -33,7 +33,7 @@ namespace Slug.CI.SlugBuildStages
 			IReadOnlyCollection<AbsolutePath> directoriesToClean = CISession.SolutionPath.GlobDirectories("**/bin", "**/obj");
 			foreach (AbsolutePath dir in directoriesToClean)
 			{
-				FileSystemTasks.EnsureCleanDirectory(dir);
+			//	FileSystemTasks.EnsureCleanDirectory(dir);
 			}
 
 
