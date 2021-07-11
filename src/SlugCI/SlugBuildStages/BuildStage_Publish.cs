@@ -266,13 +266,16 @@ namespace Slug.CI.SlugBuildStages
 					// Loop thru projects looking for that assembly name
 					foreach ( SlugCIProject project in CISession.Projects ) {
 						if ( project.AssemblyName.ToLower() == fileName || project.PackageId.ToLower() == fileName) {
+							// TODO - Remove - not needed anylonger.
 							// For Tool Deployed projects, we need to copy the current version out to the deploy folder 
+							/*
 							if ( project.Deploy == SlugCIDeployMethod.Tool ) {
 								AbsolutePath deployFile = CISession.DeployCopyPath / project.Name / CISession.PublishTarget.ToString() / "Version.json";
 								ToolVersionJSON toolVersionJSON = new ToolVersionJSON() {ToolVersion = CISession.VersionInfo.SemVersionAsString};
 								string json = JsonSerializer.Serialize<ToolVersionJSON>(toolVersionJSON, ToolVersionJSON.SerializerOptions());
 								File.WriteAllText(deployFile, json);
 							}
+							*/
 							project.Results.PublishedSuccess = true;
 							break;
 						}
