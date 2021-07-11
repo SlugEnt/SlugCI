@@ -1,0 +1,29 @@
+{
+  "ConfigStructureVersion": "0.30.0",
+  "UseCodeCoverage": true,
+  "CodeCoverageThreshold": 90,
+  "DeployProdRoot": null,
+  "DeployAlphaRoot": null,
+  "DeployBetaRoot": null,
+  "DeployDevRoot": null,
+  "DeployToVersionedFolder": true,
+  "DeployFolderUsesSemVer": true,
+  "DeployToAssemblyFolders": false,
+  "GitRemote": null,
+  "AngularDeployRootName": null,
+  "Projects": [
+    {
+      "Name": "SlugCI",
+      "Deploy": "Tool",
+      "HasTypeWriterScripts": false,
+      "IsTestProject": false
+    },
+    {
+      "Name": "Test_SlugCI",
+      "Deploy": "None",
+      "HasTypeWriterScripts": false,
+      "IsTestProject": true
+    }
+  ],
+  "AngularProjects": []
+}

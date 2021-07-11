@@ -61,6 +61,10 @@
     "Setup": {
       "commandName": "Project",
       "commandLineArgs": "--rootdir C:\\A_Dev\\slugent\\SlugCISample\\src --setup"
+    },
+    "SlugCI - ToolDeploy": {
+      "commandName": "Project",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\slugent\\SlugCI --deployto alpha --faststart false --skipangular --skipnuget"
     }
   }
 }
