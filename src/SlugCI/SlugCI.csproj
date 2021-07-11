@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyVersion>0.30.0.253</AssemblyVersion>
+    <AssemblyVersion>0.30.0.259</AssemblyVersion>
     <RootNamespace>Slug.CI</RootNamespace>
     <Authors>Scott Herrmann</Authors>
     <Company>SlugEnt</Company>
@@ -27,7 +27,7 @@
     <PackAsTool>true</PackAsTool>
     <PackageId>dotnet-SlugCI</PackageId>
     <ToolCommandName>slugci</ToolCommandName>
-    <PackageOutputPath>../nupkg</PackageOutputPath>
+    <PackageOutputPath>../../artifacts</PackageOutputPath>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageLicenseExpression></PackageLicenseExpression>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
@@ -39,7 +39,7 @@
     <EmbeddedResource Remove="NukeClasses\Tools\GitVersion\**" />
     <None Remove="CustomNuke\**" />
     <None Remove="NukeClasses\Tools\GitVersion\**" />
-    <None Include="..\LICENSE.md">
+    <None Include="..\..\LICENSE.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
