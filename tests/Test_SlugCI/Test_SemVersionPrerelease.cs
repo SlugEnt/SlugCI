@@ -32,10 +32,10 @@ namespace Test_SlugCI
 			
 		}
 
-		[TestCase("alpha",4,IncrementTypeEnum.None,"alpha.0004")]
-		[TestCase("alpha", 4, IncrementTypeEnum.Patch, "alpha.0004a")]
-		[TestCase("alpha", 4, IncrementTypeEnum.Minor, "alpha.0004b")]
-		[TestCase("alpha", 4, IncrementTypeEnum.Major, "alpha.0004c")]
+		[TestCase("alpha",4,IncrementTypeEnum.None,"alpha-0004")]
+		[TestCase("alpha", 4, IncrementTypeEnum.Patch, "alpha-0004a")]
+		[TestCase("alpha", 4, IncrementTypeEnum.Minor, "alpha-0004b")]
+		[TestCase("alpha", 4, IncrementTypeEnum.Major, "alpha-0004c")]
 
 		public void Tag_success (string releaseType, int numeric, IncrementTypeEnum incrementType,string expTag) {
 			SemVersionPreRelease sem = new SemVersionPreRelease(releaseType, numeric, incrementType);
@@ -46,22 +46,22 @@ namespace Test_SlugCI
 		}
 
 
-		[TestCase("alpha.0016c", IncrementTypeEnum.Major, "alpha.0017c")]
-		[TestCase("alpha.0016c", IncrementTypeEnum.Minor, "alpha.0017c")]
-		[TestCase("alpha.0016c", IncrementTypeEnum.Patch, "alpha.0017c")]
-		[TestCase("alpha.0016c", IncrementTypeEnum.None, "alpha.0017c")]
-		[TestCase("alpha.0016b", IncrementTypeEnum.Major, "alpha.0017c")]
-		[TestCase("alpha.0013c", IncrementTypeEnum.Minor, "alpha.0014c")]
-		[TestCase("alpha.0013b", IncrementTypeEnum.Minor, "alpha.0014b")]
-		[TestCase("alpha.0013a", IncrementTypeEnum.Minor, "alpha.0014b")]
-		[TestCase("alpha.0011c", IncrementTypeEnum.Patch, "alpha.0012c")]
-		[TestCase("alpha.0011b", IncrementTypeEnum.Patch, "alpha.0012b")]
-		[TestCase("alpha.0011a", IncrementTypeEnum.Patch, "alpha.0012a")]
-		[TestCase("alpha.0011a", IncrementTypeEnum.None, "alpha.0012a")]
-		[TestCase("alpha.0011", IncrementTypeEnum.None, "alpha.0012")]
-		[TestCase("alpha.0011", IncrementTypeEnum.Major, "alpha.0012c")]
-		[TestCase("alpha.0011", IncrementTypeEnum.Minor, "alpha.0012b")]
-		[TestCase("alpha.0011",IncrementTypeEnum.Patch,"alpha.0012a")]
+		[TestCase("alpha.0016c", IncrementTypeEnum.Major, "alpha-0017c")]
+		[TestCase("alpha.0016c", IncrementTypeEnum.Minor, "alpha-0017c")]
+		[TestCase("alpha.0016c", IncrementTypeEnum.Patch, "alpha-0017c")]
+		[TestCase("alpha.0016c", IncrementTypeEnum.None, "alpha-0017c")]
+		[TestCase("alpha.0016b", IncrementTypeEnum.Major, "alpha-0017c")]
+		[TestCase("alpha.0013c", IncrementTypeEnum.Minor, "alpha-0014c")]
+		[TestCase("alpha.0013b", IncrementTypeEnum.Minor, "alpha-0014b")]
+		[TestCase("alpha.0013a", IncrementTypeEnum.Minor, "alpha-0014b")]
+		[TestCase("alpha.0011c", IncrementTypeEnum.Patch, "alpha-0012c")]
+		[TestCase("alpha.0011b", IncrementTypeEnum.Patch, "alpha-0012b")]
+		[TestCase("alpha.0011a", IncrementTypeEnum.Patch, "alpha-0012a")]
+		[TestCase("alpha.0011a", IncrementTypeEnum.None, "alpha-0012a")]
+		[TestCase("alpha.0011", IncrementTypeEnum.None, "alpha-0012")]
+		[TestCase("alpha.0011", IncrementTypeEnum.Major, "alpha-0012c")]
+		[TestCase("alpha.0011", IncrementTypeEnum.Minor, "alpha-0012b")]
+		[TestCase("alpha.0011",IncrementTypeEnum.Patch,"alpha-0012a")]
 		[Test]
 		public void BumpPatch_Success (string preRelease, IncrementTypeEnum incrementType, string expected) {
 			SemVersionPreRelease start = new SemVersionPreRelease(preRelease);
