@@ -18,12 +18,6 @@
 
 
 		/// <summary>
-		/// Stage completed, but it might not have done so successfully.
-		/// </summary>
-		Warning = 50,
-
-
-		/// <summary>
 		/// Stage was unable to successfully complete.
 		/// </summary>
 		Failure = 100,
@@ -32,7 +26,13 @@
 		/// <summary>
 		/// Stage was purposefully skipped
 		/// </summary>
-		Skipped = 200,
+		Skipped = 150,
+
+
+		/// <summary>
+		/// Stage completed, but it might not have done so successfully.
+		/// </summary>
+		Warning = 200,
 
 
 		/// <summary>

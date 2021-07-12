@@ -31,6 +31,9 @@ namespace Slug.CI
 		/// <param name="info">Displays detailed information about the Solution and Environment</param>
 		/// <param name="failedtestsok">If true, unit tests that fail do not stop the build from continuing</param>
 		/// <param name="verbosity">Sets the verbosity of command output.  You can set value for all commands or just certain commands.  Be careful with all, it can generate a LOT of output on debug level
+		/// <param name="setup">Perform initial setup of a repository</param>
+		/// <param name="skipangular">Skips the Angular Build</param>
+		/// <param name="skiptests">Will skip unit testing completely</param>
 		/// <para>  The best is set to specific methods via:   method:value|method:value|method:value.</para>
 		/// <para>  Valid methods are:</para>
 		/// <para>    compile, pack, gitversion</para>
@@ -47,7 +50,8 @@ namespace Slug.CI
 		                                   bool failedtestsok = false,
 		                                   bool info = false,
 		                                   bool setup = false,
-		                                   bool skipangular = false) {
+		                                   bool skipangular = false,
+		                                   bool skiptests = false) {
 			CISession ciSession = new CISession();
 
 			Logger.SetOutputSink(CISession.OutputSink);
@@ -114,6 +118,10 @@ namespace Slug.CI
 
 				// Setup mode
 				ciSession.IsInSetupMode = setup;
+
+				// Skip unit tests
+				ciSession.SkipTests = skiptests;
+
 
 				// Perform Validation 
 				ValidateDependencies validation = new ValidateDependencies(ciSession);
@@ -252,6 +260,12 @@ namespace Slug.CI
 					lineColor = Color.WhiteSmoke;
 				Console.WriteLine(" (A)  Skip Angular Build & Publish  [ " + ciSession.SkipAngularBuild + " ]", lineColor);
 
+				// Menu Item
+				if (ciSession.SkipTests)
+					lineColor = Color.Yellow;
+				else
+					lineColor = Color.WhiteSmoke;
+				Console.WriteLine(" (T)  Skip All Test Runs  [ " + ciSession.SkipTests + " ]", lineColor);
 
 				// Menu Item
 				if ( ciSession.FailedUnitTestsOkay )
@@ -281,6 +295,8 @@ namespace Slug.CI
 					ConsoleKey.V,
 					ConsoleKey.R,
 					ConsoleKey.S,
+					ConsoleKey.T,
+					ConsoleKey.U,
 					ConsoleKey.X,
 					ConsoleKey.Enter,
 				};
@@ -293,6 +309,8 @@ namespace Slug.CI
 				else if ( answer == ConsoleKey.A ) ciSession.SkipAngularBuild = !ciSession.SkipAngularBuild;
 				else if ( answer == ConsoleKey.X ) return false;
 				else if ( answer == ConsoleKey.R ) ciSession.GitProcessor.RefreshUncommittedChanges();
+				else if ( answer == ConsoleKey.T ) ciSession.SkipTests = true;
+				else if ( answer == ConsoleKey.U ) ciSession.FailedUnitTestsOkay = true;
 				else if ( answer == ConsoleKey.C ) {
 					BuildStage_GitCleanup gitCleanup = new BuildStage_GitCleanup(ciSession);
 					if (!gitCleanup.Execute() ) Console.WriteLine("Git Cleanup Failed.");

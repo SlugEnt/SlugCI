@@ -277,6 +277,13 @@ namespace Slug.CI.NukeClasses
 		/// </summary>
 		public string SlugCI_Version { get; set; }
 
+
+		/// <summary>
+		/// If true unit tests are not run at all.
+		/// </summary>
+		public bool SkipTests { get; set; }
+
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
