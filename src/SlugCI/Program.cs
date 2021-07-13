@@ -368,26 +368,6 @@ namespace Slug.CI
 			Console.WriteLine("You are currently targeting a build to: {0}",ciSession.PublishTarget.ToString());
 
 			bool continueLooping = true;
-/*			PublishTargetEnum target = PublishTargetEnum.Alpha;
-
-			Console.WriteLine("What branch do you want to override the version to?");
-			Console.WriteLine(" (A) Alpha");
-			Console.WriteLine(" (B) Beta");
-			Console.WriteLine(" (M) Main / Prod");
-			Console.WriteLine(" (x) Exit / Cancel");
-			while ( continueLooping ) {
-				ConsoleKeyInfo keyInfo = Console.ReadKey();
-				if ( keyInfo.Key == ConsoleKey.X ) return;
-				if ( keyInfo.Key == ConsoleKey.A ) target = PublishTargetEnum.Alpha;
-				else if ( keyInfo.Key == ConsoleKey.B ) target = PublishTargetEnum.Beta;
-				else if ( keyInfo.Key == ConsoleKey.M )
-					target = PublishTargetEnum.Production;
-				else
-					continue;
-				// If here we have a valid selection - exit the loop
-				break;
-			}
-*/
 			PublishTargetEnum target = ciSession.PublishTarget;
 			string branchName = target switch
 			{
@@ -401,18 +381,17 @@ namespace Slug.CI
 
 			Console.WriteLine("{0}The latest version on this Branch is: {1}", Environment.NewLine, currentMaxVersion);
 			if ( target == PublishTargetEnum.Production ) {
-				 Console.WriteLine("  (1) To bump the Patch / Revision number from {0} to {1}",currentMaxVersion.Patch, currentMaxVersion.Patch + 1);
-				 Console.WriteLine("  (2) To bump the Minor version number from {0} to {1}", currentMaxVersion.Minor,currentMaxVersion.Minor + 1);
-				 Console.WriteLine("  (3) To bump the Major version number from {0} to {1}", currentMaxVersion.Major,currentMaxVersion.Major+1);
-				 
+				Console.WriteLine("  (1) To bump the Major version number from {0} to {1}", currentMaxVersion.Major, currentMaxVersion.Major + 1);
+				Console.WriteLine("  (2) To bump the Minor version number from {0} to {1}", currentMaxVersion.Minor,currentMaxVersion.Minor + 1);
+				Console.WriteLine("  (3) To bump the Patch number from {0} to {1}", currentMaxVersion.Patch, currentMaxVersion.Patch + 1);
 
-				 while ( continueLooping ) {
+				while ( continueLooping ) {
 					 ConsoleKeyInfo keyInfo = Console.ReadKey();
-					if ( keyInfo.Key == ConsoleKey.D1 )
+					 if ( keyInfo.Key == ConsoleKey.D3 )
 						 newManualVersion = new SemVersion(currentMaxVersion.Major, currentMaxVersion.Minor, currentMaxVersion.Patch + 1);
 					 else if ( keyInfo.Key == ConsoleKey.D2 )
 						 newManualVersion = new SemVersion(currentMaxVersion.Major, currentMaxVersion.Minor + 1, 0);
-					 else if ( keyInfo.Key == ConsoleKey.D3 )
+					 else if ( keyInfo.Key == ConsoleKey.D1 )
 						newManualVersion = new SemVersion(currentMaxVersion.Major + 1, 0, 0);
 					else
 						continue;
@@ -433,16 +412,16 @@ namespace Slug.CI
 			// Alpha / Beta branch
 			else {
 				SemVersionPreRelease svpr = new SemVersionPreRelease(currentMaxVersion.Prerelease);
-				Console.WriteLine("  (1) To bump the Patch / Revision number from {0} to {1}", currentMaxVersion.Patch, currentMaxVersion.Patch + 1);
+				Console.WriteLine("  (1) To bump the Major version number from {0} to {1}", currentMaxVersion.Major, currentMaxVersion.Major + 1);
 				Console.WriteLine("  (2) To bump the Minor version number from {0} to {1}", currentMaxVersion.Minor, currentMaxVersion.Minor + 1);
-				Console.WriteLine("  (3) To bump the Major version number from {0} to {1}", currentMaxVersion.Major, currentMaxVersion.Major + 1);
-				Console.WriteLine("  (4) To bump the revision number from {0} to {1}",svpr.ReleaseNumber,svpr.ReleaseNumber+1);
+				Console.WriteLine("  (3) To bump the Patch number from {0} to {1}", currentMaxVersion.Patch, currentMaxVersion.Patch + 1);
+				Console.WriteLine("  (4) To bump the pre-release number from {0} to {1}",svpr.ReleaseNumber,svpr.ReleaseNumber+1);
 
 
 				while (continueLooping)
 				{
 					ConsoleKeyInfo keyInfo = Console.ReadKey();
-					if ( keyInfo.Key == ConsoleKey.D1 ) {
+					if ( keyInfo.Key == ConsoleKey.D3 ) {
 						newManualVersion = new SemVersion(currentMaxVersion.Major, currentMaxVersion.Minor, currentMaxVersion.Patch + 1);
 						svpr =new SemVersionPreRelease(branchName,0,IncrementTypeEnum.Patch);
 					}
@@ -451,7 +430,7 @@ namespace Slug.CI
 						svpr = new SemVersionPreRelease(branchName, 0, IncrementTypeEnum.Minor);
 						//svpr.BumpMinor();
 					}
-					else if ( keyInfo.Key == ConsoleKey.D3 ) {
+					else if ( keyInfo.Key == ConsoleKey.D1 ) {
 						newManualVersion = new SemVersion(currentMaxVersion.Major + 1, 0, 0);
 						svpr = new SemVersionPreRelease(branchName, 0, IncrementTypeEnum.Major);
 						//svpr.BumpMajor();
