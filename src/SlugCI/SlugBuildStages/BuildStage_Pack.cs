@@ -56,6 +56,7 @@ namespace Slug.CI.SlugBuildStages
 					NoRestore = true,
 					Verbosity = DotNetVerbosity.Minimal,
 					PropertiesInternal = new Dictionary<string, object>(),
+					NoBuild = true,
 				};
 
 				settings = settings.SetFileVersion(CISession.VersionInfo.FileVersion)
@@ -150,21 +151,7 @@ namespace Slug.CI.SlugBuildStages
 			ReadOnlySpan<char> textSpan = text;
 
 			if (type == EnumProcessOutputType.ProcessErr) return LineOutColored.Error(text);
-
-			// Find index of the actual message part:
-			// The plus 17 is arbitrary as the src path,. still has a project path and source filename as well as line and column number entries
-/*			int compileMsgStart = CISession.SourceDirectory.Length + 17;
-
-			if (text.Length > compileMsgStart)
-			{
-				int index = text.IndexOf(": ", compileMsgStart);
-				if (index > 0)
-				{
-					if (StringExtension.SpanSearcherContains(textSpan, "error", index + 2, index + 10)) return LineOutColored.LogicError(text);
-					if (StringExtension.SpanSearcherContains(textSpan, "warning", index + 2, index + 10 + 50)) return LineOutColored.Warning(text);
-				}
-			}
-*/
+			if (StringExtension.SpanSearcherContains(textSpan, "Successfully created package", 2, 32)) return LineOutColored.Success(text);
 			return LineOutColored.Normal(text);
 		}
 
