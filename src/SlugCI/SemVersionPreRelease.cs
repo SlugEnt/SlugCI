@@ -94,7 +94,7 @@ namespace Slug.CI
 		/// Constructs a SemVersionPreRelease tag
 		/// </summary>
 		/// <param name="releaseType">Either Alpha or Beta typically</param>
-		/// <param name="releaseNumber"></param>
+		/// <param name="releaseNumber">The release number to set.</param>
 		/// <param name="incrementType"></param>
 		public SemVersionPreRelease (string releaseType, int releaseNumber, IncrementTypeEnum incrementType) {
 			IsValidReleaseType(releaseType);
@@ -166,6 +166,9 @@ namespace Slug.CI
 			return value;
 		}
 
-		
+
+		public string ToString () {
+			return Tag();
+		}		
 	}
 }

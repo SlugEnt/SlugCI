@@ -453,7 +453,7 @@ namespace Slug.CI
 		/// <param name="userVersionInput"></param>
 		/// <returns></returns>
 		public bool SetVersionManually (string userVersionInput) {
-			// Try to conver to a SemVer
+			// Try to convert to a SemVer
 			if ( !SemVersion.TryParse(userVersionInput, out SemVersion semVersion, true) ) return false;
 
 			CISession.ManuallySetVersion = semVersion;

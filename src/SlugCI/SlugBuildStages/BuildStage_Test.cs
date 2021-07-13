@@ -137,6 +137,7 @@ namespace Slug.CI.SlugBuildStages
 			// First 2 columns are blank
 			if (StringExtension.SpanSearcherContains(textSpan, "Failed", 2, 9)) return LineOutColored.LogicError(text);
 			if (StringExtension.SpanSearcherContains(textSpan, "Failed!", 0, 9)) return LineOutColored.Error(text);
+			if (StringExtension.SpanSearcherContains(textSpan, "Passed!", 0, 9)) return LineOutColored.Success(text);
 			return LineOutColored.Normal(text);
 		}
 	}

@@ -9,6 +9,7 @@ using Nuke.Common;
 using Nuke.Common.IO;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Utilities;
+using Semver;
 using Slug.CI.NukeClasses;
 using Slug.CI.SlugBuildStages;
 using Console = Colorful.Console;
@@ -210,7 +211,7 @@ namespace Slug.CI
 		/// <returns></returns>
 		private static bool Menu (CISession ciSession, SlugCI slugCi) {
 			bool keepLooping = true;
-			while (keepLooping) {
+			while ( keepLooping ) {
 				Console.WriteLine(Environment.NewLine);
 				Color lineColor = Color.WhiteSmoke;
 
@@ -218,13 +219,14 @@ namespace Slug.CI
 				string versionPreReleaseName = "alpha";
 
 				// Get most recent Version Tag for the desired branch type
-				
+
 
 				Misc.WriteSubHeader("Git Project Information");
-				Console.WriteLine(" {0,-25}  |  {1,-34}","Current Branch",ciSession.GitProcessor.CurrentBranch);
-				Console.WriteLine(" {0,-25}  |  {1,-20}","Main Branch Name", ciSession.GitProcessor.MainBranchName);
-				Console.WriteLine(" {0,-25}  |  {1,-20}","Main Branch Version #", ciSession.GitBranches[ciSession.GitProcessor.MainBranchName].LatestSemVersionOnBranch.ToString());
-				
+				Console.WriteLine(" {0,-25}  |  {1,-34}", "Current Branch", ciSession.GitProcessor.CurrentBranch);
+				Console.WriteLine(" {0,-25}  |  {1,-20}", "Main Branch Name", ciSession.GitProcessor.MainBranchName);
+				Console.WriteLine(" {0,-25}  |  {1,-20}", "Main Branch Version #",
+				                  ciSession.GitBranches [ciSession.GitProcessor.MainBranchName].LatestSemVersionOnBranch.ToString());
+
 				Console.WriteLine(" {0,-25}  |  {1,-20}", "Alpha Branch Version #", ciSession.GitProcessor.GetMostRecentVersionTagOfBranch("alpha"));
 				Console.WriteLine(" {0,-25}  |  {1,-20}", "Beta Branch Version #", ciSession.GitProcessor.GetMostRecentVersionTagOfBranch("beta"));
 
@@ -235,12 +237,15 @@ namespace Slug.CI
 				Console.WriteLine(" {0,-30}    |  {1,-35}", "Compile Config:", ciSession.CompileConfig, lineColor);
 
 				// Menu Item
-				string ver = "";
-				if (ciSession.ManuallySetVersion != null) ver = ciSession.ManuallySetVersion.ToString();
 				Console.WriteLine(" (I)  Information about Project", Color.Yellow);
 
 				// Menu Item
-				Console.WriteLine(" (V)  Manually Set the next version [ " + ver + " ]", Color.WhiteSmoke);
+				string ver = "";
+				if ( ciSession.ManuallySetVersion != null ) 
+					ver = ciSession.ManuallySetVersion.ToString();
+				lineColor = ver != string.Empty ? Color.Yellow : Color.WhiteSmoke;
+				Console.WriteLine(" (V)  Manually Set the next version [ " + ver + " ]", lineColor);
+				Console.WriteLine(" (9)  Show Next Version #", Color.WhiteSmoke);
 				Console.WriteLine();
 
 				// Menu Item
@@ -298,6 +303,7 @@ namespace Slug.CI
 					ConsoleKey.T,
 					ConsoleKey.U,
 					ConsoleKey.X,
+					ConsoleKey.D9,
 					ConsoleKey.Enter,
 				};
 
@@ -311,6 +317,20 @@ namespace Slug.CI
 				else if ( answer == ConsoleKey.R ) ciSession.GitProcessor.RefreshUncommittedChanges();
 				else if ( answer == ConsoleKey.T ) ciSession.SkipTests = true;
 				else if ( answer == ConsoleKey.U ) ciSession.FailedUnitTestsOkay = true;
+				else if ( answer == ConsoleKey.D9 ) {
+					BuildStage_CalcVersion calcVersion = new BuildStage_CalcVersion(ciSession);
+					calcVersion.Execute();
+					Console.WriteLine("{0}{0}", Environment.NewLine);
+					Console.WriteLine("Next version will be:  ", Color.DarkCyan);
+					Console.WriteLine("  Assembly Version:       {0}", ciSession.VersionInfo.AssemblyVersion);
+					Console.WriteLine("  File Version:           {0}", ciSession.VersionInfo.FileVersion);
+					Console.WriteLine("  Informational Version:  {0}", ciSession.VersionInfo.InformationalVersion);
+					Console.WriteLine("  SemVersion:             {0}", ciSession.VersionInfo.SemVersionAsString);
+					Console.WriteLine("  NPM Version:            {0}", ciSession.VersionInfo.NPMVersion);
+					Console.WriteLine("{0}{0}Press any key to return to menu", Environment.NewLine);
+					Console.ReadKey();
+					Console.Clear();
+				}
 				else if ( answer == ConsoleKey.C ) {
 					BuildStage_GitCleanup gitCleanup = new BuildStage_GitCleanup(ciSession);
 					if (!gitCleanup.Execute() ) Console.WriteLine("Git Cleanup Failed.");
@@ -326,25 +346,137 @@ namespace Slug.CI
 		}
 
 
+
+		/// <summary>
+		/// Allows user to change the next version of the app - manually.
+		/// </summary>
+		/// <param name="ciSession"></param>
+		/// <param name="slugCi"></param>
 		private static void ManualVersionPrompts (CISession ciSession, SlugCI slugCi)
 		{
-			Misc.WriteMainHeader("Manually Set Version");
+			Misc.WriteMainHeader("Set Version Override");
 			Console.ForegroundColor = Color.WhiteSmoke;
 			
 			Console.WriteLine();
 			Console.WriteLine("This allows you to manually set the primary version numbers of the application for the branch being deployed to.");
-			Console.WriteLine("Version number should be in format:   #.#.#");
-			Console.WriteLine("Enter x to exit, not setting the version number");
 			Console.WriteLine();
+			Console.WriteLine("You are currently targeting a build to: {0}",ciSession.PublishTarget.ToString());
 
 			bool continueLooping = true;
-			while ( continueLooping ) {
-				Console.WriteLine("Enter Ver # in format #.#.#");
-				string response = Console.ReadLine();
-				if ( response.ToLower() == "x" ) return;
+/*			PublishTargetEnum target = PublishTargetEnum.Alpha;
 
-				if (slugCi.SetVersionManually(response)) continueLooping = false;
+			Console.WriteLine("What branch do you want to override the version to?");
+			Console.WriteLine(" (A) Alpha");
+			Console.WriteLine(" (B) Beta");
+			Console.WriteLine(" (M) Main / Prod");
+			Console.WriteLine(" (x) Exit / Cancel");
+			while ( continueLooping ) {
+				ConsoleKeyInfo keyInfo = Console.ReadKey();
+				if ( keyInfo.Key == ConsoleKey.X ) return;
+				if ( keyInfo.Key == ConsoleKey.A ) target = PublishTargetEnum.Alpha;
+				else if ( keyInfo.Key == ConsoleKey.B ) target = PublishTargetEnum.Beta;
+				else if ( keyInfo.Key == ConsoleKey.M )
+					target = PublishTargetEnum.Production;
+				else
+					continue;
+				// If here we have a valid selection - exit the loop
+				break;
 			}
+*/
+			PublishTargetEnum target = ciSession.PublishTarget;
+			string branchName = target switch
+			{
+				PublishTargetEnum.Alpha => "alpha",
+				PublishTargetEnum.Beta => "beta",
+				PublishTargetEnum.Production => ciSession.GitProcessor.MainBranchName,
+			};
+
+			SemVersion currentMaxVersion = ciSession.GitProcessor.GetMostRecentVersionTagOfBranch(branchName);
+			SemVersion newManualVersion = new SemVersion(0,0,0);
+
+			Console.WriteLine("{0}The latest version on this Branch is: {1}", Environment.NewLine, currentMaxVersion);
+			if ( target == PublishTargetEnum.Production ) {
+				 Console.WriteLine("  (1) To bump the Patch / Revision number from {0} to {1}",currentMaxVersion.Patch, currentMaxVersion.Patch + 1);
+				 Console.WriteLine("  (2) To bump the Minor version number from {0} to {1}", currentMaxVersion.Minor,currentMaxVersion.Minor + 1);
+				 Console.WriteLine("  (3) To bump the Major version number from {0} to {1}", currentMaxVersion.Major,currentMaxVersion.Major+1);
+				 
+
+				 while ( continueLooping ) {
+					 ConsoleKeyInfo keyInfo = Console.ReadKey();
+					if ( keyInfo.Key == ConsoleKey.D1 )
+						 newManualVersion = new SemVersion(currentMaxVersion.Major, currentMaxVersion.Minor, currentMaxVersion.Patch + 1);
+					 else if ( keyInfo.Key == ConsoleKey.D2 )
+						 newManualVersion = new SemVersion(currentMaxVersion.Major, currentMaxVersion.Minor + 1, 0);
+					 else if ( keyInfo.Key == ConsoleKey.D3 )
+						newManualVersion = new SemVersion(currentMaxVersion.Major + 1, 0, 0);
+					else
+						continue;
+					break;
+				 }
+
+				 Console.WriteLine("{0}Y/N?  Do you want to set the version for branch {1} to version # {2}",Environment.NewLine,branchName,newManualVersion.ToString());
+				 while ( true ) {
+					 ConsoleKeyInfo keyInfoPYN = Console.ReadKey();
+					 if ( keyInfoPYN.Key == ConsoleKey.Y ) {
+						 ciSession.ManuallySetVersion = newManualVersion;
+						 return;
+					 }
+					 else if ( keyInfoPYN.Key == ConsoleKey.N ) return;
+				 }
+			}
+
+			// Alpha / Beta branch
+			else {
+				SemVersionPreRelease svpr = new SemVersionPreRelease(currentMaxVersion.Prerelease);
+				Console.WriteLine("  (1) To bump the Patch / Revision number from {0} to {1}", currentMaxVersion.Patch, currentMaxVersion.Patch + 1);
+				Console.WriteLine("  (2) To bump the Minor version number from {0} to {1}", currentMaxVersion.Minor, currentMaxVersion.Minor + 1);
+				Console.WriteLine("  (3) To bump the Major version number from {0} to {1}", currentMaxVersion.Major, currentMaxVersion.Major + 1);
+				Console.WriteLine("  (4) To bump the revision number from {0} to {1}",svpr.ReleaseNumber,svpr.ReleaseNumber+1);
+
+
+				while (continueLooping)
+				{
+					ConsoleKeyInfo keyInfo = Console.ReadKey();
+					if ( keyInfo.Key == ConsoleKey.D1 ) {
+						newManualVersion = new SemVersion(currentMaxVersion.Major, currentMaxVersion.Minor, currentMaxVersion.Patch + 1);
+						svpr =new SemVersionPreRelease(branchName,0,IncrementTypeEnum.Patch);
+					}
+					else if ( keyInfo.Key == ConsoleKey.D2 ) {
+						newManualVersion = new SemVersion(currentMaxVersion.Major, currentMaxVersion.Minor + 1, 0);
+						svpr = new SemVersionPreRelease(branchName, 0, IncrementTypeEnum.Minor);
+						//svpr.BumpMinor();
+					}
+					else if ( keyInfo.Key == ConsoleKey.D3 ) {
+						newManualVersion = new SemVersion(currentMaxVersion.Major + 1, 0, 0);
+						svpr = new SemVersionPreRelease(branchName, 0, IncrementTypeEnum.Major);
+						//svpr.BumpMajor();
+					}
+					else if ( keyInfo.Key == ConsoleKey.D4 ) {
+						newManualVersion = currentMaxVersion;
+						svpr.BumpVersion();
+					}
+					else
+						continue;
+					break;
+				}
+
+				newManualVersion = new SemVersion(newManualVersion.Major,newManualVersion.Minor,newManualVersion.Patch,svpr.Tag());
+				
+				Console.WriteLine("{0}Y/N?  Do you want to set the version for branch {1} to version # {2}", Environment.NewLine, branchName, newManualVersion.ToString());
+				while (true)
+				{
+					ConsoleKeyInfo keyInfoPYN = Console.ReadKey();
+					if (keyInfoPYN.Key == ConsoleKey.Y)
+					{
+						ciSession.ManuallySetVersion = newManualVersion;
+						return;
+					}
+					else if (keyInfoPYN.Key == ConsoleKey.N) return;
+				}
+
+			}
+
+
 		}
 
 
