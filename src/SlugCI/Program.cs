@@ -211,6 +211,12 @@ namespace Slug.CI
 		/// <returns></returns>
 		private static bool Menu (CISession ciSession, SlugCI slugCi) {
 			bool keepLooping = true;
+			
+			// Get some variables that are expensive to get, just once.
+			string versionAlpha = ciSession.GitProcessor.GetMostRecentVersionTagOfBranch("alpha").ToString();
+			string versionBeta = ciSession.GitProcessor.GetMostRecentVersionTagOfBranch("beta").ToString();
+			string versionMain = ciSession.GitBranches[ciSession.GitProcessor.MainBranchName].LatestSemVersionOnBranch.ToString();
+
 			while ( keepLooping ) {
 				Console.WriteLine(Environment.NewLine);
 				Color lineColor = Color.WhiteSmoke;
@@ -224,11 +230,10 @@ namespace Slug.CI
 				Misc.WriteSubHeader("Git Project Information");
 				Console.WriteLine(" {0,-25}  |  {1,-34}", "Current Branch", ciSession.GitProcessor.CurrentBranch);
 				Console.WriteLine(" {0,-25}  |  {1,-20}", "Main Branch Name", ciSession.GitProcessor.MainBranchName);
-				Console.WriteLine(" {0,-25}  |  {1,-20}", "Main Branch Version #",
-				                  ciSession.GitBranches [ciSession.GitProcessor.MainBranchName].LatestSemVersionOnBranch.ToString());
+				Console.WriteLine(" {0,-25}  |  {1,-20}", "Main Branch Version #", versionMain);
 
-				Console.WriteLine(" {0,-25}  |  {1,-20}", "Alpha Branch Version #", ciSession.GitProcessor.GetMostRecentVersionTagOfBranch("alpha"));
-				Console.WriteLine(" {0,-25}  |  {1,-20}", "Beta Branch Version #", ciSession.GitProcessor.GetMostRecentVersionTagOfBranch("beta"));
+				Console.WriteLine(" {0,-25}  |  {1,-20}", "Alpha Branch Version #", versionAlpha);
+				Console.WriteLine(" {0,-25}  |  {1,-20}", "Beta Branch Version #", versionBeta);
 
 
 				Misc.WriteMainHeader("SlugCI Interactive Menu", new List<string>() {ciSession.Solution.Name});
