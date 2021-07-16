@@ -384,7 +384,7 @@ namespace Slug.CI
 				Console.WriteLine("  (1) To bump the Major version number from {0} to {1}", currentMaxVersion.Major, currentMaxVersion.Major + 1);
 				Console.WriteLine("  (2) To bump the Minor version number from {0} to {1}", currentMaxVersion.Minor,currentMaxVersion.Minor + 1);
 				Console.WriteLine("  (3) To bump the Patch number from {0} to {1}", currentMaxVersion.Patch, currentMaxVersion.Patch + 1);
-
+				Console.WriteLine( "  (9) To change all 3 components at once.");
 				while ( continueLooping ) {
 					 ConsoleKeyInfo keyInfo = Console.ReadKey();
 					 if ( keyInfo.Key == ConsoleKey.D3 )
@@ -393,12 +393,21 @@ namespace Slug.CI
 						 newManualVersion = new SemVersion(currentMaxVersion.Major, currentMaxVersion.Minor + 1, 0);
 					 else if ( keyInfo.Key == ConsoleKey.D1 )
 						newManualVersion = new SemVersion(currentMaxVersion.Major + 1, 0, 0);
+					 else if ( keyInfo.Key == ConsoleKey.D9 ) {
+						Console.WriteLine("Enter X to exit without changing version  OR  enter Version number in format #.#.#");
+						string manVer = Console.ReadLine();
+						if ( manVer == "x" || manVer == "X" ) return;
+
+						// Change Version
+						if ( slugCi.SetVersionManually(manVer) ) continueLooping = false;
+					 }
+
 					else
 						continue;
 					break;
 				 }
 
-				 Console.WriteLine("{0}Y/N?  Do you want to set the version for branch {1} to version # {2}",Environment.NewLine,branchName,newManualVersion.ToString());
+				 Console.WriteLine("{0} Y/N?  Do you want to set the version for branch {1} to version # {2}",Environment.NewLine,branchName,newManualVersion.ToString());
 				 while ( true ) {
 					 ConsoleKeyInfo keyInfoPYN = Console.ReadKey();
 					 if ( keyInfoPYN.Key == ConsoleKey.Y ) {
@@ -416,7 +425,7 @@ namespace Slug.CI
 				Console.WriteLine("  (2) To bump the Minor version number from {0} to {1}", currentMaxVersion.Minor, currentMaxVersion.Minor + 1);
 				Console.WriteLine("  (3) To bump the Patch number from {0} to {1}", currentMaxVersion.Patch, currentMaxVersion.Patch + 1);
 				Console.WriteLine("  (4) To bump the pre-release number from {0} to {1}",svpr.ReleaseNumber,svpr.ReleaseNumber+1);
-
+				Console.WriteLine("  (9) To change all 3 components at once.");
 
 				while (continueLooping)
 				{
@@ -438,6 +447,15 @@ namespace Slug.CI
 					else if ( keyInfo.Key == ConsoleKey.D4 ) {
 						newManualVersion = currentMaxVersion;
 						svpr.BumpVersion();
+					}
+					else if ( keyInfo.Key == ConsoleKey.D9 ) {
+						Console.WriteLine("Enter X to exit without changing version  OR  enter Version number in format #.#.#");
+						string manVer = Console.ReadLine();
+						if ( manVer == "x" || manVer == "X" ) return;
+						if ( !SemVersion.TryParse(manVer, out SemVersion newVer) ) continue;
+						svpr = new SemVersionPreRelease(branchName,0,IncrementTypeEnum.None);
+
+						newManualVersion = new SemVersion(newVer.Major,newVer.Minor,newVer.Patch,svpr.ToString());
 					}
 					else
 						continue;

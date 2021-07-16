@@ -329,6 +329,8 @@ namespace Slug.CI.SlugBuildStages
 			ReadOnlySpan<char> textSpan = text;
 
 			if (type == EnumProcessOutputType.ProcessErr) return LineOutColored.Error(text);
+			
+			if (StringExtension.SpanSearcherContains(textSpan, "warn :", 0, 7)) return LineOutColored.Warning(text);
 
 			return LineOutColored.Normal(text);
 		}
