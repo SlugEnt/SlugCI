@@ -448,7 +448,7 @@ namespace Slug.CI
 
 
 		/// <summary>
-		/// Sets the next version manually.
+		/// Sets the next version manually if it is valid.  Returns true if valid and set.
 		/// </summary>
 		/// <param name="userVersionInput"></param>
 		/// <returns></returns>
