@@ -108,8 +108,9 @@ namespace Slug.CI.SlugBuildStages
 			if ( CISession.PublishTarget == PublishTargetEnum.Beta ) versionPreReleaseName = "beta";
 			
 			// Get most recent Version Tag for the desired branch type
-			mostRecentBranchTypeVersion = CISession.GitProcessor.GetMostRecentVersionTagOfBranch(versionPreReleaseName);
-
+			mostRecentBranchTypeVersion = GetMostRecentVersionTagOfBranch(currentBranch);
+			//mostRecentBranchTypeVersion = CISession.GitProcessor.GetMostRecentVersionTagOfBranch(versionPreReleaseName);
+			
 
 			if ( CISession.PublishTarget== PublishTargetEnum.Production) {
 				CalculateMainVersion();
@@ -129,6 +130,23 @@ namespace Slug.CI.SlugBuildStages
 			AOT_Info("New Version is:  " + newVersion);
 
 			return StageCompletionStatusEnum.Success;
+		}
+
+
+
+		/// <summary>
+		/// There is an issue whereby if an alpha / beta branch has been merged into main branch, it will list the #.#.#-alpha as the most current.
+		/// It should be #.#.#+1 as the most current.  This fixes this.
+		/// </summary>
+		/// <param name="branch"></param>
+		/// <returns></returns>
+		public SemVersion GetMostRecentVersionTagOfBranch (GitBranchInfo branch) {
+			SemVersion tempVersion = CISession.GitProcessor.GetMostRecentVersionTagOfBranch(branch.Name);
+			if ( branch.LatestSemVersionOnBranch >= tempVersion ) {
+				incrementPatch = true;
+				return branch.LatestSemVersionOnBranch;
+			}
+			return tempVersion;
 		}
 
 
@@ -153,7 +171,7 @@ namespace Slug.CI.SlugBuildStages
 			SemVersionPreRelease updatedBeta;
 
 			// Build New PreRelease tag based upon old, but with new number and type set to Beta.
-			if ( mostRecentBranchTypeVersion >= newestVersion ) {
+			if ( mostRecentBranchTypeVersion > newestVersion ) {
 				newestVersion = mostRecentBranchTypeVersion;
 				updatedBeta = new SemVersionPreRelease(newestVersion.Prerelease);
 			}
@@ -214,7 +232,7 @@ namespace Slug.CI.SlugBuildStages
 		SemVersion CompareToMainVersion (SemVersion comparisonVersion,string comparisonBranchName) {
 			SemVersion tempVersion;
 
-			if (mainBranch.LatestSemVersionOnBranch > comparisonVersion)
+			if (mainBranch.LatestSemVersionOnBranch >= comparisonVersion)
 			{
 				int major = mainBranch.LatestSemVersionOnBranch.Major;
 				int minor = mainBranch.LatestSemVersionOnBranch.Minor;

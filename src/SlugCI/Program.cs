@@ -245,6 +245,9 @@ namespace Slug.CI
 				Console.WriteLine(" (I)  Information about Project", Color.Yellow);
 
 				// Menu Item
+				Console.WriteLine(" (G)  Display Git Command History",lineColor);
+
+				// Menu Item
 				string ver = "";
 				if ( ciSession.ManuallySetVersion != null ) 
 					ver = ciSession.ManuallySetVersion.ToString();
@@ -302,6 +305,7 @@ namespace Slug.CI
 					ConsoleKey.A,
 					ConsoleKey.I,
 					ConsoleKey.C,
+					ConsoleKey.G,
 					ConsoleKey.V,
 					ConsoleKey.R,
 					ConsoleKey.S,
@@ -322,6 +326,11 @@ namespace Slug.CI
 				else if ( answer == ConsoleKey.R ) ciSession.GitProcessor.RefreshUncommittedChanges();
 				else if ( answer == ConsoleKey.T ) ciSession.SkipTests = true;
 				else if ( answer == ConsoleKey.U ) ciSession.FailedUnitTestsOkay = true;
+				else if ( answer == ConsoleKey.G ) {
+					ciSession.GitProcessor.PrintGitHistory();
+					Console.WriteLine("Press [space] key to return to menu", Color.Yellow);
+					while (Console.ReadKey().Key != ConsoleKey.Spacebar) { }
+				}
 				else if ( answer == ConsoleKey.D9 ) {
 					BuildStage_CalcVersion calcVersion = new BuildStage_CalcVersion(ciSession);
 					calcVersion.Execute();
