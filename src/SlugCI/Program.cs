@@ -409,7 +409,8 @@ namespace Slug.CI
 
 				 Console.WriteLine("{0} Y/N?  Do you want to set the version for branch {1} to version # {2}",Environment.NewLine,branchName,newManualVersion.ToString());
 				 while ( true ) {
-					 ConsoleKeyInfo keyInfoPYN = Console.ReadKey();
+					 while (Console.KeyAvailable) Console.ReadKey();
+					ConsoleKeyInfo keyInfoPYN = Console.ReadKey(true);
 					 if ( keyInfoPYN.Key == ConsoleKey.Y ) {
 						 ciSession.ManuallySetVersion = newManualVersion;
 						 return;
@@ -427,21 +428,25 @@ namespace Slug.CI
 				Console.WriteLine("  (4) To bump the pre-release number from {0} to {1}",svpr.ReleaseNumber,svpr.ReleaseNumber+1);
 				Console.WriteLine("  (9) To change all 3 components at once.");
 
-				while (continueLooping)
-				{
-					ConsoleKeyInfo keyInfo = Console.ReadKey();
+				while (continueLooping) {
+					while ( Console.KeyAvailable ) Console.ReadKey();
+					ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+
 					if ( keyInfo.Key == ConsoleKey.D3 ) {
-						newManualVersion = new SemVersion(currentMaxVersion.Major, currentMaxVersion.Minor, currentMaxVersion.Patch + 1);
-						svpr =new SemVersionPreRelease(branchName,0,IncrementTypeEnum.Patch);
+						svpr = new SemVersionPreRelease(branchName, 0, IncrementTypeEnum.Patch);
+						newManualVersion = new SemVersion(currentMaxVersion.Major, currentMaxVersion.Minor, currentMaxVersion.Patch + 1,svpr.Tag());
+						
 					}
 					else if ( keyInfo.Key == ConsoleKey.D2 ) {
-						newManualVersion = new SemVersion(currentMaxVersion.Major, currentMaxVersion.Minor + 1, 0);
 						svpr = new SemVersionPreRelease(branchName, 0, IncrementTypeEnum.Minor);
+						newManualVersion = new SemVersion(currentMaxVersion.Major, currentMaxVersion.Minor + 1, 0,svpr.Tag());
+						
 						//svpr.BumpMinor();
 					}
 					else if ( keyInfo.Key == ConsoleKey.D1 ) {
-						newManualVersion = new SemVersion(currentMaxVersion.Major + 1, 0, 0);
 						svpr = new SemVersionPreRelease(branchName, 0, IncrementTypeEnum.Major);
+						newManualVersion = new SemVersion(currentMaxVersion.Major + 1, 0, 0,svpr.Tag());
+						
 						//svpr.BumpMajor();
 					}
 					else if ( keyInfo.Key == ConsoleKey.D4 ) {
@@ -455,7 +460,7 @@ namespace Slug.CI
 						if ( !SemVersion.TryParse(manVer, out SemVersion newVer) ) continue;
 						svpr = new SemVersionPreRelease(branchName,0,IncrementTypeEnum.None);
 
-						newManualVersion = new SemVersion(newVer.Major,newVer.Minor,newVer.Patch,svpr.ToString());
+						newManualVersion = new SemVersion(newVer.Major,newVer.Minor,newVer.Patch,svpr.Tag());
 					}
 					else
 						continue;
@@ -467,6 +472,7 @@ namespace Slug.CI
 				Console.WriteLine("{0}Y/N?  Do you want to set the version for branch {1} to version # {2}", Environment.NewLine, branchName, newManualVersion.ToString());
 				while (true)
 				{
+					while (Console.KeyAvailable) Console.ReadKey();
 					ConsoleKeyInfo keyInfoPYN = Console.ReadKey();
 					if (keyInfoPYN.Key == ConsoleKey.Y)
 					{

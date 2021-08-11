@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyVersion>0.30.0.277</AssemblyVersion>
+    <AssemblyVersion>0.31.2.282</AssemblyVersion>
     <RootNamespace>Slug.CI</RootNamespace>
     <Authors>Scott Herrmann</Authors>
     <Company>SlugEnt</Company>
@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/SlugEnt/SlugCISample</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
-    <Version>0.30.0</Version>
+    <Version>0.31.2</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
