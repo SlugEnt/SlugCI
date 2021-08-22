@@ -13,16 +13,16 @@
       "environmentVariables": {
         "Key": "Value",
         "SLUGCI_DEPLOY_DEV": "C:\\temp\\cideploy\\Dev",
-        "SLUGCI_DEPLOY_PROD": "C:\\temp\\cideploy",
-        "SLUGCI_DEPLOY_TEST": "C:\\temp\\cideploy\\Test"
+        "SLUGCI_DEPLOY_TEST": "C:\\temp\\cideploy\\Test",
+        "SLUGCI_DEPLOY_PROD": "C:\\temp\\cideploy"
       }
     },
     "SlugCISample": {
       "commandName": "Project",
       "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --skipnuget --deployto alpha",
       "environmentVariables": {
-        "SLUGCI_DEPLOY_ALPHA": "c:\\temp\\DeployAlpha",
-        "SLUGCI_DEPLOY_BETA": "c:\\temp\\DeployBeta"
+        "SLUGCI_DEPLOY_BETA": "c:\\temp\\DeployBeta",
+        "SLUGCI_DEPLOY_ALPHA": "c:\\temp\\DeployAlpha"
       }
     },
     "Info": {
@@ -56,7 +56,7 @@
     },
     "GenericTest": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\slugent\\TimeGuid --deployto alpha --faststart false --skipangular --skipnuget"
+      "commandLineArgs": "--rootdir C:\\A_Dev\\slugent\\DayTimeInterval --skipangular --skipnuget"
     },
     "Setup": {
       "commandName": "Project",
