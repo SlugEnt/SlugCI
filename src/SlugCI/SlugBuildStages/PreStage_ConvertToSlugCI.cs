@@ -304,7 +304,7 @@ namespace Slug.CI.SlugBuildStages
 
 			// Ensure the version of the config file layout is set to most current.  We do this after the copy, so we can 
 			// detect changes in the file layout, fields, etc.
-			slugCiConfig.ConfigStructureVersion = CISession.SlugCI_Version;
+			slugCiConfig.ConfigStructureVersion = SlugCIConfig.CONFIG_STRUCTURE_VERSION;
 
 			bool updateProjectAdd = false;
 			bool hasCopyDeployMethod = false;
