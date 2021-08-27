@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/SlugEnt/SlugCISample</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <PackageReleaseNotes>Initial Release</PackageReleaseNotes>
-    <Version>0.31.2</Version>
+    <Version>0.34.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

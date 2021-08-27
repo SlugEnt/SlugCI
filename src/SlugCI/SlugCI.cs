@@ -123,20 +123,9 @@ namespace Slug.CI
 			}
 
 
-			//Task slnPreLoadTask = Task.Run(PreLoadSolutionAsync);
-
-
-
-			//slnPreLoadTask.Wait();
-
-			// Ensure Solution is in SlugCI format. If not migrate it.
-
-
-
 
 			// Combine the Visual Studio solution project info into the individual projects of the
 			// SlugCIConfig projects for easier access later on.
-			//slnPreLoadTask.Wait();
 			MergeVSProjectIntoSlugCI();
 
 

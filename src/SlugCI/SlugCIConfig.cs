@@ -47,7 +47,7 @@ namespace Slug.CI {
 		/// <summary>
 		/// This value should be updated every time this config layout changes
 		/// </summary>
-		public const string CONFIG_STRUCTURE_VERSION = "0.22.0";
+		public const string CONFIG_STRUCTURE_VERSION = "0.33.0";
 
 		/// <summary>
 		/// The version format of the config file.
