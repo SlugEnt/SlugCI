@@ -30,7 +30,7 @@ namespace Slug.CI.SlugBuildStages
 			// See if slugci directory exists.
 			if ( !CISession.IsInSetupMode )
 				if ( !FileSystemTasks.DirectoryExists(CISession.SlugCIPath) || !FileSystemTasks.FileExists(CISession.SlugCIFileName) ) 
-					{
+                {
 					AOT_Error("Are you in the Repository root folder - where .git folder for the project is located at?");
 					AOT_Error("Either change to the root folder of the project or run with --setup flag");
 					return StageCompletionStatusEnum.Aborted;
@@ -48,7 +48,9 @@ namespace Slug.CI.SlugBuildStages
 
 			// See if version of config matches the version of SlugCI (our current instance)
 			if (!CISession.IsInSetupMode)
-				if ( CISession.SlugCI_Version != CISession.SlugCIConfigObj.ConfigStructureVersion ) {
+				if ( SlugCIConfig.CONFIG_STRUCTURE_VERSION != CISession.SlugCIConfigObj.ConfigStructureVersion)
+                {
+				    //	if ( CISession.SlugCI_Version != CISession.SlugCIConfigObj.ConfigStructureVersion ) {
 					AOT_Warning("The version of the SlugCIConfig object does not match the current SlugCI version.  Setup will need to be run.");
 					CISession.IsInSetupMode = true;
 					return StageCompletionStatusEnum.Warning;

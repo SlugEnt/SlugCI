@@ -430,7 +430,15 @@ namespace Slug.CI
 
 			// Alpha / Beta branch
 			else {
-				SemVersionPreRelease svpr = new SemVersionPreRelease(currentMaxVersion.Prerelease);
+				SemVersionPreRelease svpr;
+				if (currentMaxVersion.Prerelease != string.Empty) {
+					svpr = new SemVersionPreRelease(currentMaxVersion.Prerelease);
+				}
+				else {
+					
+					svpr = new SemVersionPreRelease(branchName, 0, IncrementTypeEnum.Patch); 
+				}
+				
 				Console.WriteLine("  (1) To bump the Major version number from {0} to {1}", currentMaxVersion.Major, currentMaxVersion.Major + 1);
 				Console.WriteLine("  (2) To bump the Minor version number from {0} to {1}", currentMaxVersion.Minor, currentMaxVersion.Minor + 1);
 				Console.WriteLine("  (3) To bump the Patch number from {0} to {1}", currentMaxVersion.Patch, currentMaxVersion.Patch + 1);
