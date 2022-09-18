@@ -21,7 +21,7 @@ namespace Slug.CI
 		public SemVersionPreRelease PreRelease { get; set; }
 
 		/// <summary>
-		/// NPM Version.  NPM only uses pure SemVer, no pre-release information
+		/// NPM Version.  NPM only uses pure SemVer
 		/// </summary>
 		public string NPMVersion { get; set; }
 
