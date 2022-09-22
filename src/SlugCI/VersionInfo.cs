@@ -57,7 +57,6 @@ namespace Slug.CI
 
 			InformationalVersion = SemVersionAsString + ".g" + commitHash;
 
-			//NPMVersion = semVersion.Major + "." + semVersion.Minor + "." + semVersion.Patch;
 			NPMVersion = SemVersionAsString;
 		}
 	}

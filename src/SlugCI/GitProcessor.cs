@@ -67,7 +67,7 @@ namespace Slug.CI
 		/// <summary>
 		/// The Branch that the repository is currently on
 		/// </summary>
-		public string CurrentBranch { get; private set; }
+		public string CurrentBranch { get; internal set; }
 
 
 		public bool IsLocalBranchUptoDate { get; private set; }

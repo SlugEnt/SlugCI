@@ -64,7 +64,7 @@ namespace Slug.CI {
 		/// <summary>
 		/// This value should be updated every time this config layout changes
 		/// </summary>
-		public const string CONFIG_STRUCTURE_VERSION = "0.35.0";
+		public const string CONFIG_STRUCTURE_VERSION = "0.35.1";
 
 		/// <summary>
 		/// The version format of the config file.
@@ -123,6 +123,12 @@ namespace Slug.CI {
 		/// If true the DeployToVersionedFolder uses a full SemVer, Ie. Ver#.#.#-xyz
 		/// </summary>
 		public bool DeployFolderUsesSemVer { get; set; } = true;
+
+
+		/// <summary>
+		/// If true then the Sem Version Number Major = Year of Commit / Build and Minor = Month of Commit/Build
+		/// </summary>
+		public bool UseYearMonthSemVersioning { get; set; } = false;
 
 
 		/// <summary>
