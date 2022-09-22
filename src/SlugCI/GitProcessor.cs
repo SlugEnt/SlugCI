@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -25,7 +26,7 @@ namespace Slug.CI
 	/// <summary>
 	/// Branch / Commit Information
 	/// </summary>
-	public record RecordBranchLatestCommit (bool isCheckedOutBranch, string branch, string commitHash, string commitMsg);
+	public record RecordBranchLatestCommit (bool isCheckedOutBranch, string branch, string commitHash, string commitMsg, bool isLocal);
 
 
 	/// <summary>
@@ -55,6 +56,13 @@ namespace Slug.CI
 		/// Session settings and data
 		/// </summary>
 		private CISession CISession { get; set; }
+
+
+		/// <summary>
+		/// Used only for debugging the length of time to run Git Commands
+		/// </summary>
+		public List<GitProcessLogTime> ProcessTimeLogs { get; set; } = new();
+
 
 		/// <summary>
 		/// The Branch that the repository is currently on
@@ -172,7 +180,9 @@ namespace Slug.CI
 		/// Prints the current version of the Git Command being used.  Version is only shown when PrintGitHistory is called.
 		/// </summary>
 		private async Task GetGitCommandVersionAsync () {
-
+			Stopwatch stopwatch = new();
+			stopwatch.Start();
+			
 			List<LineOutColored> gitOutput;
 			string gitArgs = "--version";
 			ExecuteGitTryCatch("GetGitCommandVersion", gitArgs, out gitOutput);
@@ -180,6 +190,8 @@ namespace Slug.CI
 			else
 				ControlFlow.Assert(true == false, "Retrieving Git --Version returned an invalid value of - " + gitOutput [0].Text);
 
+			stopwatch.Stop();
+			ProcessTimeLogs.Add(new GitProcessLogTime("GetGitCommandVersion",gitArgs,stopwatch.ElapsedMilliseconds));
 			return;
 		}
 
@@ -191,9 +203,15 @@ namespace Slug.CI
 		/// <returns></returns>
 		public string GetCurrentBranch () {
 			try {
+				Stopwatch stopwatch = new();
+				stopwatch.Start();
+
 				string cmdArgs = "branch --show-current";
 				if ( !ExecuteGit(cmdArgs, out List<LineOutColored> output) ) throw new ApplicationException("GetCurrentBranch::: Git Command failed:  git " + cmdArgs);
 				CurrentBranch = output.First().Text;
+
+				stopwatch.Stop();
+				ProcessTimeLogs.Add(new GitProcessLogTime("GetCurrentBranch", cmdArgs, stopwatch.ElapsedMilliseconds));
 				return CurrentBranch;
 			}
 			catch ( Exception e ) {
@@ -235,14 +253,17 @@ namespace Slug.CI
 
 			// Convert output into record results
 			foreach ( LineOutColored output in gitOutput ) {
+				bool isLocal = true;
 				RecordBranchLatestCommit record;
 				if ( output.Text.Substring(0, 1) == "*" ) {
 					string [] elements = output.Text.Substring(2).Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
-					record = new RecordBranchLatestCommit(true, elements [0], elements [1], elements [2]);
+					if ( elements [0].StartsWith("remotes/") ) isLocal = false;
+					record = new RecordBranchLatestCommit(true, elements [0], elements [1], elements [2],isLocal);
 				}
 				else {
 					string [] elements = output.Text.Trim().Split(' ', 3, StringSplitOptions.RemoveEmptyEntries);
-					record = new RecordBranchLatestCommit(false, elements [0], elements [1], elements [2]);
+					if (elements[0].StartsWith("remotes/")) isLocal = false;
+					record = new RecordBranchLatestCommit(false, elements [0], elements [1], elements [2],isLocal);
 				}
 
 				results.Add(record);
@@ -361,6 +382,9 @@ namespace Slug.CI
 		/// </summary>
 		/// <returns></returns>
 		public void GetMainBranchName () {
+			Stopwatch stopwatch = new();
+			stopwatch.Start();
+
 			List<LineOutColored> gitOutput;
 			string gitArgs = "remote show origin";
 			ExecuteGitTryCatch("GetMainBranchName", gitArgs, out gitOutput);
@@ -377,6 +401,8 @@ namespace Slug.CI
 				}
 			}
 
+			stopwatch.Stop();
+			ProcessTimeLogs.Add(new GitProcessLogTime("GetMainBranchName", gitArgs, stopwatch.ElapsedMilliseconds));
 			ControlFlow.Assert(true == false, "Did not find the required output text from the git command to determine the main branch name");
 		}
 
@@ -388,6 +414,9 @@ namespace Slug.CI
 		/// <returns></returns>
 		public void RefreshUncommittedChanges () {
 			try {
+				Stopwatch stopwatch = new();
+				stopwatch.Start();
+
 				string gitArgs = "update-index -q --refresh";
 				if ( !ExecuteGit_NoOutput(gitArgs) ) throw new ApplicationException("RefreshUncommittedChanges::: Git Command failed:  git " + gitArgs);
 
@@ -396,6 +425,9 @@ namespace Slug.CI
 					AreUncommitedChangesOnLocalBranch = true;
 				else
 					AreUncommitedChangesOnLocalBranch = false;
+
+				stopwatch.Stop();
+				ProcessTimeLogs.Add(new GitProcessLogTime("RefreshUncommittedChanges", "Multiple Git Calls", stopwatch.ElapsedMilliseconds));
 			}
 			catch ( Exception e ) {
 				PrintGitHistory();
@@ -436,6 +468,9 @@ namespace Slug.CI
 		/// <param name="branchName"></param>
 		/// <returns></returns>
 		public bool RefreshLocalBranchStatus (string branchName = null) {
+			Stopwatch stopwatch = new();
+			stopwatch.Start();
+
 			if ( branchName == null ) branchName = CurrentBranch;
 
 			try {
@@ -448,6 +483,9 @@ namespace Slug.CI
 					                               branchName +
 					                               "] is not up to date with the remote one.  You will need to manually correct and then try again.");
 				IsLocalBranchUptoDate = true;
+
+				stopwatch.Stop();
+				ProcessTimeLogs.Add(new GitProcessLogTime("RefreshLocalBranchStatus", gitArgs, stopwatch.ElapsedMilliseconds));
 				return true;
 			}
 			catch ( Exception e ) {
@@ -792,6 +830,9 @@ namespace Slug.CI
 		/// <returns></returns>
 		public bool FetchOriginToLocal (string branchName, bool rejectionIsValid = true) {
 			if ( CurrentBranch == branchName ) return true;
+			Stopwatch stopwatch = new();
+			stopwatch.Start();
+
 			List<LineOutColored> gitOutput;
 			string gitArgs = "fetch origin " + branchName + ":" + branchName;
 
@@ -805,6 +846,8 @@ namespace Slug.CI
 				else
 					return false;
 
+			stopwatch.Stop();
+			ProcessTimeLogs.Add(new GitProcessLogTime("FetchOriginToLocal", gitArgs, stopwatch.ElapsedMilliseconds));
 			return true;
 		}
 

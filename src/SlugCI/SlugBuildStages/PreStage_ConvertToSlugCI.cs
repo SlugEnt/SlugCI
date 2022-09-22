@@ -613,9 +613,13 @@ namespace Slug.CI.SlugBuildStages
 			string lcprojName = visualStudioProject.Name.ToLower();
 
 			AbsolutePath newRootPath = ExpectedSolutionPath;
+			// Load the Visual Studio project to get properties, etc
+			var mt = nukeProject.GetMSBuildProject(lcprojName);
 
-			visualStudioProject.ProjectType = nukeProject.GetProperty("OutputType");
-			visualStudioProject.ToolName = nukeProject.GetProperty("ToolCommandName");
+			visualStudioProject.ProjectType = mt.GetProperty("OutputType")?.EvaluatedValue;
+			visualStudioProject.ToolName = mt.GetProperty("ToolCommandName")?.EvaluatedValue;
+				//nukeProject.GetProperty("OutputType");
+			//visualStudioProject.ToolName = nukeProject.GetProperty("ToolCommandName");
 			if ( visualStudioProject.ToolName != null ) visualStudioProject.IsToolPackage = true;
 
 			visualStudioProject.OriginalPath = nukeProject.Directory;

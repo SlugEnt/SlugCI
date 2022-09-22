@@ -5,7 +5,9 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using JetBrains.Annotations;
 using Nuke.Common.IO;
+using Semver;
 using static Nuke.Common.IO.FileSystemTasks;
 
 
@@ -40,6 +42,21 @@ namespace Slug.CI {
 	}
 
 
+	public class SemVerJSONConverter : JsonConverter<SemVersion>
+	{
+		[CanBeNull]
+		public override SemVersion Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+		{
+			SemVersion version = SemVersion.Parse(reader.GetString(),SemVersionStyles.Strict);
+			return version;
+		}
+
+		public override void Write(Utf8JsonWriter writer, SemVersion value, JsonSerializerOptions options)
+		{
+			writer.WriteStringValue(value.ToString());
+		}
+	}
+
 	/// <summary>
 	/// Contains information about the solution and projects that SlugNuke needs in order to build and publish the projects.
 	/// </summary>
@@ -47,14 +64,20 @@ namespace Slug.CI {
 		/// <summary>
 		/// This value should be updated every time this config layout changes
 		/// </summary>
-		public const string CONFIG_STRUCTURE_VERSION = "0.33.0";
+		public const string CONFIG_STRUCTURE_VERSION = "0.35.0";
 
 		/// <summary>
 		/// The version format of the config file.
 		/// </summary>
 		public string ConfigStructureVersion { get; set; }
 
-
+		//public string MainBranchVersion { get; set; }
+		public SemVersion MainBranchSemVersion { get; set; }
+		
+		//public string DevelopBranchVersion { get; set; }
+		
+		public SemVersion DevelopBranchSemVersion { get; set; }
+		
 		/// <summary>
 		/// If true Code Coverage reports will be run.
 		/// </summary>
@@ -139,6 +162,8 @@ namespace Slug.CI {
 		public SlugCIConfig () {
 			Projects = new List<SlugCIProject>();
 			AngularProjects = new List<AngularProject>();
+			MainBranchSemVersion = new SemVersion(0,0,0);
+			DevelopBranchSemVersion = new(0, 0, 0);
 		}
 
 
@@ -157,9 +182,14 @@ namespace Slug.CI {
 		}
 
 
+		/// <summary>
+		/// Custom Serializer for the Config File
+		/// </summary>
+		/// <returns></returns>
 		public static JsonSerializerOptions SerializerOptions () {
 			JsonSerializerOptions options = new JsonSerializerOptions();
 			options.Converters.Add(new JsonStringEnumConverter());
+			options.Converters.Add(new SemVerJSONConverter());
 			options.WriteIndented = true;
 			return options;
 		}
@@ -217,6 +247,8 @@ namespace Slug.CI {
 			b.UseCodeCoverage = UseCodeCoverage;
 			b.GitRemote = GitRemote;
 			b.ConfigStructureVersion = ConfigStructureVersion;
+			b.MainBranchSemVersion = MainBranchSemVersion;
+			b.DevelopBranchSemVersion = DevelopBranchSemVersion;
 
 			foreach ( SlugCIProject project in Projects ) {
 				b.Projects.Add(project.Copy());
@@ -241,6 +273,8 @@ namespace Slug.CI {
 			{
 				string Json = File.ReadAllText(fileName);
 				slugCiConfig = JsonSerializer.Deserialize<SlugCIConfig>(Json, SlugCIConfig.SerializerOptions());
+
+				// Initialize SemVer fields if they have not been initialized
 				return slugCiConfig;
 			}
 

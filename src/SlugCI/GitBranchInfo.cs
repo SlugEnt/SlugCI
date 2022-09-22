@@ -26,11 +26,15 @@ namespace Slug.CI
 		public GitCommitInfo LatestCommitOnBranch { get; set; } = null;
 
 
+		public bool IsLocalBranch { get; set; }
+
+
 		/// <summary>
 		/// Constructor
 		/// </summary>
 		public GitBranchInfo (RecordBranchLatestCommit branchRecord, GitProcessor gitProcessor) {
 			Name = branchRecord.branch;
+			IsLocalBranch = branchRecord.isLocal;
 
 			// Retrieve info about the latest commit on the branch
 			if (branchRecord.commitHash != "->") 

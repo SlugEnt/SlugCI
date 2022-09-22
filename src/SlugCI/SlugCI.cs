@@ -5,6 +5,7 @@ using Nuke.Common.Utilities;
 using Slug.CI.NukeClasses;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -71,6 +72,7 @@ namespace Slug.CI
 			ciSession.GitProcessor = new GitProcessor(ciSession);
 		}
 
+		
 
 		private async Task PreLoadSolutionAsync () {
 			
@@ -169,7 +171,17 @@ namespace Slug.CI
 			LineOutput.Add(new LineOutColored(EnumProcessOutputType.Std,"Git Command Version:  " + CISession.GitProcessor.GitCommandVersion,Color.Yellow));
 
 			IsReady = true;
-		}
+
+			// Display GitProcessing Time History if requested
+			if ( CISession.VerbosityGitVersion != ProcessVerbosity.Nothing ) {
+				Console.WriteLine("{0}Git Processing Times",Environment.NewLine,Color.DarkCyan);
+				foreach ( GitProcessLogTime gitProcessorProcessTimeLog in CISession.GitProcessor.ProcessTimeLogs ) {
+					Console.WriteLine(gitProcessorProcessTimeLog.Output(),Color.Orange);
+				}
+
+				Console.ReadKey();
+			}
+		 }
 
 
 		/// <summary>
@@ -181,14 +193,36 @@ namespace Slug.CI
 		private async Task GetBranchInfoAsync()
 		{
 			List<RecordBranchLatestCommit> latestCommits;
+			Stopwatch stopwatch = new();
+			stopwatch.Start();
 
-			
+			DateTime staleDate = DateTime.Now.AddDays(-21);
+
 			latestCommits = CISession.GitProcessor.GetAllBranchesWithLatestCommit();
 			foreach (RecordBranchLatestCommit recordBranchLatestCommit in latestCommits)
 			{
 				GitBranchInfo branch = new GitBranchInfo(recordBranchLatestCommit, CISession.GitProcessor);
 				CISession.GitBranches.Add(branch.Name, branch);
+
+				// See if this is a stale branch - add to stale list
+				if ( branch.LatestCommitOnBranch.DateCommitted < staleDate ) {
+					if ( branch.IsLocalBranch ) {
+						if ( !((branch.Name.StartsWith("alpha") ||
+						        branch.Name.StartsWith("main") ||
+						        branch.Name.StartsWith("master") ||
+						        branch.Name.StartsWith("beta"))) )
+							CISession.StaleBranches.Add(branch);
+					}
+					else {
+						if (!((branch.Name.EndsWith("/alpha") ||
+						       branch.Name.EndsWith("/main") ||
+						       branch.Name.EndsWith("/master") ||
+						       branch.Name.EndsWith("/beta"))))
+							CISession.StaleBranches.Add(branch);
+					}
+				}
 			}
+
 
 			// Process the Dictionary and remove the remotes that are exact same as locals
 			List<string> branchesToRemove = new List<string>();
@@ -206,6 +240,9 @@ namespace Slug.CI
 			}
 
 			foreach (string s in branchesToRemove) { CISession.GitBranches.Remove(s); }
+
+			stopwatch.Stop();
+			CISession.GitProcessor.ProcessTimeLogs.Add(new GitProcessLogTime("GetBranchInfoAsync/GetAllBranchesWithLatestCommit", "Multiple Calls", stopwatch.ElapsedMilliseconds));
 		}
 
 
@@ -335,6 +372,10 @@ namespace Slug.CI
 			return null;
 		}
 
+
+		/// <summary>
+		/// Loads the Visual Studio solution file 
+		/// </summary>
 		private void LoadSolutionInfo () {
 			List<string> solutionFiles = SearchForSolutionFile(CISession.RootDirectory.ToString(), ".sln");
 			ControlFlow.Assert(solutionFiles.Count != 0, "Unable to find the solution file");
@@ -355,18 +396,23 @@ namespace Slug.CI
 				if (slugCIProject == null) throw new ApplicationException("Trying to match SlugCIConfig Projects with Visual Studio Solution Projects failed.  This is unexpected... Visual Studio Project = [" + x.Name + "]");
 				slugCIProject.VSProject = x;
 
+				// Load the Visual Studio project to get properties, etc
+				var mt = x.GetMSBuildProject(x);
+
 				// Get Framework(s)
-				string framework = x.GetProperty("TargetFramework");
+				string framework = mt.GetProperty("TargetFramework")?.EvaluatedValue;
 				if (framework != null)  slugCIProject.Frameworks.Add(framework);
 				else {
-					framework = x.GetProperty("TargetFrameworks");
+					framework = mt.GetProperty("TargetFrameworks")?.EvaluatedValue;
 					if (framework != null) slugCIProject.Frameworks.AddRange(framework.Split(";"));
 				}
+
 				
-
-
-				slugCIProject.AssemblyName = x.GetProperty("AssemblyName");
-				slugCIProject.PackageId = x.GetProperty("PackageId");
+				//var property = mt.GetProperty("AssemblyName");
+				slugCIProject.AssemblyName = mt.GetProperty("AssemblyName")?.EvaluatedValue;
+				slugCIProject.PackageId = mt.GetProperty("PackageId")?.EvaluatedValue;
+				//slugCIProject.AssemblyName = x.GetProperty("AssemblyName");
+				//slugCIProject.PackageId = x.GetProperty("PackageId");
 
 				ControlFlow.Assert(!String.IsNullOrEmpty(slugCIProject.AssemblyName),
 				                   "Unable to locate the Assembly name from the .csproj for project [" + slugCIProject.Name + "]");

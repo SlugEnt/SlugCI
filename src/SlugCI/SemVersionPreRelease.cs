@@ -162,7 +162,7 @@ namespace Slug.CI
 			else if ( IncrementType == IncrementTypeEnum.Minor ) strIncrementType = "b";
 			else if ( IncrementType == IncrementTypeEnum.Patch ) strIncrementType = "a";
 
-			string value = ReleaseType + "-" + ReleaseNumber.ToString("D4") + strIncrementType;
+			string value = ReleaseType + "." + ReleaseNumber.ToString("D4") + strIncrementType;
 			return value;
 		}
 

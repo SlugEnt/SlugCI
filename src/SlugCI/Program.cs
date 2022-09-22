@@ -12,6 +12,8 @@ using Nuke.Common.Utilities;
 using Semver;
 using Slug.CI.NukeClasses;
 using Slug.CI.SlugBuildStages;
+using Slugent.CommonFunctions;
+using SlugEnt.CommonFunctions;
 using Console = Colorful.Console;
 using Logger = Nuke.Common.Logger;
 
@@ -224,7 +226,9 @@ namespace Slug.CI
 				// Display Git Info / Versions of project
 				string versionPreReleaseName = "alpha";
 
-				// Get most recent Version Tag for the desired branch type
+				if ( ciSession.StaleBranches.Count > 0 ) {
+					Console.WriteLine("Warning!  There are {0} branches that have had no updates in the last 21 days.  Startup is delayed by about {1} seconds due to these stale branches.",ciSession.StaleBranches.Count, (ciSession.StaleBranches.Count * 3));
+				}
 
 
 				Misc.WriteSubHeader("Git Project Information");
@@ -292,19 +296,31 @@ namespace Slug.CI
 					lineColor = Color.Red;
 					Console.WriteLine(" (R)  Refresh Git (You have uncommitted changes on branch).  Commit and then issue this command", lineColor);
 				}
-				
+
+
+				// Menu Item - View Stale Branches
+				if ( ciSession.StaleBranches.Count > 0 ) {
+					lineColor = Color.Yellow;
+					Console.WriteLine(" (8)  Show Stale Branches", lineColor);
+				}
 
 				// Last line of Menu
 				Console.Write(" (X)  Exit", Color.Red);
 
 				Console.WriteLine();
-				
+
+				if (ciSession.StaleBranches.Count > 0)
+				{
+					Console.WriteLine("Warning!  There are {0} branches that have had no updates in the last 21 days.  Startup is delayed by about {1} seconds due to these stale branches.", ciSession.StaleBranches.Count, (ciSession.StaleBranches.Count * 3));
+				}
+
 				// Set Valid Keys
 				List<ConsoleKey> validKeys = new List<ConsoleKey>()
 				{
 					ConsoleKey.A,
 					ConsoleKey.I,
 					ConsoleKey.C,
+					ConsoleKey.D,
 					ConsoleKey.G,
 					ConsoleKey.V,
 					ConsoleKey.R,
@@ -313,6 +329,7 @@ namespace Slug.CI
 					ConsoleKey.U,
 					ConsoleKey.X,
 					ConsoleKey.D9,
+					ConsoleKey.D8,
 					ConsoleKey.Enter,
 				};
 
@@ -322,6 +339,8 @@ namespace Slug.CI
 				else if (answer == ConsoleKey.V) ManualVersionPrompts(ciSession,slugCi);
 				else if ( answer == ConsoleKey.S ) ciSession.SkipNuget = !ciSession.SkipNuget;
 				else if ( answer == ConsoleKey.A ) ciSession.SkipAngularBuild = !ciSession.SkipAngularBuild;
+				else if ( answer == ConsoleKey.D ) { BranchDeletion(ciSession); }
+
 				else if ( answer == ConsoleKey.X ) return false;
 				else if ( answer == ConsoleKey.R ) ciSession.GitProcessor.RefreshUncommittedChanges();
 				else if ( answer == ConsoleKey.T ) ciSession.SkipTests = true;
@@ -331,6 +350,7 @@ namespace Slug.CI
 					Console.WriteLine("Press [space] key to return to menu", Color.Yellow);
 					while (Console.ReadKey().Key != ConsoleKey.Spacebar) { }
 				}
+				else if ( answer == ConsoleKey.D8) DisplayStaleBranches(ciSession);
 				else if ( answer == ConsoleKey.D9 ) {
 					BuildStage_CalcVersion calcVersion = new BuildStage_CalcVersion(ciSession);
 					calcVersion.Execute();
@@ -359,6 +379,65 @@ namespace Slug.CI
 			return true;
 		}
 
+
+		/// <summary>
+		/// Displays Stale Branches and allows you to remove them.
+		/// </summary>
+		/// <param name="ciSession"></param>
+		private static void BranchDeletion (CISession ciSession) {
+			Console.Clear();
+
+			ListPromptOptions<GitBranchInfo> listBranchOptions = new()
+			{
+				ItemSingularText = "Branch",
+				ListItemDisplay_AsString = DisplayBranchToDeleteInfo,
+			};
+
+			(int returnCode, GitBranchInfo selectedBranch) = ciSession.StaleBranches.AskUserToSelectItem(listBranchOptions);
+			if ( returnCode == ListFX.CHOOSE_LIST_EXIT ) return;
+			if ( selectedBranch == null ) return;
+
+			// Process deletion of branch
+			string branchName = selectedBranch.Name;
+			if (branchName.StartsWith("remotes/origin/") )branchName = branchName.Substring(15);
+			if ( !ciSession.GitProcessor.DeleteBranch(branchName, selectedBranch.IsLocalBranch) ) {
+				Console.WriteLine("Deletion of the branch - {0} failed.", branchName, Color.Red);
+			}
+			else {
+				ciSession.StaleBranches.Remove(selectedBranch);
+				Console.WriteLine("Deletion of branch: {0} was succesful!", branchName, Color.Green);
+			}
+
+
+		}
+
+
+		/// <summary>
+		/// Used to display branch and commit info on a single line for user selection of branch to delete
+		/// </summary>
+		/// <param name="branch"></param>
+		/// <returns></returns>
+		private static string DisplayBranchToDeleteInfo (GitBranchInfo branch) {
+			return String.Format("{0} - {1} [{2}]", branch.Name, branch.LatestCommitOnBranch.DateCommitted, branch.LatestCommitOnBranch.Committer);}
+
+
+
+
+		/// <summary>
+		/// List branches that have gone stale - no updates in X days
+		/// </summary>
+		/// <param name="ciSession"></param>
+		private static void DisplayStaleBranches (CISession ciSession) {
+			Console.Clear();
+			Console.WriteLine(" {0,-35}  |  {1,-30}", "Branch Name", "Last Commit Date");
+			foreach ( GitBranchInfo gitBranch in ciSession.StaleBranches ) {
+				
+				Console.WriteLine(" {0,-35}  |  {1,-30}", gitBranch.Name, gitBranch.LatestCommitOnBranch.DateCommitted);
+			}
+
+			Console.WriteLine("Press any key to continue");
+			Console.ReadKey();
+		}
 
 
 		/// <summary>

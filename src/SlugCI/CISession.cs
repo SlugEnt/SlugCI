@@ -284,6 +284,7 @@ namespace Slug.CI.NukeClasses
 		public bool SkipTests { get; set; }
 
 
+		public List<GitBranchInfo> StaleBranches { get; set; } = new();
 		/// <summary>
 		/// Constructor
 		/// </summary>

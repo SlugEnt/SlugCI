@@ -7,19 +7,9 @@
     "No Args": {
       "commandName": "Project"
     },
-    "PracticeF Init": {
-      "commandName": "Project",
-      "commandLineArgs": "--rootdir c:\\a_dev\\practice\\practiceG --faststart --verbosity gitversion:debug|compile:info --skipnuget --deployto test",
-      "environmentVariables": {
-        "Key": "Value",
-        "SLUGCI_DEPLOY_DEV": "C:\\temp\\cideploy\\Dev",
-        "SLUGCI_DEPLOY_TEST": "C:\\temp\\cideploy\\Test",
-        "SLUGCI_DEPLOY_PROD": "C:\\temp\\cideploy"
-      }
-    },
     "SlugCISample": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --skipnuget --deployto alpha",
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --verbosity gitversion:debug|compile:info --skipnuget --deployto alpha",
       "environmentVariables": {
         "SLUGCI_DEPLOY_BETA": "c:\\temp\\DeployBeta",
         "SLUGCI_DEPLOY_ALPHA": "c:\\temp\\DeployAlpha"
@@ -64,7 +54,7 @@
     },
     "SlugCI - ToolDeploy": {
       "commandName": "Project",
-      "commandLineArgs": "--rootdir C:\\A_Dev\\slugent\\SlugCI --deployto alpha --faststart false --skipangular --skipnuget"
+      "commandLineArgs": "--rootdir C:\\A_Dev\\SlugEnt\\SlugCISample --deployto alpha --faststart false --skipangular --skipnuget"
     }
   }
 }
