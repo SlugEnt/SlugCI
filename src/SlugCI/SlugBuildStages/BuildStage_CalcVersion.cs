@@ -160,30 +160,44 @@ namespace Slug.CI.SlugBuildStages
 		/// <param name="useYearMonthScheme"></param>
 		/// <returns></returns>
 		internal SemVersion CalculateNextVersion (SemVersion currentMain,
-		                               SemVersion currentBranch,
-		                               PublishTargetEnum publishTarget,
-		                               string currentBranchName,
-		                               string mainBranchName,
-		                               bool useYearMonthScheme) {
+		                                          SemVersion currentBranch,
+		                                          PublishTargetEnum publishTarget,
+		                                          string currentBranchName,
+		                                          string mainBranchName,
+		                                          bool useYearMonthScheme) {
 			SemVersion nextVersion = new(0);
-
+			//bool isBranchSwitch = (currentBranchName == currentMain);
 
 			// If we are using Year/Month Semversioning 
-			if ( useYearMonthScheme )
-			{
-				_incrementPatch = false;
+			if ( useYearMonthScheme ) {
 				DateTime currentDate = DateTime.Now;
+
+
+				if ( publishTarget == PublishTargetEnum.Production ) {
+					if ( currentMain.Major == currentDate.Year && currentMain.Minor == currentDate.Month )
+						nextVersion = new SemVersion(currentDate.Year, currentDate.Month, (currentMain.Patch + 1));
+					else
+						nextVersion = new SemVersion(currentDate.Year, currentDate.Month, 0);
+
+					return nextVersion;
+				}
+
+				// We are working on an alpha / beta or some other non production branch.  We need release info
 				int patchNum = 0;
+				if ( currentBranch.Major == currentDate.Year && currentBranch.Minor == currentDate.Month ) patchNum =  currentBranch.Patch+1;
 
-				// If current date is same as last versions year and month, then patchnum is same, otherwise its zero
-				if (_mostRecentBranchTypeVersion.Major == currentDate.Year && _mostRecentBranchTypeVersion.Minor == currentDate.Month)
-					patchNum = _mostRecentBranchTypeVersion.Patch;
+				SemVersionPreRelease semVersionPreRelease = new (currentBranchName, patchNum, IncrementTypeEnum.None);
+				if ( nextVersion.Patch > 0 ) semVersionPreRelease.BumpPatch();
+				nextVersion = new SemVersion(currentDate.Year, currentDate.Month, patchNum, semVersionPreRelease.Tag());
 
-				SemVersion newestVersion = new SemVersion(currentDate.Year, currentDate.Month, patchNum);
+
+				return nextVersion;
+
 			}
 
 			return nextVersion;
 		}
+
 
 		/// <summary>
 		/// There is an issue whereby if an alpha / beta branch has been merged into main branch, it will list the #.#.#-alpha as the most current.
